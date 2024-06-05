@@ -28,13 +28,25 @@ RUN apt-get update -qq && \
 # Update ImageMagick policy
 RUN sed -i 's/policy\ domain=\"coder\" rights=\"none\" pattern=\"PDF\"/policy domain=\"coder\" rights=\"read\" pattern=\"PDF\"/g' /etc/ImageMagick-6/policy.xml
 
-# COPY OUR DEFAULT CONTAINER CONFIG
-COPY ./container-config /etc/container-config
-# THESE CONFIG FILES CAN BE SUPPLEMENTED OR OVERWRITTEN BY THE container_start.sh SCRIPT
-# BY MOUNTING ADDITIONAL FILES INTO /etc/container-config-overwrite FOLDER.  THIS FOLDER
-# IS ALIASED AS THE `WEB_OVERRIDES` ENV VARIABLE IN THE .env FILE
+# REDCap Container configs,templates and scripts
+COPY container_assets /etc/redcap_container_assets
 
+RUN chmod -R +x /etc/redcap_container_assets/scripts/
 
+# Deploy php.ini
+RUN mv /etc/redcap_container_assets/config/php/php.ini /usr/local/etc/php/php.ini && \
+    chmod 600 /usr/local/etc/php/php.ini && \
+    rm -r /etc/redcap_container_assets/config/php
+# Deploy apache virtual host
+RUN rm -R /etc/apache2/sites-enabled && \
+    mv /etc/redcap_container_assets/config/apache2/sites-enabled /etc/apache2/sites-enabled && \
+    chmod -R 644 /etc/apache2/sites-enabled
+# Deploy apache config
+RUN mv /etc/redcap_container_assets/config/apache2/conf-enabled/* /etc/apache2/conf-enabled && \
+    chmod -R 644 /etc/apache2/conf-enabled && \
+    rm -r /etc/redcap_container_assets/config/apache2
+
+ENV PHP_INI_SCAN_DIR=/usr/local/etc/php.d:/config/php/custom_inis:
 ENV SERVER_NAME localhost
 ENV SERVER_ADMIN root
 ENV SERVER_ALIAS localhost
@@ -43,13 +55,9 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV APACHE_ERROR_LOG /dev/stdout
 ENV APACHE_ACCESS_LOG /dev/stdout
 
-# Enable extensions
+# Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite
 
 
-# Copy main startup script
-COPY container_start.sh /etc/container_start.sh
-
-RUN chmod +x /etc/container_start.sh
-CMD ["/etc/container_start.sh"]
+CMD ["/etc/redcap_container_assets/scripts/container_start.sh"]

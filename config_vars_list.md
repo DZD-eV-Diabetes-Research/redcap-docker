@@ -53,6 +53,14 @@ DTS_USERNAME
 DTS_PASSWORD
 ```
 
+# REDCap Basic Admin tasks
+
+## suspend site_admin
+
+```env
+REDCAP_SUSPEND_SITE_ADMIN # Default: True
+```
+
 
 # REDCap Application Config vars
 
@@ -60,11 +68,12 @@ This container instance enables you to set any configuration variable that is in
 
 ## APPLY_RCCONF_VARIABLES
 
-If `APPLY_RCCONF_VARIABLES` is set to true, the env var config variables that are supplied to the container will be set on every container start (overwriting any configurations that were set via webinterface since last boot of the instance).
+If `APPLY_RCCONF_VARIABLES` is set to true, the env var config variables, that are supplied to the container, will be set on every container start (overwriting any configurations that were set via webinterface since last boot of the instance).
 If you only want to apply the config (via env vars) once, set `APPLY_RCCONF_VARIABLES` to `false` after setting up your REDCap instance.
 
+
 ```env
-APPLY_RCCONF_VARIABLES # Default: True
+APPLY_RCCONF_VARIABLES # Default: False
 ```
 
 ## Possible config variables

@@ -5,5 +5,5 @@ if [ ! -z "$TZ" ]; then
   sed -i "s#date.timezone.*#date.timezone\ =\ $TZ#g" /usr/local/etc/php/conf.d/*
   echo "Updated timezone $TZ"
 else
-  echo "$TZ IS NOT DEFINED"
+  echo "Timezone IS NOT DEFINED"
 fi

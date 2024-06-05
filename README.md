@@ -27,3 +27,23 @@ This dir can be changed via env var `PHP_INI_SCAN_DIR`
 `/config/apache/custom.virtualhost`
 
 
+
+
+# Troubleshooting
+
+## I get a "permission denied" error, when trying to visit my new REDCap instance
+
+Check and adapt the permissions of your REDCap source files.
+
+First try to give ownership of the REDCap files to www-data:
+```bash
+docker compose exec redcap /bin/bash -c 'chown -R www-data ${APACHE_DOCUMENT_ROOT}'
+```
+
+If you still get permission problem try to set the permission for all directories and files with the following two commands:
+```bash
+docker compose exec redcap /bin/bash -c 'find ${APACHE_DOCUMENT_ROOT} -type d -exec chmod 755 {} \;'
+```
+```bash
+docker compose exec redcap /bin/bash -c 'chmod -R 644 *.php'
+```

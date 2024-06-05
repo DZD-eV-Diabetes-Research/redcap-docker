@@ -1,0 +1,68 @@
+services:
+  redcap:
+    build: ../..
+    environment:
+      DB_PORT: 3306
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      APPLY_RCCONF_VARIABLES: true
+      RCCONF_enable_url_shortener_redcap: 0
+    restart: always
+    depends_on:
+          db:
+            condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - ../../data/redcap/redcap:/var/www/html
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  db:
+    image: mysql:lts
+    restart: always
+    cap_add:
+      - SYS_NICE # CAP_SYS_NICE
+    volumes:
+      - ./data/db:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=redcaproot123
+      - MYSQL_DATABASE=redcap
+      - MYSQL_USER=redcap
+      - MYSQL_PASSWORD=redcap123
+      - TZ=UTC
+    healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            timeout: 3s
+            interval: 3s
+            retries: 10
+    command:
+      # Per REDCap Recommendations
+      - --max_allowed_packet=128M
+      # If you have a larger development database, you may want to increase this value:
+      # Default is 128MB (134217728) - I'm upping it to 512MB
+      - --innodb_buffer_pool_size=536870912
+      # 2x default
+      # sort_buffer_size=524288
+      - --sort_buffer_size=1024K
+      # Default
+      #read_rnd_buffer_size=262144
+      - --read_rnd_buffer_size=1024K
+      # By default we only accept connections from localhost but we want to allow connections from anywhere!
+      # bind-address=127.0.0.1
+      - --bind-address=0.0.0.0
+      # MAKE SEPARATE FILES PER TABLE
+      - --innodb_file_per_table=1
+      # Disabling symbolic-links is recommended to prevent assorted security risks
+      - --symbolic-links=0
+      # SLOW QUERY LOGGING
+      - --log_output=FILE
+      - --slow_query_log=0
+      - --slow_query_log_file=/var/log/mysql_slow.log
+      - --long_query_time=2.000
+      - --log-queries-not-using-indexes=0

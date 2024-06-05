@@ -51,6 +51,7 @@ if (is_null($db_ssl_key)) {
 $config_table_exists = $mysqli->query("SHOW TABLES LIKE 'redcap_config';");
 if ($config_table_exists->num_rows == 0) {
     printf("Can not apply config vars (RCCONF_*) as REDCap does not seem to be installed (Missing 'redcap_config' table.)\n");
+    printf("You propably need to call the REDCap install page ('http(s)://<youinstance>/install.php') page first.)\n");
     exit(0);
 }
 
@@ -82,4 +83,4 @@ foreach ($redcap_config as $key => $value) {
 }
 
 $mysqli->close();
-printf("...pre-config REDCap done.\n")
+printf("...pre-config REDCap done.\n");

@@ -7,6 +7,7 @@ services:
       DB_NAME: redcap
       DB_USERNAME: redcap
       DB_PASSWORD: redcap123
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
       APPLY_RCCONF_VARIABLES: true
       RCCONF_enable_url_shortener_redcap: 0
     restart: always

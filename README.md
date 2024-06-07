@@ -2,11 +2,13 @@
 # redcap-docker
 Yet another try to containerize REDCap but with a focus on automated deployments.
 
-Status: This is a work progress with a working alpha version.
-Maintainer: Tim Bleimehl, DZD
-Docker image: https://hub.docker.com/r/dzdde/redcap-docker
+Status: This is a work progress with a working alpha version.  
+Maintainer: Tim Bleimehl, DZD  
+Docker image: https://hub.docker.com/r/dzdde/redcap-docker  
+  
 
 - [redcap-docker](#redcap-docker)
+- [Disclaimer](#disclaimer)
 - [About / Motivation](#about--motivation)
 - [Minimal example docker compose](#minimal-example-docker-compose)
   - [Environment Variables](#environment-variables)
@@ -18,10 +20,17 @@ Docker image: https://hub.docker.com/r/dzdde/redcap-docker
 - [Troubleshooting](#troubleshooting)
   - [I get a "permission denied" error, when trying to visit my new REDCap instance](#i-get-a-permission-denied-error-when-trying-to-visit-my-new-redcap-instance)
 
+# Disclaimer
+
+This is not an official REDCap project.  
+We are only a institutional partner of the REDCap Consortium. But besides that we have no connection to REDCap. We are just REDCap users.  
+This project does not distribute REDCap and will never do. Its just a wrapper to help deploy REDCap.  
+Users still need to provide their own copy of REDCap.  
+
 # About / Motivation
 
 We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.
-While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention. 
+While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention.  
 This is our try, to containerize REDCap in a way, we can deploy a new instance, with out the need for manual intervention during setup.
 
 # Minimal example docker compose

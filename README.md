@@ -2,9 +2,9 @@
 # redcap-docker
 Yet another try to containerize [REDCap](https://www.project-redcap.org/) but with a focus on automated deployments.
 
-Status: This is a work progress with a working alpha version.  
-Maintainer: Tim Bleimehl, DZD  
-Docker image: https://hub.docker.com/r/dzdde/redcap-docker  
+**Status**: This is a work progress with a working alpha version.  
+**Maintainer**: Tim Bleimehl, DZD  
+**Docker image**: https://hub.docker.com/r/dzdde/redcap-docker  
   
 
 - [redcap-docker](#redcap-docker)
@@ -38,7 +38,7 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 > We assume some basic knowledge about `docker` and `docker compose` and that it is installed
 
 
-> 🔋🛑 Batteries not included! Due to the way how REDCap is licenced you still need to provide the REDCap source-code/php-scripts.
+> 🔋🛑 Batteries not included! Due to the way how REDCap is licensed, you still need to provide the REDCap source-code/php-scripts.
 
 
 Create a docker-compose file with following content:
@@ -46,8 +46,8 @@ Create a docker-compose file with following content:
 ```yaml
 services:
   redcap:
-    build: ../..
-    # image: dzdde/redcap-docker
+    # build: ../..
+    image: dzdde/redcap-docker
     environment:
       DB_PORT: 3306
       DB_HOSTNAME: db

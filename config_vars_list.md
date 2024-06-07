@@ -1,13 +1,16 @@
 
 
+> TODO: Format this document better and add some more descriptions
+
 # PHP
 
+```env
 TZ # default: UTC
 PHP_MEMORY_LIMIT # default: 2048M
 PHP_INI_SCAN_DIR # default: /php/custom_inis/
-
+```
 # Apache
-
+```env
 SERVER_NAME # Default: localhost
 SERVER_ADMIN # Default: root
 SERVER_ALIAS # Default:localhost
@@ -15,7 +18,7 @@ APACHE_RUN_HOME # Default: /var/www
 APACHE_DOCUMENT_ROOT # Default: /var/www/html
 APACHE_ERROR_LOG # Default: /dev/stdout
 APACHE_ACCESS_LOG # Default: /dev/stdout
-
+```
 # REDCap database connection environment variable
 
 ```env

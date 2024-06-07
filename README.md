@@ -1,6 +1,6 @@
 
 # redcap-docker
-Yet another try to containerize REDCap but with a focus on automated deployments.
+Yet another try to containerize [REDCap](https://www.project-redcap.org/) but with a focus on automated deployments.
 
 Status: This is a work progress with a working alpha version.  
 Maintainer: Tim Bleimehl, DZD  

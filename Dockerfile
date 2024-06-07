@@ -54,6 +54,7 @@ ENV APACHE_RUN_HOME /var/www
 ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV APACHE_ERROR_LOG /dev/stdout
 ENV APACHE_ACCESS_LOG /dev/stdout
+ENV REDCAP_INSTALL_SQL_SCRIPT_PATH=/config/redcap/install/install.sql
 
 # Enable apache extensions
 RUN a2enmod proxy_http

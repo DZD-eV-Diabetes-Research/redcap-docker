@@ -1,12 +1,10 @@
 <?php
 
-$env_var_prefix = 'RCCONFIG_';
+$env_var_prefix = 'RCCONF_';
 
 printf("Pre-Config REDCap...\n");
 
-// # CHECK IF WE NEED TO SET CONFIG VARS
-printf(getenv('APPLY_RCCONF_VARIABLES'));
-printf("\n");
+
 
 $set_conf_vars = filter_var(getenv('APPLY_RCCONF_VARIABLES'), FILTER_VALIDATE_BOOLEAN);
 if (!$set_conf_vars) {
@@ -59,12 +57,16 @@ if ($config_table_exists->num_rows == 0) {
 
 // Get all environment variables
 $all_env_vars = getenv();
-
+printf("ALL ENVS:");
+print_r($all_env_vars);
 // Filter the environment variables to only include those starting with "RCCONFIG_"
 $redcap_config_env_vars = array_filter($all_env_vars, function ($key) use ($env_var_prefix) {
+    $is_rcconfig = str_starts_with($key, $env_var_prefix);
+    printf("Check if $key starts with $env_var_prefix -> $is_rcconfig \n");
     return str_starts_with($key, $env_var_prefix);
 }, ARRAY_FILTER_USE_KEY);
-printf("Found following RCCONF env variables: $redcap_config_env_vars \n");
+printf("Found following RCCONF env variables: ");
+print_r($redcap_config_env_vars);
 $redcap_config = array();
 $replace_count = 1;
 foreach ($redcap_config_env_vars as $key => $value) {

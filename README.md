@@ -11,6 +11,8 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [redcap-docker](#redcap-docker)
 - [Disclaimer](#disclaimer)
 - [About / Motivation](#about--motivation)
+- [Features](#features)
+- [Roadmap](#roadmap)
 - [Minimal example docker compose](#minimal-example-docker-compose)
   - [Environment Variables](#environment-variables)
   - [container pathes](#container-pathes)
@@ -33,6 +35,18 @@ Users still need to provide their own copy of REDCap.
 We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.
 While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention.  
 This is our try, to containerize REDCap in a way, we can deploy a new instance, with out the need for manual intervention during setup.
+
+# Features
+
+* Automated installation without the need to copy and run REDCap generated SQL scripts
+* REDCap Database configuration via env vars
+* REDCap Application configuration via env vars
+* Automated basic routine task like deactivating the default admin (Optionaly)
+
+# Roadmap
+
+* Testing if REDCap upgrades work with this setup
+* Provide simple mail setup (msmtprc config via env vars)
 
 # Minimal example docker compose
 

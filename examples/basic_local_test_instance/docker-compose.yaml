@@ -1,17 +1,22 @@
 services:
   redcap:
     build: ../..
+    # image: dzdde/redcap-docker
     environment:
       DB_PORT: 3306
       DB_HOSTNAME: db
       DB_NAME: redcap
       DB_USERNAME: redcap
       DB_PASSWORD: redcap123
+      # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+      REDCAP_INSTALL_ENABLE: true
+      # REDCAP_SUSPEND_SITE_ADMIN: true
       APPLY_RCCONF_VARIABLES: true
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop "
       RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      # TODO Provide base config here as example. see insatll.sql 4272 and followin lines
     restart: always
     depends_on:
           db:
@@ -20,7 +25,6 @@ services:
       - "80:80"
     volumes:
       - ../../data/redcap/redcap:/var/www/html
-      - ./data/redcap_install_script/install.sql:/config/redcap/install/install.sql
     logging:
       options:
         max-size: "10m"
@@ -41,14 +45,10 @@ services:
       - MYSQL_PASSWORD=redcap123
       - TZ=UTC
     healthcheck:
-            # this healthcheck will return a fault "healthy" on frist boot. 
-            # that is because the container will a full proper boot of the root schema (this will check as "healthy")
-            # and only then then creates the `MYSQL_DATABASE` database. After that is does a restart of the db process, whcih can lead to faulty connection in this moment besides docker still reports "healthy" in this moment.
-            #  investigate a solution.
-            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-            timeout: 3s
-            interval: 3s
-            retries: 10
+            test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
+            timeout: 5s
+            interval: 5s
+            retries: 4
     command:
       # Per REDCap Recommendations
       - --max_allowed_packet=128M

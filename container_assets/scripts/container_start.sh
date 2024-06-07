@@ -38,6 +38,7 @@ for cmds in /etc/redcap_container_assets/scripts/startup-scripts/*.php; do
     php -f ${cmds}
 done
 
+echo "Start REDCap now..."
 # START APACHE
 mkdir -p /var/log/apache2
 exec /usr/sbin/apache2 -DFOREGROUND

@@ -37,6 +37,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_DZD_USERNAME }}
           password: ${{ secrets.DOCKERHUB_DZD_PASSWORD }}
           repository: dzdde/${{ github.event.repository.name }}
-          short-description: "A container image to host a REDCap instance with a focus in automated deployments. More info at https://github.com/DZD-eV-Diabetes-Research/redcap-docker"
+          short-description: "A container image to host a REDCap instance with a focus in automated deployments."
           enable-url-completion: true
           #readme-filepath: "MedLog/backend/README.md"

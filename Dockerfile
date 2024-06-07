@@ -54,7 +54,14 @@ ENV APACHE_RUN_HOME /var/www
 ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV APACHE_ERROR_LOG /dev/stdout
 ENV APACHE_ACCESS_LOG /dev/stdout
+ENV REDCAP_INSTALL_ENABLE=true
 ENV REDCAP_INSTALL_SQL_SCRIPT_PATH=/config/redcap/install/install.sql
+ENV REDCAP_SUSPEND_SITE_ADMIN=false
+
+# Default config
+ENV RCCONF_redcap_base_url=http://localhost
+ENV RCCONF_password_algo=sha512
+ENV RCCONF_hook_functions_file=/var/www/html/hook_functions.php
 
 # Enable apache extensions
 RUN a2enmod proxy_http

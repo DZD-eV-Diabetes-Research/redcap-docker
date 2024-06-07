@@ -14,8 +14,9 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [Features](#features)
 - [Roadmap](#roadmap)
 - [Minimal example docker compose](#minimal-example-docker-compose)
+- [Container image details](#container-image-details)
   - [Environment Variables](#environment-variables)
-  - [container pathes](#container-pathes)
+  - [Volume/Pathes](#volumepathes)
     - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
     - [Custom php ini config](#custom-php-ini-config)
     - [Custom apache virtual host directives](#custom-apache-virtual-host-directives)
@@ -139,12 +140,12 @@ services:
 Now we just need to run `docker compose up -d` and keep an eye on the logs for any errors (Remember this is an alpha version) with `docker compose logs -f`
 There will be some log messages about the inital installation and configuration. After you see a message "Start REDCap now..." you can visit http://localhost and admire your local REDCap instance.
 
-
+# Container image details
 ## Environment Variables
 
 see [config_vars_list.md](config_vars_list.md) for all available variables.
 
-## container pathes
+## Volume/Pathes
 
 ### REDCap php scripts aka apache document root dir
 

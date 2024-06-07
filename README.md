@@ -63,7 +63,6 @@ services:
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop "
       RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
-      # TODO Provide base config here as example. see insatll.sql 4272 and followin lines
     restart: always
     depends_on:
           db:

@@ -48,6 +48,7 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 * Testing if REDCap upgrades work with this setup
 * Provide simple mail setup (msmtprc config via env vars)
+* User provisioning via env vars
 
 # Minimal example docker compose
 

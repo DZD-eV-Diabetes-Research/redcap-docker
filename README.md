@@ -67,7 +67,6 @@ Create a docker-compose file with following content:
 ```yaml
 services:
   redcap:
-    # build: ../..
     image: dzdde/redcap-docker
     environment:
       DB_PORT: 3306
@@ -75,7 +74,7 @@ services:
       DB_NAME: redcap
       DB_USERNAME: redcap
       DB_PASSWORD: redcap123
-      # Do not reuse this example DB_SALT if doing anything serious
+      # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
       REDCAP_INSTALL_ENABLE: true
       # REDCAP_SUSPEND_SITE_ADMIN: true
@@ -83,6 +82,10 @@ services:
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop "
       RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      # Name of REDCap Administrator
+      RCCONF_project_contact_name: Colette Ferro
+      RCCONF_project_contact_email: c.ferro@wyyu.earth
+    restart: always
     restart: always
     depends_on:
           db:

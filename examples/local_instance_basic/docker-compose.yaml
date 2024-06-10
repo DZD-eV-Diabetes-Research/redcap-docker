@@ -1,7 +1,6 @@
 services:
   redcap:
-    build: ../..
-    # image: dzdde/redcap-docker
+    image: dzdde/redcap-docker
     environment:
       DB_PORT: 3306
       DB_HOSTNAME: db
@@ -19,8 +18,6 @@ services:
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
       RCCONF_project_contact_email: c.ferro@wyyu.earth
-
-      # TODO Provide base config here as example. see insatll.sql 4272 and followin lines
     restart: always
     env_file:
       - .env

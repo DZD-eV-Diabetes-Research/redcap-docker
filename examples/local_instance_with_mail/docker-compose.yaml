@@ -1,7 +1,6 @@
 services:
   redcap:
-    build: ../..
-    # image: dzdde/redcap-docker
+    image: dzdde/redcap-docker
     environment:
       DB_PORT: 3306
       DB_HOSTNAME: db

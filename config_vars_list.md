@@ -89,6 +89,30 @@ It defaults to `/config/redcap/install/install.sql`
 REDCAP_SUSPEND_SITE_ADMIN # Default: True
 ```
 
+# MSMTP
+
+You can set all msmtp config vars via environment. Just prefix the msmpt config commands/params `MSMTP_`
+
+For a list of all config commands see
+* https://marlam.de/msmtp/msmtp.html#General-commands
+* https://marlam.de/msmtp/msmtp.html#Authentication-commands
+* https://marlam.de/msmtp/msmtp.html#TLS-commands
+* https://marlam.de/msmtp/msmtp.html#Commands-specific-to-sendmail-mode
+
+Example for sending mails via a Hetzner mail account: 
+
+```env
+MSMTP_from=redcap-system@wy-corp.earth
+MSMTP_host=mail.your-server.de
+MSMTP_port=587
+MSMTP_auth=on
+MSMTP_user=redcap-system@wy-corp.earth
+MSMTP_password=mytotalsecretpassword
+MSMTP_tls=on
+MSMTP_tls_starttls=on
+MSMTP_syslog=on
+RCCONF_from_email=redcap-system@wy-corp.earth
+```
 
 # REDCap Application Config vars
 

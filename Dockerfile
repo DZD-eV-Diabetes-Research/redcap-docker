@@ -67,5 +67,7 @@ ENV RCCONF_hook_functions_file=/var/www/html/hook_functions.php
 RUN a2enmod proxy_http
 RUN a2enmod rewrite
 
+# log mstmp (sendmail) to stdout
+ENV MSMTP_logfile=-
 
 CMD ["/etc/redcap_container_assets/scripts/container_start.sh"]

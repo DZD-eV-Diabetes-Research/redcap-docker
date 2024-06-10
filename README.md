@@ -16,6 +16,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [Minimal example docker compose](#minimal-example-docker-compose)
 - [Container image details](#container-image-details)
   - [Environment Variables](#environment-variables)
+  - [Email configuration](#email-configuration)
   - [Volume/Pathes](#volumepathes)
     - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
     - [Custom php ini config](#custom-php-ini-config)
@@ -43,12 +44,15 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 * REDCap Database configuration via env vars
 * REDCap Application configuration via env vars
 * Automated basic routine task like deactivating the default admin (Optionaly)
+* Provide simple mail setup (msmtprc config via env vars)
 
 # Roadmap
 
 * Testing if REDCap upgrades work with this setup
-* Provide simple mail setup (msmtprc config via env vars)
+
 * User provisioning via env vars
+* Docker healthcheck
+* Alternative "cron mode"
 
 # Minimal example docker compose
 
@@ -145,6 +149,10 @@ There will be some log messages about the inital installation and configuration.
 ## Environment Variables
 
 see [config_vars_list.md](config_vars_list.md) for all available variables.
+
+## Email configuration
+
+see [config_vars_list.md#msmtp](config_vars_list.md#msmtp) for mail config vars
 
 ## Volume/Pathes
 

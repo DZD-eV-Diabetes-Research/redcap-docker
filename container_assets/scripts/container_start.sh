@@ -18,7 +18,7 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
     # start service
     exec busybox crond -f -L /dev/stdout -l 0
 else
-    echo "Start REDCap Docker Webserver..."
+    echo "Try starting REDCap Docker Webserver..."
 
     # CHECK IF REDCAP FILES ARE EXISTENT #
 
@@ -33,7 +33,7 @@ else
     # TODO: DOwnload redcap if redcap_source_existent=false annd REDCAP_SOURCE_DOWNLOAD_URL is set
     # Exit with an error if redcap_installed is false
     if [ "$redcap_source_existent" = false ]; then
-        echo "Error: Redcap is not installed."
+        echo "Error: Can not find a copy of REDCap in ${APACHE_DOCUMENT_ROOT}."
         exit 1
     fi
 

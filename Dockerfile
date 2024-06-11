@@ -70,4 +70,7 @@ RUN a2enmod rewrite
 # log mstmp (sendmail) to stdout
 ENV MSMTP_logfile=-
 
+# define healthcheck
+HEALTHCHECK --interval=5s --timeout=3s CMD /etc/redcap_container_assets/scripts/healthcheck.sh
+
 CMD ["/etc/redcap_container_assets/scripts/container_start.sh"]

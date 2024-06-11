@@ -49,7 +49,7 @@ services:
       - TZ=UTC
     healthcheck:
             test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
-            timeout: 5s
+            timeout: 3s
             interval: 5s
             retries: 4
     command:

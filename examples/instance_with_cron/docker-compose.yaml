@@ -65,8 +65,6 @@ services:
       MSMTP_tls_starttls: on
       MSMTP_syslog: on
       RCCONF_from_email: redcap-system@wy-corp.earth
-    env_file:
-      - .env
     volumes:
       - ./data/redcap/redcap:/var/www/html
     logging:

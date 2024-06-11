@@ -73,7 +73,7 @@ ENV CRON_INTERVAL="*/5 * * * *"
 ENV CRON_RUN_JOB_ON_START=false
 ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
 # register cron command
-RUN ln -s /etc/redcap_container_assets/scripts/cron.sh /usr/bin/redcap-cron
+RUN ln -s /etc/redcap_container_assets/scripts/cron-job.sh /usr/bin/redcap-cron
 # Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite

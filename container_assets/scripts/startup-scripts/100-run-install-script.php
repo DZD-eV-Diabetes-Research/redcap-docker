@@ -4,37 +4,20 @@
 # import get_db_con() from php_helpers/db.php
 require __DIR__ . '/php_helpers/db.php';
 
+# import 
+#get_redcap_source_path()
+#get_existent_redcap_version_dirs()
+#get_highest_redcap_version_dir()
+#get_highest_redcap_version_no()
+#get_installed_redcap_version_no()
+#get_installed_redcap_version_dir_path() 
+# from php_helpers/redcap_info.php
+require __DIR__ . '/php_helpers/redcap_info.php';
+
 //STATICS
 $env_var_prefix = 'RCCONFIG_';
 //FUNCTIONS
-function get_redcap_version_dirs(string $base_path)
-{
-    $version_dirs = [];
 
-    // Ensure the base path is a directory
-    if (is_dir($base_path)) {
-        // Open the directory
-        if ($handle = opendir($base_path)) {
-            // Read each entry in the directory
-            while (false !== ($entry = readdir($handle))) {
-                // Check if the entry is a directory and matches the pattern
-                if (is_dir($base_path . DIRECTORY_SEPARATOR . $entry) && preg_match('/^redcap_v(\d+\.\d+\.\d+)$/', $entry, $matches)) {
-                    // Extract the version number
-                    $version = $matches[1];
-                    // Store the absolute path with the version number as the key
-                    $version_dirs[$version] = realpath($base_path . DIRECTORY_SEPARATOR . $entry);
-                }
-            }
-            // Close the directory handle
-            closedir($handle);
-        }
-    }
-
-    // Sort the array by version numbers in ascending order
-    uksort($version_dirs, 'version_compare');
-
-    return $version_dirs;
-}
 function run_sql_files(string $sql_file_path, mysqli $sql_connection)
 {
     printf("Run SQL script from '$sql_file_path'\n");
@@ -60,11 +43,15 @@ function run_sql_files(string $sql_file_path, mysqli $sql_connection)
 
 //MAIN SCRIPT
 
-$local_redcap_versions = get_redcap_version_dirs(getenv('APACHE_DOCUMENT_ROOT'));
+## DEBUG
+$local_redcap_versions = get_existent_redcap_version_dirs();
 printf("Localy available REDCap Versions:\n");
 print_r($local_redcap_versions);
-$latest_redcap_version = array_key_last($local_redcap_versions);
-$latest_redcap_version_dir_path = end($local_redcap_versions);
+## /DEBUG
+
+
+$latest_redcap_version = get_highest_redcap_version_no();
+$latest_redcap_version_dir_path = get_highest_redcap_version_dir();
 printf("Latest available REDCap Versions is $latest_redcap_version located at '$latest_redcap_version_dir_path'\n");
 
 
@@ -80,9 +67,6 @@ printf("Install Database Scheme if it is not existent and a REDCap install SQL-s
 
 // Connect DB
 $mysqli_con = get_db_con();
-
-
-
 
 
 // ## CHECK IF REDCAP IS INSTALLED

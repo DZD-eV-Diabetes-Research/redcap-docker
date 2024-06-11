@@ -14,10 +14,21 @@ services:
       APPLY_RCCONF_VARIABLES: true
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop "
-      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      RCCONF_homepage_contact_email: "k.bishop@wy-corp.earth"
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
-      RCCONF_project_contact_email: c.ferro@wyyu.earth
+      RCCONF_project_contact_email: c.ferro@wy-corp.earth
+      # Email conf
+      MSMTP_from: redcap-system@wy-corp.earth
+      MSMTP_host: mail.your-server.de
+      MSMTP_port: 587
+      MSMTP_auth: on
+      MSMTP_user: redcap-system@wy-corp.earth
+      MSMTP_password: mytotalsecretpassword
+      MSMTP_tls: on
+      MSMTP_tls_starttls: on
+      MSMTP_syslog: on
+      RCCONF_from_email: redcap-system@wy-corp.earth
     restart: always
     depends_on:
           db:
@@ -27,6 +38,37 @@ services:
     volumes:
       # Here you need to mount your copy of the redcap source/php script.
       - ./data/redcap:/var/www/html
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  redcap-cron:
+    image: dzdde/redcap-docker
+    environment:
+      CRON_MODE: true
+      CRON_INTERVAL: "*/1 * * * *"
+      DB_PORT: 3306
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      # Do not reuse this example DB_SALT
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+      # Email conf
+      MSMTP_from: redcap-system@wy-corp.earth
+      MSMTP_host: mail.your-server.de
+      MSMTP_port: 587
+      MSMTP_auth: on
+      MSMTP_user: redcap-system@wy-corp.earth
+      MSMTP_password: mytotalsecretpassword
+      MSMTP_tls: on
+      MSMTP_tls_starttls: on
+      MSMTP_syslog: on
+      RCCONF_from_email: redcap-system@wy-corp.earth
+    env_file:
+      - .env
+    volumes:
+      - ./data/redcap/redcap:/var/www/html
     logging:
       options:
         max-size: "10m"

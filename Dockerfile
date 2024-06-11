@@ -4,6 +4,9 @@ FROM php:8.2-apache-buster
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+
+
+# Install Webserver dep
 RUN apt-get update -qq && \
     apt-get -yq --no-install-recommends install \
     msmtp-mta \
@@ -17,6 +20,8 @@ RUN apt-get update -qq && \
     zip \
     ghostscript \
     libmagickwand-dev \
+    # cron req
+    busybox-static \
     # INSTALL IMAGICK
     && pecl install imagick \
     && docker-php-ext-enable imagick \
@@ -62,7 +67,13 @@ ENV REDCAP_SUSPEND_SITE_ADMIN=false
 ENV RCCONF_redcap_base_url=http://localhost
 ENV RCCONF_password_algo=sha512
 ENV RCCONF_hook_functions_file=/var/www/html/hook_functions.php
-
+# cron default config
+ENV CRON_MODE=false
+ENV CRON_INTERVAL="*/5 * * * *"
+ENV CRON_RUN_JOB_ON_START=false
+ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
+# register cron command
+RUN ln -s /etc/redcap_container_assets/scripts/cron.sh /usr/bin/redcap-cron
 # Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite

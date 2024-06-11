@@ -2,6 +2,22 @@
 
 > TODO: Format this document better and add some more descriptions
 
+- [PHP](#php)
+- [Apache](#apache)
+- [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
+  - [REDCap Data Transfer Services](#redcap-data-transfer-services)
+- [REDCap installation](#redcap-installation)
+  - [Option 1 - automated installation](#option-1---automated-installation)
+  - [Option 2 - Installation with bring-your-own SQL install Script](#option-2---installation-with-bring-your-own-sql-install-script)
+- [REDCap Basic Admin tasks](#redcap-basic-admin-tasks)
+  - [suspend site\_admin](#suspend-site_admin)
+- [MSMTP](#msmtp)
+- [Cron](#cron)
+- [REDCap Application Config vars](#redcap-application-config-vars)
+  - [APPLY\_RCCONF\_VARIABLES](#apply_rcconf_variables)
+  - [Possible config variables](#possible-config-variables)
+
+
 # PHP
 
 ```env
@@ -113,6 +129,17 @@ MSMTP_tls_starttls=on
 MSMTP_syslog=on
 RCCONF_from_email=redcap-system@wy-corp.earth
 ```
+# Cron
+
+`CRON_MODE` - default `false`  
+If you set `CRON_MODE` to true the container will not start the REDCap webserver but run the REDCap cron job in an intervall.
+  
+`CRON_INTERVAL` - default `*/5 * * * *`  
+With `CRON_INTERVAL` you can define the interval how often the REDCap cronjob should run
+  
+`CRON_RUN_JOB_ON_START` - default `false`  
+If you want to run the job as soon the container starts you set this to true
+
 
 # REDCap Application Config vars
 

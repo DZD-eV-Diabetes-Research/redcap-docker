@@ -16,7 +16,9 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [Minimal example docker compose](#minimal-example-docker-compose)
 - [Container image details](#container-image-details)
   - [Environment Variables](#environment-variables)
-  - [Email configuration](#email-configuration)
+    - [REDCap Application configuration](#redcap-application-configuration)
+    - [Email configuration](#email-configuration)
+    - [Cron mode](#cron-mode)
   - [Volume/Pathes](#volumepathes)
     - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
     - [Custom php ini config](#custom-php-ini-config)
@@ -45,14 +47,12 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 * REDCap Application configuration via env vars
 * Automated basic routine task like deactivating the default admin (Optionaly)
 * Provide simple mail setup (msmtprc config via env vars)
+* "Cron mode" to run the same image as REDCap cronjob manager
 
 # Roadmap
 
 * Testing if REDCap upgrades work with this setup
-
 * User provisioning via env vars
-* Docker healthcheck
-* Alternative "cron mode"
 
 # Minimal example docker compose
 
@@ -61,101 +61,33 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 > 🔋🛑 Batteries not included! Due to the way how REDCap is licensed, you still need to provide the REDCap source-code/php-scripts.
 
-
-Create a docker-compose file with following content:
-
-```yaml
-services:
-  redcap:
-    image: dzdde/redcap-docker
-    environment:
-      DB_PORT: 3306
-      DB_HOSTNAME: db
-      DB_NAME: redcap
-      DB_USERNAME: redcap
-      DB_PASSWORD: redcap123
-      # Do not reuse this example DB_SALT
-      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
-      REDCAP_INSTALL_ENABLE: true
-      # REDCAP_SUSPEND_SITE_ADMIN: true
-      APPLY_RCCONF_VARIABLES: true
-      RCCONF_institution: "Weyland-Yutani Corporation"
-      RCCONF_homepage_contact: "Karl Bishop "
-      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
-      # Name of REDCap Administrator
-      RCCONF_project_contact_name: Colette Ferro
-      RCCONF_project_contact_email: c.ferro@wyyu.earth
-    restart: always
-    restart: always
-    depends_on:
-          db:
-            condition: service_healthy
-    ports:
-      - "80:80"
-    volumes:
-      # target your redcap directory here. We need the directory that contains the index.php file (among all other php files).
-      - ./redcap:/var/www/html
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-  db:
-    image: mysql:lts
-    restart: always
-    cap_add:
-      - SYS_NICE # CAP_SYS_NICE
-    volumes:
-      - ./data/db:/var/lib/mysql
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=redcaproot123
-      - MYSQL_DATABASE=redcap
-      - MYSQL_USER=redcap
-      - MYSQL_PASSWORD=redcap123
-      - TZ=UTC
-    healthcheck:
-            test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
-            timeout: 5s
-            interval: 5s
-            retries: 4
-    command:
-      # Per REDCap Recommendations
-      - --max_allowed_packet=128M
-      # If you have a larger development database, you may want to increase this value:
-      # Default is 128MB (134217728) - I'm upping it to 512MB
-      - --innodb_buffer_pool_size=536870912
-      # 2x default
-      # sort_buffer_size=524288
-      - --sort_buffer_size=1024K
-      # Default
-      #read_rnd_buffer_size=262144
-      - --read_rnd_buffer_size=1024K
-      # MAKE SEPARATE FILES PER TABLE
-      - --innodb_file_per_table=1
-      # Disabling symbolic-links is recommended to prevent assorted security risks
-      - --symbolic-links=0
-      # SLOW QUERY LOGGING
-      - --log_output=FILE
-      - --slow_query_log=0
-      - --slow_query_log_file=/var/log/mysql_slow.log
-      - --long_query_time=2.000
-      - --log-queries-not-using-indexes=0
-```
-
-🛑 You need to provide the REDCap source. See the `services`->`redcap`->`volumes` chapter.
-
-Now we just need to run `docker compose up -d` and keep an eye on the logs for any errors (Remember this is an alpha version) with `docker compose logs -f`
-There will be some log messages about the inital installation and configuration. After you see a message "Start REDCap now..." you can visit http://localhost and admire your local REDCap instance.
+Have a look in the [example section for a minimal docker compose](examples/local_instance_basic)  that you can start right now.
 
 # Container image details
 ## Environment Variables
 
 see [config_vars_list.md](config_vars_list.md) for all available variables.
 
-## Email configuration
+### REDCap Application configuration
+
+You can configure the REDCap instance with env vars.
+
+see [REDCap allication env vars](config_vars_list.md#redcap-application-config-vars) for a list of all options
+
+### Email configuration
 
 see [config_vars_list.md#msmtp](config_vars_list.md#msmtp) for mail config vars
+
+### Cron mode
+
+you can use the same docker image to run the REDCap cron process.
+Just set the env var `CRON_MODE`to true.  
+  
+> HINT: You still need to run a second container with the REDCap webserver)
+
+see [config_vars_list.md#cron](config_vars_list.md#msmtp) for all env var options  
+see [Cron example compose](examples/instance_with_cron) how to configure it next to a REDCap instance
+
 
 ## Volume/Pathes
 
@@ -181,6 +113,8 @@ This dir can be changed via env var `PHP_INI_SCAN_DIR`
 
 
 ### Custom install SQL Script
+
+> This is optional
 
 You can provide the REDCap installation script (generated by `http(s)://<myredcapdomain>/install.php`)
 

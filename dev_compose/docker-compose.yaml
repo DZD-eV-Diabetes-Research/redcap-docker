@@ -28,6 +28,7 @@ services:
       - "80:80"
     volumes:
       - ./data/redcap/redcap:/var/www/html
+      - ../container_assets/scripts/startup-scripts/php_helpers/:/opt/redcap-docker/assets/scripts/startup-scripts/php_helpers/
     logging:
       options:
         max-size: "10m"

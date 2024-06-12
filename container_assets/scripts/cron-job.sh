@@ -4,7 +4,7 @@
 # set -e tells the shell to exit if a command exits with an error (except if the exit value is tested in some other way). That can be used in some cases to abort the script on error, without explicitly testing the status of each and every command.
 set -eu
 
-source /etc/redcap_container_assets/scripts/catch.sh
+source /opt/redcap-docker/assets/scripts/catch.sh
 datettime=$(date '+%d/%m/%Y %H:%M:%S')
 # run the cron job
 catch stdout stderr php -f ${APACHE_DOCUMENT_ROOT}/cron.php

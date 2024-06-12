@@ -23,11 +23,11 @@ function get_db_con(): mysqli
     $db_ssl_capath = getenv('DB_SSL_CA_DIR_PATH') ?? null;
     $db_ssl_cipher = getenv('DB_SSL_ALGOS') ?? null;
     $db_ssl_verify_server_cert = filter_var(getenv('DB_SSL_VERIFY_SERVER'), FILTER_VALIDATE_BOOLEAN);
-    printf("Connect to database '$db_hostname:$db_port/$db_name' with user '$db_username'\n");
+    #printf("Connect to database '$db_hostname:$db_port/$db_name' with user '$db_username'\n");
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     $mysqli_con = new mysqli($db_hostname, $db_username, $db_password, $db_name);
     if (is_null($db_ssl_key)) {
-        printf("SET DB SSL CONFIG\n");
+        #printf("SET DB SSL CONFIG\n");
         $mysqli_con->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, $db_ssl_verify_server_cert);
         $mysqli_con->ssl_set($db_ssl_key, $db_ssl_cert, $db_ssl_ca, $db_ssl_capath, $db_ssl_cipher);
     }

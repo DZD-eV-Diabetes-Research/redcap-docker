@@ -13,6 +13,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [About / Motivation](#about--motivation)
 - [Features](#features)
 - [Roadmap](#roadmap)
+- [Ideas](#ideas)
 - [Minimal example docker compose](#minimal-example-docker-compose)
 - [Container image details](#container-image-details)
   - [Environment Variables](#environment-variables)
@@ -52,7 +53,12 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 # Roadmap
 
 * Testing if REDCap upgrades work with this setup
-* User provisioning via env vars
+* User provisioning via env vars and/or yaml files
+
+# Ideas
+
+* Project provisioning
+
 
 # Minimal example docker compose
 

@@ -64,9 +64,10 @@ ENV REDCAP_INSTALL_SQL_SCRIPT_PATH=/config/redcap/install/install.sql
 ENV REDCAP_SUSPEND_SITE_ADMIN=false
 
 # USER Provisioning
+ENV ENABLE_USER_PROV=true
 ENV USER_PROV_YAML_DIR=/opt/redcap-docker/users
-
-# Default config
+ENV USER_PROV_OVERWRITE_EXISTING=false
+# Application default config
 ENV RCCONF_redcap_base_url=http://localhost
 ENV RCCONF_password_algo=sha512
 ENV RCCONF_hook_functions_file=/var/www/html/hook_functions.php

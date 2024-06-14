@@ -6,6 +6,7 @@
 - [Apache](#apache)
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)
+- [User provisioning](#user-provisioning)
 - [REDCap installation](#redcap-installation)
   - [Option 1 - automated installation](#option-1---automated-installation)
   - [Option 2 - Installation with bring-your-own SQL install Script](#option-2---installation-with-bring-your-own-sql-install-script)
@@ -71,6 +72,24 @@ DTS_DB
 DTS_USERNAME
 DTS_PASSWORD
 ```
+
+# User provisioning
+
+This container image can prefill the database with users. for more details have a look at [User provisioning](USER_PROV.md)
+
+Available env vars:
+
+
+`ENABLE_USER_PROV` default `true` -  siwtch to false to disable user provisoning completly
+
+`USER_PROV_FILE_DIR` default `/opt/redcap-docker/users` - A path that will be scanned for json or yaml files with user data for the user provisioning
+
+`USER_PROV_OVERWRITE_EXISTING` default `false` - if set top true existing users in the REDCap database with the same username will be overwriten
+
+`USER_PROV` default none - Multiple users data as json. see [User provisioning](USER_PROV.md) for details and format
+
+`USER_PROV_``*` default none -  User data as json. see [User provisioning](USER_PROV.md) for details and format
+
 
 # REDCap installation
 
@@ -438,7 +457,7 @@ RCCONF_auto_prod_changes                                    # Database default: 
 RCCONF_enable_edit_prod_events                              # Database default: '1'
 RCCONF_allow_create_db_default                              # Database default: '1'
 RCCONF_api_enabled                                          # Database default: '1'
-RCCONF_auth_meth_global                                     # Database default: 'none'
+RCCONF_auth_meth_global                                     # Database default: 'none' valid values: 'none', 'table','ldap', 'ldap_table', 'shibboleth', 'shibboleth_table', 'openid_google', 'oauth2_azure_ad', 'oauth2_azure_ad_table', 'rsa', 'sams', 'aaf', 'aaf_table', 'openid_connect', 'openid_connect_table'
 RCCONF_auto_report_stats                                    # Database default: '1'
 RCCONF_autologout_timer                                     # Database default: '30'
 RCCONF_certify_text_create                                  # Database default: ''

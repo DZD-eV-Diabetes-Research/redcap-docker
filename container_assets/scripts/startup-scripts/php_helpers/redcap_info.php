@@ -44,11 +44,11 @@ function get_existent_redcap_version_dirs(string $base_path = null)
 }
 function get_highest_redcap_version_dir(string $base_path = null)
 {
-    return array_key_last(get_existent_redcap_version_dirs($base_path));
+    return end(get_existent_redcap_version_dirs($base_path));
 }
 function get_highest_redcap_version_no(string $base_path = null)
 {
-    return end(get_existent_redcap_version_dirs($base_path));
+    return array_key_last(get_existent_redcap_version_dirs($base_path));
 }
 function get_installed_redcap_version_no()
 {

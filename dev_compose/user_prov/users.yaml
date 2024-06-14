@@ -1,0 +1,10 @@
+REDCapUserList:
+  - username: yamluser1
+    user_firstname: UserOne
+    user_lastname: YamlFile
+    user_email: maily1@test.com
+  - username: yamluser2
+    user_firstname: UserTwo
+    user_lastname: YamlFile
+    user_email: maily1@test.com
+    password: asdiufewzigsecret

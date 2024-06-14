@@ -1,0 +1,28 @@
+{
+    "REDCapUserList": [
+        {
+            "username": "jsonfileuser1",
+            "user_firstname": "userone",
+            "last_name": "Jsonfile",
+            "user_email": "mail1@test.com"
+        },
+        {
+            "username": "jsonfileuser2",
+            "user_firstname": "usertwo",
+            "user_lastname": "Jsonfile",
+            "user_email": "mail2@test.com"
+        },
+        {
+            "username": "jsonfiluser_missingmail",
+            "user_firstname": "usertwo",
+            "user_lastname": "Jsonfile"
+        },
+        {
+            "username": "jsonfiluser_wrongprop",
+            "user_firstname": "usertwo",
+            "user_lastname": "Jsonfile",
+            "user_email": "mailwp@test.com",
+            "fav_drink": "mudwater"
+        }
+    ]
+}

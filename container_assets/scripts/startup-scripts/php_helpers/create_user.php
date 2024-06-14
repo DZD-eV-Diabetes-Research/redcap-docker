@@ -83,13 +83,13 @@ class UserData
         $null_fields = [];
         $required_fields = array("username", "user_email", "user_firstname", "user_lastname");
         foreach ($required_fields as $req_field_name) {
-            if ($this->$req_field_name == null or $this->$req_field_name == '') {
+            if (!isset($this->$req_field_name) or $this->$req_field_name == null or $this->$req_field_name == '') {
                 $null_fields[] = $req_field_name;
             }
         }
         return $null_fields;
     }
-    public function check_if_required_fields_not_empty(): bool
+    public function required_fields_not_empty(): bool
     {
         return empty($this->get_required_fields_that_are_empty());
     }
@@ -196,7 +196,7 @@ class UserCRUD
             $query = $this->generateInsertUserQuery($userdata);
         }
         $res = $this->db->query($query);
-        if ($overwrite_existing and ($userdata->password != null or $userdata->password != '')) {
+        if ($overwrite_existing and (isset($userdata->password) and ($userdata->password != null or $userdata->password != ''))) {
             printf("[USER PROVISIONING]: Update/Create password for user '$userdata->username'\n");
             $this->UpsertPassword($userdata);
         }

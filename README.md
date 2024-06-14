@@ -20,11 +20,13 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
     - [REDCap Application configuration](#redcap-application-configuration)
     - [Email configuration](#email-configuration)
     - [Cron mode](#cron-mode)
+    - [User provisioning](#user-provisioning)
   - [Volume/Pathes](#volumepathes)
     - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
     - [Custom php ini config](#custom-php-ini-config)
     - [Custom apache virtual host directives](#custom-apache-virtual-host-directives)
     - [Custom install SQL Script](#custom-install-sql-script)
+    - [User provisioning files](#user-provisioning-files)
 - [Troubleshooting](#troubleshooting)
   - [I get a "permission denied" error, when trying to visit my new REDCap instance](#i-get-a-permission-denied-error-when-trying-to-visit-my-new-redcap-instance)
 
@@ -49,11 +51,11 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 * Automated basic routine task like deactivating the default admin (Optionaly)
 * Provide simple mail setup (msmtprc config via env vars)
 * "Cron mode" to run the same image as REDCap cronjob manager
+* User provisioning via env vars and/or yaml files
 
 # Roadmap
 
 * Testing if REDCap upgrades work with this setup
-* User provisioning via env vars and/or yaml files
 
 # Ideas
 
@@ -94,6 +96,13 @@ Just set the env var `CRON_MODE`to true.
 see [config_vars_list.md#cron](config_vars_list.md#msmtp) for all env var options  
 see [Cron example compose](examples/instance_with_cron) how to configure it next to a REDCap instance
 
+### User provisioning
+
+This container image can prefill your REDCap instance with table users.
+
+See the manual at [USER_PROV.md](USER_PROV.md) for more details.  
+See the list of env vars concerning user provisiong at [USER_PROV.md](config_vars_list.md#user-provisioning) for more details.  
+Have a look at the [docker compose exmaple](examples/local_instance_with_user_prov) how it works in action.  
 
 ## Volume/Pathes
 
@@ -132,6 +141,10 @@ We will run this script at startup.
 This dir can be changed via env var `REDCAP_INSTALL_SQL_SCRIPT_PATH`
 
 If the file is not provided, we will just pull a generic version it from the REDCap sources you provided.
+
+### User provisioning files
+
+`/opt/redcap-docker/users` directory that will be scanned for user data to be provisioned. See [User provisioning](#user-provisioning) for more details.
 
 # Troubleshooting
 

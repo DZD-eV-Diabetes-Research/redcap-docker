@@ -93,7 +93,7 @@ if (!file_exists($redcap_install_sql_script_pathes[0])) {
 
 if (!file_exists($redcap_install_sql_script_pathes[0])) {
     # We could not find any install sql scripts. Warn user the need to fix this! 
-    printf("WARNING: REDCap seems not to be installed and there is no install SQL script provided at '$redcap_install_sql_script_custom' or availabel via source in $$latest_redcap_version_dir_path\n");
+    printf("WARNING: Something went wrong with the REDCap installation process. REDCap seems not to be installed and there is no install SQL script available via source in directory '$latest_redcap_version_dir_path' or user provided at '$redcap_install_sql_script_custom'\n");
     printf("You propably need to call the REDCap install page ('http(s)://<youinstance>/install.php') page first.)\n");
     exit(0);
 }

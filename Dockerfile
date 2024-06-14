@@ -5,7 +5,6 @@ FROM php:8.2-apache-buster
 ARG DEBIAN_FRONTEND=noninteractive
 
 
-
 # Install Webserver dep
 RUN apt-get update -qq && \
     apt-get -yq --no-install-recommends install \
@@ -20,8 +19,11 @@ RUN apt-get update -qq && \
     zip \
     ghostscript \
     libmagickwand-dev \
+    libyaml-dev \
     # cron req
     busybox-static \
+    # yaml support for user prov
+    && pecl install yaml \
     # INSTALL IMAGICK
     && pecl install imagick \
     && docker-php-ext-enable imagick \
@@ -65,7 +67,8 @@ ENV REDCAP_SUSPEND_SITE_ADMIN=false
 
 # USER Provisioning
 ENV ENABLE_USER_PROV=true
-ENV USER_PROV_YAML_DIR=/opt/redcap-docker/users
+ENV USER_PROV_FILE_DIR=/opt/redcap-docker/users
+RUN mkdir -p $USER_PROV_FILE_DIR
 ENV USER_PROV_OVERWRITE_EXISTING=false
 # Application default config
 ENV RCCONF_redcap_base_url=http://localhost

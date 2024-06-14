@@ -1,5 +1,21 @@
 # DZD Docker REDCap User Provisioning
 
+
+- [DZD Docker REDCap User Provisioning](#dzd-docker-redcap-user-provisioning)
+- [Enable or disable user provisioning](#enable-or-disable-user-provisioning)
+- [Update existing user](#update-existing-user)
+- [User data structure/model](#user-data-structuremodel)
+  - [Example](#example)
+    - [Simple User](#simple-user)
+    - [Simple User with password](#simple-user-with-password)
+    - [User admin user with password](#user-admin-user-with-password)
+    - [Super user](#super-user)
+- [Provide user data](#provide-user-data)
+  - [Option 1 - Json list in environment variable](#option-1---json-list-in-environment-variable)
+  - [Option 2 - json in multiple indexed environment variable](#option-2---json-in-multiple-indexed-environment-variable)
+  - [Option 3 - Yaml or json files](#option-3---yaml-or-json-files)
+
+
 This container images has a feature to pre fill the REDCap database with table users.
 The users will be created on container boot and optionally updated if allready existent on container boot.
 

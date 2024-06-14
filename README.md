@@ -20,7 +20,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
     - [REDCap Application configuration](#redcap-application-configuration)
     - [Email configuration](#email-configuration)
     - [Cron mode](#cron-mode)
-    - [User provisioning](#user-provisioning)
+  - [User provisioning](#user-provisioning)
   - [Volume/Pathes](#volumepathes)
     - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
     - [Custom php ini config](#custom-php-ini-config)
@@ -96,7 +96,7 @@ Just set the env var `CRON_MODE`to true.
 see [config_vars_list.md#cron](config_vars_list.md#msmtp) for all env var options  
 see [Cron example compose](examples/instance_with_cron) how to configure it next to a REDCap instance
 
-### User provisioning
+## User provisioning
 
 This container image can prefill your REDCap instance with table users.
 

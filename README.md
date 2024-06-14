@@ -55,6 +55,7 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 # Roadmap
 
+* Define user file repo directory in env var (investigate)
 * Testing if REDCap upgrades work with this setup
 
 # Ideas

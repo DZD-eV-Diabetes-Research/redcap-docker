@@ -159,6 +159,7 @@ With `CRON_INTERVAL` you can define the interval how often the REDCap cronjob sh
 `CRON_RUN_JOB_ON_START` - default `false`  
 If you want to run the job as soon the container starts you set this to true
 
+see the [cron example](examples/instance_with_cron) for a docker compose exmaple.
 
 # REDCap Application Config vars
 

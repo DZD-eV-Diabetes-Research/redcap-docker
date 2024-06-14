@@ -24,7 +24,7 @@ The users will be created on container boot and optionally updated if allready e
 You can set the environment variable `ENABLE_USER_PROV` to true or false to enable or disable the user provisioning feature.
 
 > [!TIP]
-> Table user only make sense when there is table based authentification system enabled in REDCap. One way to use this container images environment variable `RCCONF_auth_meth_global` (e.g. `RCCONF_auth_meth_global=table`)
+> user provisioning only make sense when there is table based authentification system enabled in REDCap. One way to use this container images environment variable `RCCONF_auth_meth_global` (e.g. `RCCONF_auth_meth_global=table`)
 
 # Update existing user
 

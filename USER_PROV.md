@@ -101,7 +101,7 @@ A simple user entry that will not be able to login until an admin provides a way
 ```yaml
 username: r.jorden
 user_firstname: Rebecca
-last_name: Jorden
+user_lastname: Jorden
 user_email: r.jorden@lv-426.exo
 ```
 
@@ -124,7 +124,7 @@ A simple user that is allowed to login from the getgo
 ```yaml
 - username: r.frost
   user_firstname: Ricco
-  last_name: Frost
+  user_lastname: Frost
   user_email: r.frost@uss-sulaco.space
   password: do-not-tell-anyone
 ```
@@ -150,7 +150,7 @@ An low level REDCap admin that can manage user accounts
 ```yaml
 - username: s.gorman
   user_firstname: Scott
-  last_name: Gorman
+  user_lastname: Gorman
   user_email: r.gorman@lv-426.exo
   password: pssst1234
   admin_rights: 1
@@ -182,7 +182,7 @@ A full blown admin that can do anything
 ```yaml
 - username: bishop
   user_firstname: Lance
-  last_name: Bishop
+  user_lastname: Bishop
   user_email: bishop@hyperdyne.sys
   password: pw341-B
   super_user: 1
@@ -273,23 +273,23 @@ You can have multiple files. the REDCap docker container images scan the directo
 REDCapUserList:
 - username: r.jorden
   user_firstname: Rebecca
-  last_name: Jorden
+  user_lastname: Jorden
   user_email: r.jorden@lv-426.exo
 - username: r.frost
   user_firstname: Ricco
-  last_name: Frost
+  user_lastname: Frost
   user_email: r.frost@uss-sulaco.space
   password: do-not-tell-anyone
 - username: s.gorman
   user_firstname: Scott
-  last_name: Gorman
+  user_lastname: Gorman
   user_email: r.gorman@lv-426.exo
   password: pssst1234
   admin_rights: 1
   account_manager: 1
 - username: bishop
   user_firstname: Lance
-  last_name: Bishop
+  user_lastname: Bishop
   user_email: bishop@hyperdyne.sys
   password: pw341-B
   super_user: 1

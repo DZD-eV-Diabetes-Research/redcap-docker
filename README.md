@@ -27,6 +27,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
     - [Custom apache virtual host directives](#custom-apache-virtual-host-directives)
     - [Custom install SQL Script](#custom-install-sql-script)
     - [User provisioning files](#user-provisioning-files)
+    - [REDCap file repository](#redcap-file-repository)
   - [File Ownership](#file-ownership)
 
 # Disclaimer
@@ -54,13 +55,11 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 # Roadmap
 
-* Define user file repo directory in env var (investigate)
-* Testing if REDCap upgrades work with this setup
+* Testing if REDCap upgrades work with this setup (probably will)
 
 # Ideas
 
 * Project provisioning
-
 
 # Minimal example docker compose
 
@@ -150,6 +149,16 @@ If the file is not provided, we will just pull a generic version it from the RED
 ### User provisioning files
 
 `/opt/redcap-docker/users` directory that will be scanned for user data to be provisioned. See [User provisioning](#user-provisioning) for more details.
+
+### REDCap file repository
+
+By the default the REDCap user uploaded filw will be saved into your document root dir `/var/www/html/edocs`. But as stated by the REDCap manual you may want to change that.  
+
+This is easy with this container image, Just set `RCCONF_edoc_path` (e.g. `RCCONF_edoc_path=/data`) to the path of your choice and mount this path via docker to your host system.  
+
+Have a look at the [docker compose example](examples/local_instance_custom_edocs) how it works in action.
+
+
 
 ## File Ownership
 

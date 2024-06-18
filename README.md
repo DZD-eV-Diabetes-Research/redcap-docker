@@ -27,8 +27,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
     - [Custom apache virtual host directives](#custom-apache-virtual-host-directives)
     - [Custom install SQL Script](#custom-install-sql-script)
     - [User provisioning files](#user-provisioning-files)
-- [Troubleshooting](#troubleshooting)
-  - [I get a "permission denied" error, when trying to visit my new REDCap instance](#i-get-a-permission-denied-error-when-trying-to-visit-my-new-redcap-instance)
+  - [File Ownership](#file-ownership)
 
 # Disclaimer
 
@@ -79,9 +78,9 @@ see [config_vars_list.md](config_vars_list.md) for all available variables.
 
 ### REDCap Application configuration
 
-You can configure the REDCap instance with env vars.
+You can configure the REDCap instance with env vars. Just prefix the config variables available in the REDCap database table `redcap_config` with `RCCONF_`
 
-see [REDCap allication env vars](config_vars_list.md#redcap-application-config-vars) for a list of all options
+see [REDCap allication env vars](config_vars_list.md#redcap-application-config-vars) for a list of (almost) all available options
 
 ### Email configuration
 
@@ -99,11 +98,16 @@ see [Cron example compose](examples/instance_with_cron) how to configure it next
 
 ## User provisioning
 
-This container image can prefill your REDCap instance with table users.
+This container image can prefill your REDCap instance with table users based on json in the environemnt variable `USER_PROV`.
+
+But there are also different options:
 
 See the manual at [USER_PROV.md](USER_PROV.md) for more details.  
 See the list of env vars concerning user provisiong at [USER_PROV.md](config_vars_list.md#user-provisioning) for more details.  
-Have a look at the [docker compose exmaple](examples/local_instance_with_user_prov) how it works in action.  
+Have a look at the [docker compose example](examples/local_instance_with_user_prov) how it works in action.  
+
+> [!IMPORTANT]  
+> If you are using user provisioning you also want to enable the table based [authentication method](config_vars_list.md#rcconf\_auth\_meth\_global) to `table`. env var: `RCCONF_auth_meth_global=table`.
 
 ## Volume/Pathes
 
@@ -147,21 +151,7 @@ If the file is not provided, we will just pull a generic version it from the RED
 
 `/opt/redcap-docker/users` directory that will be scanned for user data to be provisioned. See [User provisioning](#user-provisioning) for more details.
 
-# Troubleshooting
+## File Ownership
 
-## I get a "permission denied" error, when trying to visit my new REDCap instance
+If you are not happy with the file ownership UID/GID of the containers internal apache run user, have a look at [`WWW_DATA_UID`/`WWW_DATA_GID`](#www-data-user-and-group-id).
 
-Check and adapt the permissions of your REDCap source files.
-
-First try to give ownership of the REDCap files to www-data:
-```bash
-docker compose exec redcap /bin/bash -c 'chown -R www-data ${APACHE_DOCUMENT_ROOT}'
-```
-
-If you still get permission problem try to set the permission for all directories and files with the following two commands:
-```bash
-docker compose exec redcap /bin/bash -c 'find ${APACHE_DOCUMENT_ROOT} -type d -exec chmod 755 {} \;'
-```
-```bash
-docker compose exec redcap /bin/bash -c 'chmod -R 644 *.php'
-```

@@ -1,8 +1,9 @@
 services:
   redcap:
-    #build: ../
-    image: dzdde/redcap-docker
+    build: ../
+    #image: dzdde/redcap-docker
     environment:
+      WWW_DATA_UID: 1000
       DB_PORT: 3306
       DB_HOSTNAME: db
       DB_NAME: redcap
@@ -40,7 +41,7 @@ services:
     build: ../
     environment:
       CRON_MODE: true
-      CRON_INTERVAL: "*/1 * * * *"
+      CRON_INTERVAL: "*/10 * * * *"
       DB_PORT: 3306
       DB_HOSTNAME: db
       DB_NAME: redcap

@@ -53,6 +53,9 @@ RUN mv /opt/redcap-docker/assets/config/apache2/conf-enabled/* /etc/apache2/conf
     chmod -R 644 /etc/apache2/conf-enabled && \
     rm -r /opt/redcap-docker/assets/config/apache2
 
+ENV WWW_DATA_UID=33
+ENV WWW_DATA_GID=33
+ENV FIX_REDCAP_DIR_PERMISSIONS=true
 ENV PHP_INI_SCAN_DIR=/usr/local/etc/php.d:/config/php/custom_inis:
 ENV SERVER_NAME localhost
 ENV SERVER_ADMIN root

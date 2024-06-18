@@ -8,3 +8,14 @@ REDCapUserList:
     user_lastname: YamlFile
     user_email: maily1@test.com
     password: asdiufewzigsecret
+  - username: root
+    user_firstname: Lance
+    user_lastname: Bishop
+    user_email: bishop@hyperdyne.sys
+    password: pw123
+    super_user: 1
+    account_manager: 1
+    access_system_config: 1
+    access_system_upgrade: 1
+    access_external_module_install: 1
+    access_admin_dashboards: 1

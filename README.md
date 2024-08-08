@@ -2,7 +2,7 @@
 # redcap-docker
 Yet another try to containerize [REDCap](https://www.project-redcap.org/) but with a focus on automated deployments.
 
-**Status**: 🚧 This project is "work in progress" but we have a running alpha.  
+**Status**: 🚧 This project is "work in progress" but we have a running ~~alpha~~ beta. I would appriciate your [feedback](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)  
 **Maintainer**: Tim Bleimehl, DZD  
 **Docker image**: https://hub.docker.com/r/dzdde/redcap-docker  
 **Source**: https://github.com/DZD-eV-Diabetes-Research/redcap-docker

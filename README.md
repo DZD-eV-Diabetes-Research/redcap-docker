@@ -112,7 +112,7 @@ Have a look at the [docker compose example](examples/local_instance_with_user_pr
 
 ### REDCap php scripts aka apache document root dir
 
-This directory will contain the REDCap php scripts.
+This directory must contain the REDCap php scripts.
 
 `/var/www/html`
 

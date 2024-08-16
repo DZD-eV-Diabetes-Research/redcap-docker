@@ -11,6 +11,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [redcap-docker](#redcap-docker)
 - [Disclaimer](#disclaimer)
 - [About / Motivation](#about--motivation)
+  - [Target Audience](#target-audience)
 - [Features](#features)
 - [Roadmap](#roadmap)
 - [Ideas](#ideas)
@@ -42,6 +43,11 @@ Users still need to provide their own copy of REDCap.
 We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.
 While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention.  
 This is our try, to containerize REDCap in a way, we can deploy a new instance, with out the need for manual intervention during setup.
+
+## Target Audience
+
+* IT Operators: Professionals with knowledge of container operations who need to deploy and manage a REDCap instances.
+* REDCap Admins: Users familiar with Docker or Podman who require local instances of REDCap for testing or experimentation.
 
 # Features
 

@@ -38,6 +38,10 @@ We are only a institutional partner of the REDCap Consortium. But besides that w
 This project does not distribute REDCap and will never do. Its just a wrapper to help deploy REDCap.  
 Users still need to provide their own copy of REDCap.  
 
+> [!CAUTION]
+> We are not responsible for any data loss or damage that may occur from the use of our container image. Use it at your own risk. Make backups!
+
+
 # About / Motivation
 
 We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.

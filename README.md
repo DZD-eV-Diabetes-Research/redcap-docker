@@ -46,7 +46,7 @@ Users still need to provide their own copy of REDCap.
 
 We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.
 While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention.  
-This is our try, to containerize REDCap in a way, we can deploy a new instance, with out the need for manual intervention during setup.
+This is our try, to containerize REDCap in a way, we can deploy a new instance, without the need for manual intervention during setup.
 
 ## Target Audience
 

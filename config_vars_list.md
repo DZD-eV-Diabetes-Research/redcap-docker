@@ -215,7 +215,7 @@ Database default: `0`
 
 ### RCCONF_cache_files_filesystem_path
 ```
-CONF_cache_files_filesystem_path
+RCCONF_cache_files_filesystem_path
 ```
  Database default: ``
 

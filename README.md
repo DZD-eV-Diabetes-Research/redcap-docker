@@ -89,7 +89,7 @@ see [config_vars_list.md](config_vars_list.md) for all available variables.
 
 You can configure the REDCap instance with env vars. Just prefix the config variables available in the REDCap database table `redcap_config` with `RCCONF_`
 
-see [REDCap allication env vars](config_vars_list.md#redcap-application-config-vars) for a list of (almost) all available options
+see [REDCap application env vars](config_vars_list.md#redcap-application-config-vars) for a list of (almost) all available options
 
 ### Email configuration
 

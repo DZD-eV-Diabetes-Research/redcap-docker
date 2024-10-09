@@ -124,7 +124,8 @@ We try to extract the SQL scripts from the REDCap source you provided. A second 
 
 ## Option 1 - automated installation 
 
-The default option to install REDCap. Runs the build-in install script if there is not `redcap_config`-table in the database.
+The default option to install REDCap. Runs the build-in install script, from the mounted redcap source, if there is not a `redcap_config`-table in the existing database. 
+(If a `redcap_config`-table is existing, this container makes the assumption REDCap is allready installed. Which may not true in all cases, in which case you have to install manually)
 
 `REDCAP_INSTALL_ENABLE`
 
@@ -141,6 +142,9 @@ It defaults to `/config/redcap/install/install.sql`
 
 **Hint**: You still need to set `REDCAP_INSTALL_ENABLE` to true
 
+# REDCap upgrade
+
+ToDo: This part is untested and undocumented yet.
 
 # REDCap Basic Admin tasks
 

@@ -101,7 +101,7 @@ DTS_PASSWORD
 
 # User provisioning
 
-This container image can prefill the database with users. for more details have a look at [User provisioning](USER_PROV.md)
+This container image can prefill the database with table users. for more details have a look at [User provisioning](USER_PROV.md)
 
 Available env vars:
 
@@ -149,6 +149,7 @@ It defaults to `/config/redcap/install/install.sql`
 ```env
 REDCAP_SUSPEND_SITE_ADMIN # Default: True
 ```
+
 
 # MSMTP
 

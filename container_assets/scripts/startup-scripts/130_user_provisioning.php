@@ -5,8 +5,11 @@ require_once __DIR__ . '/php_helpers/db.php';
 $ENABLE_USER_PROV = filter_var(getenv('ENABLE_USER_PROV'), FILTER_VALIDATE_BOOLEAN);
 
 
-function user_data_from_array(array $user_data_array, string $ident = ""): ?UserData
+function user_data_from_array(array $user_data_array = null, string $ident = ""): ?UserData
 {
+    if (is_null($user_data_array)) {
+        return [];
+    }
     $user_data = new UserData();
     foreach ($user_data_array as $user_prop_name => $user_prop_val) {
         if (!property_exists(new UserData, $user_prop_name)) {
@@ -23,8 +26,11 @@ function user_data_from_array(array $user_data_array, string $ident = ""): ?User
     return null;
 }
 
-function users_data_from_list(array $users_data_list, string $ident_base = ""): array
+function users_data_from_list(array $users_data_list = null, string $ident_base = ""): array
 {
+    if (is_null($users_data_list)) {
+        return [];
+    }
     $user_data_objs = [];
     foreach ($users_data_list as $user_data_index => $user_props) {
         $user = user_data_from_array($user_props, "$ident_base '$user_data_index'");

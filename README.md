@@ -65,6 +65,7 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 # Roadmap
 
+* Update user admin priviledges for existing (also external like ldap or oauth2 ) users
 * Testing if REDCap upgrades work with this setup (probably will)
 
 # Ideas

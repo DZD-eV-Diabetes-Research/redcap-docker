@@ -1,8 +1,11 @@
-FROM php:8.2-apache-buster
+FROM php:8.3-apache-bookworm
 
 ## https://hub.docker.com/_/php/tags?page=1&name=apache
 
 ARG DEBIAN_FRONTEND=noninteractive
+
+
+
 
 
 # Install Webserver dep
@@ -25,12 +28,30 @@ RUN apt-get update -qq && \
     # yaml support for user prov
     && pecl install yaml \
     # INSTALL IMAGICK
-    && pecl install imagick \
-    && docker-php-ext-enable imagick \
+    #&& pecl install imagick \
+    #&& docker-php-ext-enable imagick \
     # INSTALL MYSQLI AND OTHER DOCKER FUN
     && docker-php-ext-install gd zip mysqli \
     ### cleanup
     && rm -r /var/lib/apt/lists/*
+
+#  Install imagick from source as there is no PECL version
+RUN apt-get update -qq && \
+    apt-get -yq --no-install-recommends install git && \
+    git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
+    cd /tmp/imagick && \
+    git fetch origin master && \
+    git switch master && \
+    cd /tmp/imagick && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    docker-php-ext-enable imagick && \
+    # cleanup
+    apt-get -yq purge git && \
+    rm -r /tmp/imagick
+
 
 # Update ImageMagick policy
 RUN sed -i 's/policy\ domain=\"coder\" rights=\"none\" pattern=\"PDF\"/policy domain=\"coder\" rights=\"read\" pattern=\"PDF\"/g' /etc/ImageMagick-6/policy.xml

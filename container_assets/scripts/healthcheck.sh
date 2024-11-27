@@ -20,7 +20,7 @@ else
     fi
 
     # Webserver basic check
-    echo $(curl --fail --silent --show-error http://localhost:80 >/dev/null || exit 1)
+    echo $(curl --fail --silent --show-error http://localhost:80/index.php >/dev/null || exit 1)
 
     # all good
     exit 0

@@ -1,4 +1,4 @@
-FROM php:8.3-apache-bookworm
+FROM php:8.4-apache-bookworm
 
 ## https://hub.docker.com/_/php/tags?page=1&name=apache
 

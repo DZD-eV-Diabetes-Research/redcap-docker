@@ -1,2 +1,3 @@
 data/
 .env
+dev_compose/sql_scripts/*

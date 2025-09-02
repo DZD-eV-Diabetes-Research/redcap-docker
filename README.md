@@ -16,6 +16,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) but wi
 - [Roadmap](#roadmap)
 - [Ideas](#ideas)
 - [Minimal example docker compose](#minimal-example-docker-compose)
+- [REDCap Updates](#redcap-updates)
 - [Container image details](#container-image-details)
   - [Environment Variables](#environment-variables)
     - [REDCap Application configuration](#redcap-application-configuration)
@@ -66,7 +67,6 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 # Roadmap
 
 * Update user admin priviledges for existing (also external like ldap or oauth2 ) users
-* Testing if REDCap upgrades work with this setup (probably will)
 
 # Ideas
 
@@ -81,7 +81,13 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 
 Have a look in the [example section for a minimal docker compose](examples/local_instance_basic)  that you can start right now.
 
+
+# REDCap Updates
+
+On how to update your REDCap with this container image see the dedicated page at [REDCAP_UPGRADE.md](/REDCAP_UPGRADE.md)
+
 # Container image details
+
 ## Environment Variables
 
 see [config_vars_list.md](config_vars_list.md) for all available variables.

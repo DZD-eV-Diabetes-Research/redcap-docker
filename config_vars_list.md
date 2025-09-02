@@ -5,7 +5,7 @@
 - [PHP](#php)
 - [Apache](#apache)
 - [www-data user and group ID](#www-data-user-and-group-id)
-- [Run custom/upgrade SQL Scripts at boot](#run-customupgrade-sql-scripts-at-boot)
+- [Run custom or upgrade SQL Scripts at boot](#run-custom-or-upgrade-sql-scripts-at-boot)
 - [Fix REDCap source files/directory permissions](#fix-redcap-source-filesdirectory-permissions)
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)

@@ -5,7 +5,7 @@ require_once __DIR__ . '/php_helpers/db.php';
 $ENABLE_USER_PROV = filter_var(getenv('ENABLE_USER_PROV'), FILTER_VALIDATE_BOOLEAN);
 
 
-function user_data_from_array(array $user_data_array = null, string $ident = ""): ?UserData
+function user_data_from_array(?array $user_data_array = null, string $ident = ""): ?UserData
 {
     if (is_null($user_data_array)) {
         return [];
@@ -26,7 +26,7 @@ function user_data_from_array(array $user_data_array = null, string $ident = "")
     return null;
 }
 
-function users_data_from_list(array $users_data_list = null, string $ident_base = ""): array
+function users_data_from_list(?array $users_data_list = null, string $ident_base = ""): array
 {
     if (is_null($users_data_list)) {
         return [];

@@ -20,6 +20,7 @@ services:
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
       RCCONF_project_contact_email: c.ferro@wy-corp.earth
+      
     restart: always
     env_file:
       - .env
@@ -32,6 +33,7 @@ services:
     volumes:
       - ./data/redcap/redcap:/var/www/html
       - ./user_prov:/opt/redcap-docker/users
+      - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
       - ../container_assets/scripts/startup-scripts/php_helpers/:/opt/redcap-docker/assets/scripts/startup-scripts/php_helpers/
     logging:
       options:

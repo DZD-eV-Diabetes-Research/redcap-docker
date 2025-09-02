@@ -67,6 +67,7 @@ services:
       RCCONF_from_email: redcap-system@wy-corp.earth
     volumes:
       - ./data/redcap/redcap:/var/www/html
+      
     logging:
       options:
         max-size: "10m"

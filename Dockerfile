@@ -74,17 +74,21 @@ RUN mv /opt/redcap-docker/assets/config/apache2/conf-enabled/* /etc/apache2/conf
     chmod -R 644 /etc/apache2/conf-enabled && \
     rm -r /opt/redcap-docker/assets/config/apache2
 
+
+
 ENV WWW_DATA_UID=33
 ENV WWW_DATA_GID=33
+ENV AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION=/opt/redcap-docker/sql_scripts_run_once
+RUN mkdir -p $AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION
 ENV FIX_REDCAP_DIR_PERMISSIONS=true
 ENV PHP_INI_SCAN_DIR=/usr/local/etc/php.d:/config/php/custom_inis:
-ENV SERVER_NAME localhost
-ENV SERVER_ADMIN root
-ENV SERVER_ALIAS localhost
-ENV APACHE_RUN_HOME /var/www
-ENV APACHE_DOCUMENT_ROOT /var/www/html
-ENV APACHE_ERROR_LOG /dev/stdout
-ENV APACHE_ACCESS_LOG /dev/stdout
+ENV SERVER_NAME=localhost
+ENV SERVER_ADMIN=root
+ENV SERVER_ALIAS=localhost
+ENV APACHE_RUN_HOME=/var/www
+ENV APACHE_DOCUMENT_ROOT=/var/www/html
+ENV APACHE_ERROR_LOG=/dev/stdout
+ENV APACHE_ACCESS_LOG=/dev/stdout
 ENV REDCAP_INSTALL_ENABLE=true
 ENV REDCAP_INSTALL_SQL_SCRIPT_PATH=/config/redcap/install/install.sql
 ENV REDCAP_SUSPEND_SITE_ADMIN=false

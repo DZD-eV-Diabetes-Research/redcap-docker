@@ -5,6 +5,7 @@
 - [PHP](#php)
 - [Apache](#apache)
 - [www-data user and group ID](#www-data-user-and-group-id)
+- [Run custom/upgrade SQL Scripts at boot](#run-customupgrade-sql-scripts-at-boot)
 - [Fix REDCap source files/directory permissions](#fix-redcap-source-filesdirectory-permissions)
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)
@@ -392,6 +393,23 @@ You can changes this with the two env vars:
 
 This way you could give the REDCap files the same ownership as your host system user.
 
+
+# Run custom or upgrade SQL Scripts at boot
+
+
+`AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` 
+
+With the env var `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` you can set a location to a local single file, a local directory or a remote http file or directory.
+
+If the file(s) end with the extension `sql` they will be pickd up and run at the mysql database at next (re-)boot.  
+
+Each SQL file(s) will be remembered (by hash) and not run again at the following (re-)boot.
+
+This can be handy for RedCap upgrade procedures, that need you to run a sql script. see the document [REDCAP_UPGRADE.md](/REDCAP_UPGRADE.md) for more info
+  
+  
+Defaults to `/opt/redcap-docker/sql_scripts_run_once`
+
 # Fix REDCap source files/directory permissions
 
 `FIX_REDCAP_DIR_PERMISSIONS`
@@ -432,6 +450,7 @@ DB_SSL_VERIFY_SERVER # Default = false
 
 DB_SALT # Default: ''
 ```
+
 
 ## REDCap Data Transfer Services
 ```env

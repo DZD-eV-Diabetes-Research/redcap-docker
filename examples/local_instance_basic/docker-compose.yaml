@@ -27,6 +27,9 @@ services:
     volumes:
       # Here you need to mount your copy of the redcap source/php script.
       - ./data/redcap:/var/www/html
+
+      # Here you can throw in some sql script that run once at boot. this can be handy for red updates
+      - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
     logging:
       options:
         max-size: "10m"

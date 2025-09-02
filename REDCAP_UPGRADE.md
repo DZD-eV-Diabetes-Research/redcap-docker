@@ -1,129 +1,143 @@
 
-- [How to update / upgrade](#how-to-update--upgrade)
+- [How to Update / Upgrade](#how-to-update--upgrade)
   - [Environment Update](#environment-update)
-    - [docker compose](#docker-compose)
-    - [docker](#docker)
-  - [RedCap Application Update](#redcap-application-update)
+    - [Docker Compose](#docker-compose)
+    - [Docker](#docker)
+  - [REDCap Application Update](#redcap-application-update)
     - [Introduction](#introduction)
-    - [The painfull updates](#the-painfull-updates)
+    - [Manual Updates](#manual-updates)
     - [Mount /opt/redcap-docker/sql\_scripts\_run\_once](#mount-optredcap-dockersql_scripts_run_once)
     - [Update](#update)
 
 
-# How to update / upgrade
+# How to Update / Upgrade
 
-We will distinguish between environment and application.
+There are two kinds of updates:
 
-`Environment` means the Operation System, php runtime and all its third party modules like image ImageMagick.  
+- **Environment** – the operating system, PHP runtime, and third-party modules (e.g., ImageMagick).  
+- **Application** – the REDCap PHP files.  
 
-`Application` means the RedCap php files. 
-
-Both of these have different update/upgrade procedures.
+Both require different update/upgrade procedures.
 
 
 ## Environment Update
 
-This is simple as all the magic happend at docker image building.
+This process is straightforward because everything happens when rebuilding the Docker image.
 
-You just need to pull the newest docker image from docker hub. 
+Simply pull the latest Docker image from Docker Hub.  
 
-Outside of the terminal you can check at https://hub.docker.com/r/dzdde/redcap-docker/tags or https://github.com/DZD-eV-Diabetes-Research/redcap-docker/releases if there are new releases of the RedCap Docker image.
+You can check for new releases here:  
+- https://hub.docker.com/r/dzdde/redcap-docker/tags  
+- https://github.com/DZD-eV-Diabetes-Research/redcap-docker/releases  
 
-### docker compose
+### Docker Compose
 
 ```bash
 docker compose pull
-```
+````
 
-and restart RedCAP
+Restart REDCap:
 
 ```bash
 docker compose down && docker compose up -d
 ```
 
-### docker
+### Docker
 
-if you use plain docker run `docker pull dzdde/redcap-docker`. And restart your container.
+If you’re using plain Docker, run:
 
-## RedCap Application Update
+```bash
+docker pull dzdde/redcap-docker
+```
+
+Then restart your container.
+
+## REDCap Application Update
 
 ### Introduction
 
-We recommend using the "Easy Upgrade" feature of redcap which available since REDCap version 8.6.0.
-This will make the update process for you and is fully compatible with this container.
+We recommend using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
+This automates the update process and is fully compatible with this container.
 
 From the 8.6.0 Changelog:
-> Administrators may now upgrade to a more recent version of REDCap in an easier and more automated fashion with just a couple clicks. The Easy Upgrade process (if fully enabled) allows REDCap administrators to upgrade REDCap using only the REDCap user interface in the Control Center (i.e., direct access to the web server or database server is not required).
 
+> Administrators may now upgrade to a more recent version of REDCap in an easier and more automated fashion with just a couple of clicks. The Easy Upgrade process (if fully enabled) allows REDCap administrators to upgrade REDCap using only the REDCap user interface in the Control Center (i.e., direct access to the web server or database server is not required).
 
-But there is one catch:
-> If a particular upgrade is not able to complete the Easy Upgrade process because it recommends that REDCap first be taken offline before executing the upgrade SQL script, the Easy Upgrade feature will still be able to auto-download the REDCap upgrade file, but it will redirect the administrator to the Upgrade Module to complete the upgrade manually. This will occur only a small minority of the time for an upgrade.
+However, there is one caveat:
 
-### The painfull updates
+> If a particular upgrade cannot complete via the Easy Upgrade process because it requires REDCap to be taken offline before executing the SQL upgrade script, the Easy Upgrade feature will still auto-download the REDCap upgrade file but redirect the administrator to the Upgrade Module to complete the upgrade manually. This occurs only in a small minority of upgrades.
 
-This means, sometimes we need to login to the MySQL database and run a SQL script.  
+### Manual Updates
 
-in this case you will get a message like
+This means, occasionally, you may need to log in to the MySQL database and run an SQL script.
 
-![painfull-update-ahead](/img/notice-pain-full-update.png)
+In this case, you’ll see a message like this:
 
-But this container comes with a little feature to make this a little bit less painfull;
+![manual-update-ahead](/img/notice-pain-full-update.png)
 
-We will use the env var [AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION](/config_vars_list.md#run-custom-or-upgrade-sql-scripts-at-boot) to just drop in these  script.
+Fortunately, this container includes a feature that makes the process easier.
+By using the environment variable [`AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION`](/config_vars_list.md#run-custom-or-upgrade-sql-scripts-at-boot), you can simply drop the required SQL script into a directory, and it will be executed automatically at boot.
 
-The upgrader will look like this
+The upgrader will then look like this:
 
 ![upgrader-with-script](/img/upgrader-with-script.png)
 
-We can just use `Option B` downlaod the file and drop it in a directory next to our `docker-compose.yaml` file. 
+You can use **Option B** – download the SQL file and place it in a directory next to your `docker-compose.yaml` file.
 
 ### Mount /opt/redcap-docker/sql_scripts_run_once
 
-The file has the name `redcap_upgrade_150012.sql` in our example and lets say you move it to `./sql_scripts`.
+For example, let’s say the SQL file is named `redcap_upgrade_150012.sql` and you move it to `./sql_scripts`.
 
-Now make sure sure have a volume mount to `/opt/redcap-docker/sql_scripts_run_once` inside of the container.
+Make sure you mount this directory to `/opt/redcap-docker/sql_scripts_run_once` inside the container.
 
-Your REDCap container volumes may look like this
+Your REDCap container volumes may look like this:
 
 ```yaml
 services:
   redcap:
     [...]
     volumes:
-      # Here you need to mount your copy of the redcap source/php script.
+      # Mount the REDCap source/PHP scripts
       - ./data/redcap:/var/www/html
-      # Here you can throw in some sql script that run once at boot. this can be handy for red updates
+      # Mount SQL scripts to run once at boot (useful for manual updates)
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
     [...]
 ```
 
 > [!HINT]
-> You can keep this mount permanently. We will keep track of which SQL script did allready run and wont run it again.
+> You can keep this mount permanently. The system tracks which SQL scripts have already run and won’t execute them again.
 
 ### Update
 
-If your updater told you so, you want set your REDCap instance in "offline" mode in the settings.
+If the updater instructs you to do so, set your REDCap instance to **offline mode** in the settings.
 
-Now give the container restart with 
+Then restart the container with:
 
 ```bash
-docker compose down && docker compose pull && docker compose up -d`
+docker compose down && docker compose pull && docker compose up -d
 ```
 
-Check the logs with
+Check the logs with:
 
 ```bash
 docker compose logs
 ```
 
-You should find and entry like
+You should see an entry like:
 
 ```
 redcap-1       | [RUN CUSTOM BOOT SQLS] Try run file: '/opt/redcap-docker/sql_scripts_run_once/tmp/redcap_upgrade_150012.sql'
 ```
 
-If there is no error message, all is fine. Now go back to your "Easy Upgrade" page and check further instructions.
-
+If no error messages appear, everything is fine.
+Now return to the "Easy Upgrade" page in REDCap and follow any remaining instructions.
 
 > [!HINT]
-> Do not forget to switch your REDCap form "offline" to "online" in the Control Center.
+> Don’t forget to switch your REDCap system back from **offline** to **online** in the Control Center.
+
+```
+
+---
+
+Would you like me to also **add a short “Quick Summary” section at the top** with just the commands and steps, so readers can get the update done fast without reading the full details?
+

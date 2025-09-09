@@ -63,7 +63,10 @@ RUN chmod -R +x /opt/redcap-docker/assets/scripts/
 
 # Deploy php.ini
 RUN mv /opt/redcap-docker/assets/config/php/php.ini /usr/local/etc/php/php.ini && \
-    chmod 600 /usr/local/etc/php/php.ini && \
+    chmod 600 /usr/local/etc/php/php.ini
+# Deploy other php ini files
+RUN mv /opt/redcap-docker/assets/config/php/conf.d/*  /usr/local/etc/php/conf.d/ && \
+    chmod 600 /usr/local/etc/php/conf.d/* && \
     rm -r /opt/redcap-docker/assets/config/php
 # Deploy apache virtual host
 RUN rm -R /etc/apache2/sites-enabled && \
@@ -81,7 +84,7 @@ ENV WWW_DATA_GID=33
 ENV AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION=/opt/redcap-docker/sql_scripts_run_once
 RUN mkdir -p $AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION
 ENV FIX_REDCAP_DIR_PERMISSIONS=true
-ENV PHP_INI_SCAN_DIR=/usr/local/etc/php.d:/config/php/custom_inis:
+ENV PHP_INI_SCAN_DIR=:/config/php/custom_inis
 ENV SERVER_NAME=localhost
 ENV SERVER_ADMIN=root
 ENV SERVER_ALIAS=localhost

@@ -1,9 +1,7 @@
 services:
   redcap:
-    build: ../
-    #image: dzdde/redcap-docker
+    image: dzdde/redcap-docker
     environment:
-      WWW_DATA_UID: 1000
       DB_PORT: 3306
       DB_HOSTNAME: db
       DB_NAME: redcap
@@ -12,37 +10,31 @@ services:
       # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
       REDCAP_INSTALL_ENABLE: true
-      REDCAP_SUSPEND_SITE_ADMIN: false
+      # REDCAP_SUSPEND_SITE_ADMIN: true
       APPLY_RCCONF_VARIABLES: true
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop "
-      RCCONF_homepage_contact_email: "k.bishop@wy-corp.earth"
+      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
-      RCCONF_project_contact_email: c.ferro@wy-corp.earth
-      TZ: America/Matamoros
-      
-      
+      RCCONF_project_contact_email: c.ferro@wyyu.earth
+      PHP_INI_SCAN_DIR: :/config/php/custom_inis
+
     restart: always
-    env_file:
-      - .env
-      - user_prov/users.env
     depends_on:
           db:
             condition: service_healthy
     ports:
       - "80:80"
     volumes:
-      - ./data/redcap/redcap:/var/www/html
-      - ./user_prov:/opt/redcap-docker/users
-      - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
-      - ../container_assets/scripts/startup-scripts/php_helpers/:/opt/redcap-docker/assets/scripts/startup-scripts/php_helpers/
+      - ./data/redcap:/var/www/html
+      - ./customphp.ini:/config/php/custom_inis/customphp.ini
     logging:
       options:
         max-size: "10m"
         max-file: "3"
   redcap-cron:
-    build: ../
+    image: dzdde/redcap-docker
     environment:
       CRON_MODE: true
       CRON_INTERVAL: "*/1 * * * *"
@@ -53,13 +45,22 @@ services:
       DB_PASSWORD: redcap123
       # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
-      CRON_RUN_JOB_ON_START: true
-      #TZ: America/Matamoros
-    depends_on:
-          redcap:
-            condition: service_healthy
+      # Email conf
+      MSMTP_from: redcap-system@wy-corp.earth
+      MSMTP_host: mail.your-server.de
+      MSMTP_port: 587
+      MSMTP_auth: on
+      MSMTP_user: redcap-system@wy-corp.earth
+      MSMTP_password: mytotalsecretpassword
+      MSMTP_tls: on
+      MSMTP_tls_starttls: on
+      MSMTP_syslog: on
+      RCCONF_from_email: redcap-system@wy-corp.earth
+      PHP_INI_SCAN_DIR: :/config/php/custom_inis
     volumes:
-      - ./data/redcap/redcap:/var/www/html
+      - ./data/redcap:/var/www/html
+      - ./customphp.ini:/config/php/custom_inis/customphp.ini
+      
     logging:
       options:
         max-size: "10m"
@@ -81,7 +82,7 @@ services:
       - TZ=UTC
     healthcheck:
             test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
-            timeout: 5s
+            timeout: 3s
             interval: 5s
             retries: 4
     command:

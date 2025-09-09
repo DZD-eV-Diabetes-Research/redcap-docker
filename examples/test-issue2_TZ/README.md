@@ -1,5 +1,7 @@
 # Simple docker compose example with TZ set
 
+To run it jus copy a copy of redcap to `./redcap` and do a `docker compose up -d`
+
 This is just a debug example for https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/2
 
 With `TZ` set to `America/Matamoros` (UTC−05:00 or also called "CDT")  the log files are now TZ aware

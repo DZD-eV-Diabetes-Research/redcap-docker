@@ -1,0 +1,115 @@
+services:
+  redcap:
+    image: dzdde/redcap-docker
+    environment:
+      DB_PORT: 3306
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      # Do not reuse this example DB_SALT
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+      REDCAP_INSTALL_ENABLE: true
+      # REDCAP_SUSPEND_SITE_ADMIN: true
+      APPLY_RCCONF_VARIABLES: true
+      RCCONF_institution: "Weyland-Yutani Corporation"
+      RCCONF_homepage_contact: "Karl Bishop "
+      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      # Name of REDCap Administrator
+      RCCONF_project_contact_name: Colette Ferro
+      RCCONF_project_contact_email: c.ferro@wyyu.earth
+
+      TZ: America/Matamoros
+
+    restart: always
+    depends_on:
+          db:
+            condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      # Here you need to mount your copy of the redcap source/php script.
+      - ./data/redcap:/var/www/html
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  redcap-cron:
+    image: dzdde/redcap-docker
+    environment:
+      CRON_MODE: true
+      CRON_INTERVAL: "*/1 * * * *"
+      DB_PORT: 3306
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      # Do not reuse this example DB_SALT
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+      # Email conf
+      MSMTP_from: redcap-system@wy-corp.earth
+      MSMTP_host: mail.your-server.de
+      MSMTP_port: 587
+      MSMTP_auth: on
+      MSMTP_user: redcap-system@wy-corp.earth
+      MSMTP_password: mytotalsecretpassword
+      MSMTP_tls: on
+      MSMTP_tls_starttls: on
+      MSMTP_syslog: on
+      RCCONF_from_email: redcap-system@wy-corp.earth
+
+      TZ: America/Matamoros
+
+
+    volumes:
+      - ./data/redcap:/var/www/html
+      
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  db:
+    image: mysql:lts
+    restart: always
+    cap_add:
+      - SYS_NICE # CAP_SYS_NICE
+    volumes:
+      - ./data/db:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=redcaproot123
+      - MYSQL_DATABASE=redcap
+      - MYSQL_USER=redcap
+      - MYSQL_PASSWORD=redcap123
+      - TZ=UTC
+    healthcheck:
+            test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
+            timeout: 3s
+            interval: 5s
+            retries: 4
+    command:
+      # Per REDCap Recommendations
+      - --max_allowed_packet=128M
+      # If you have a larger development database, you may want to increase this value:
+      # Default is 128MB (134217728) - I'm upping it to 512MB
+      - --innodb_buffer_pool_size=536870912
+      # 2x default
+      # sort_buffer_size=524288
+      - --sort_buffer_size=1024K
+      # Default
+      #read_rnd_buffer_size=262144
+      - --read_rnd_buffer_size=1024K
+      # By default we only accept connections from localhost but we want to allow connections from anywhere!
+      # bind-address=127.0.0.1
+      - --bind-address=0.0.0.0
+      # MAKE SEPARATE FILES PER TABLE
+      - --innodb_file_per_table=1
+      # Disabling symbolic-links is recommended to prevent assorted security risks
+      - --symbolic-links=0
+      # SLOW QUERY LOGGING
+      - --log_output=FILE
+      - --slow_query_log=0
+      - --slow_query_log_file=/var/log/mysql_slow.log
+      - --long_query_time=2.000
+      - --log-queries-not-using-indexes=0

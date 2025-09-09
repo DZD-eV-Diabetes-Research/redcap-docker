@@ -546,10 +546,12 @@ RCCONF_from_email=redcap-system@wy-corp.earth
 If you set `CRON_MODE` to true the container will not start the REDCap webserver but run the REDCap cron job in an intervall.
   
 `CRON_INTERVAL` - default `*/5 * * * *`  
-With `CRON_INTERVAL` you can define the interval how often the REDCap cronjob should run
-  
+With `CRON_INTERVAL` you can define the interval how often the REDCap cronjob should run. Only available with `CRON_MODE=true`
+
+
 `CRON_RUN_JOB_ON_START` - default `false`  
-If you want to run the job as soon the container starts you set this to true
+If you want to run the job as soon the container starts you set this to true. Only available with `CRON_MODE=true`
+
 
 see the [cron example](examples/instance_with_cron) for a docker compose exmaple.
 

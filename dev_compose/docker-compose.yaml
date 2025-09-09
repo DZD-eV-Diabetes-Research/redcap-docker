@@ -20,6 +20,8 @@ services:
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
       RCCONF_project_contact_email: c.ferro@wy-corp.earth
+      TZ: Europe/Berlin
+      
       
     restart: always
     env_file:
@@ -43,7 +45,7 @@ services:
     build: ../
     environment:
       CRON_MODE: true
-      CRON_INTERVAL: "*/10 * * * *"
+      CRON_INTERVAL: "*/1 * * * *"
       DB_PORT: 3306
       DB_HOSTNAME: db
       DB_NAME: redcap
@@ -51,6 +53,8 @@ services:
       DB_PASSWORD: redcap123
       # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+      CRON_RUN_JOB_ON_START: true
+      TZ: Europe/Berlin
     depends_on:
           redcap:
             condition: service_healthy

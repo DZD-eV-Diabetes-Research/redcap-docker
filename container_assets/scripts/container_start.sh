@@ -6,17 +6,30 @@
 # Check if we should run in cron mode, if yes only start cron service
 
 if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
-    echo "Start REDCap Cron Service..."
+    echo "Setup REDCap Cron Service..."
+    #  Dump the env to be able to feed it to busybox
+    printenv | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > /etc/container-environment.sh
+    chmod +x /etc/container-environment.sh
+    chown www-data:www-data /etc/container-environment.sh
     # config msmtp
     /opt/redcap-docker/assets/scripts/startup-scripts/60_generate_msmtp_config.sh
     # config cronjob
+    echo "Define Cronjob"
     /opt/redcap-docker/assets/scripts/startup-scripts/50_define-cronjob.sh
     echo "0" >$CRON_HEALTH_STATE_FILE
-    chown www-data:www-data $CRON_HEALTH_STATE_FILE
+    
+    
     # if CRON_RUN_JOB_ON_START is set to true we run the cronjob now once before we go into interval mode
-    if [[ "${CRON_RUN_JOB_ON_START}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then /opt/redcap-docker/assets/scripts/cron-job.sh; fi
-    # start service
-    exec busybox crond -f -L /dev/stdout -l 0
+    if [[ "${CRON_RUN_JOB_ON_START}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then 
+        echo "Run inital cron job because env var 'CRON_RUN_JOB_ON_START' set to '$CRON_RUN_JOB_ON_START'..."
+        /opt/redcap-docker/assets/scripts/cron-job.sh; 
+    else
+        echo "Skip cron job run on container start because env var 'CRON_RUN_JOB_ON_START' set to '$CRON_RUN_JOB_ON_START'."
+    fi
+    chown www-data:www-data $CRON_HEALTH_STATE_FILE
+    echo "Start cron service..."
+    # start cron service
+    exec busybox crond -l 2 -f
 else
     echo "Try starting REDCap Docker Webserver..."
 

@@ -9,9 +9,14 @@
 set -eu
 . /etc/container-environment.sh
 . /opt/redcap-docker/assets/scripts/catch.sh
+. /opt/redcap-docker/assets/scripts/debug_echo.sh
 datetime=$(date '+%d/%m/%Y %H:%M:%S %Z')
 echo "#### Cron run start ($datetime)"
+debug_echo "CRON: PHP_INI_SCAN_DIR: $PHP_INI_SCAN_DIR"
+debug_echo "CRON: 'php --ini': $(php --ini)"
+
 # run the cron job
+
 catch stdout stderr php -f ${APACHE_DOCUMENT_ROOT}/cron.php
 if [ -z "$stderr" ]; then
     echo "#### Cron output ($datetime): $stdout"

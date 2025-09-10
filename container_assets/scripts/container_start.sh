@@ -2,8 +2,11 @@
 
 # PASS VARIABLES TO APACHE?
 . /etc/apache2/envvars
-
+. /opt/redcap-docker/assets/scripts/debug_echo.sh
 # Check if we should run in cron mode, if yes only start cron service
+
+debug_echo "PHP_INI_SCAN_DIR: $PHP_INI_SCAN_DIR"
+debug_echo "'php --ini': $(php --ini)"
 
 if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
     echo "Setup REDCap Cron Service..."

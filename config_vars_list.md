@@ -2,6 +2,7 @@
 
 > TODO: Format this document better and add some more descriptions
 
+- [DEBUG](#debug)
 - [PHP](#php)
 - [Apache](#apache)
 - [www-data user and group ID](#www-data-user-and-group-id)
@@ -363,6 +364,16 @@
     - [RCCONF\_system\_offline](#rcconf_system_offline)
     - [RCCONF\_cache\_storage\_system](#rcconf_cache_storage_system)
 
+
+# DEBUG
+
+This creates some more verbose log messages in the docker scripts. Its primary intended for developement of this repo.
+
+```env
+REDCAP_DOCKER_SCRIPTS_DEBUG
+```
+
+Default: `false`
 
 # PHP
 

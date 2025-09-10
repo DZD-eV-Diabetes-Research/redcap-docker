@@ -78,7 +78,7 @@ RUN mv /opt/redcap-docker/assets/config/apache2/conf-enabled/* /etc/apache2/conf
     rm -r /opt/redcap-docker/assets/config/apache2
 
 
-
+ENV REDCAP_DOCKER_SCRIPTS_DEBUG=false
 ENV WWW_DATA_UID=33
 ENV WWW_DATA_GID=33
 ENV AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION=/opt/redcap-docker/sql_scripts_run_once

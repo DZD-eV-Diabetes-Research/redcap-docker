@@ -380,7 +380,7 @@ Default: `false`
 ```env
 TZ # default: UTC
 PHP_MEMORY_LIMIT # default: 2048M
-PHP_INI_SCAN_DIR # default: /php/custom_inis/
+PHP_INI_SCAN_DIR # default: :/config/php/custom_inis
 ```
 # Apache
 ```env

@@ -63,10 +63,10 @@ RUN chmod -R +x /opt/redcap-docker/assets/scripts/
 
 # Deploy php.ini
 RUN mv /opt/redcap-docker/assets/config/php/php.ini /usr/local/etc/php/php.ini && \
-    chmod 600 /usr/local/etc/php/php.ini
+    chmod 644 /usr/local/etc/php/php.ini
 # Deploy other php ini files
 RUN mv /opt/redcap-docker/assets/config/php/conf.d/*  /usr/local/etc/php/conf.d/ && \
-    chmod 600 /usr/local/etc/php/conf.d/* && \
+    chmod 644 /usr/local/etc/php/conf.d/* && \
     rm -r /opt/redcap-docker/assets/config/php
 # Deploy apache virtual host
 RUN rm -R /etc/apache2/sites-enabled && \

@@ -7,13 +7,24 @@
 
 debug_echo "PHP_INI_SCAN_DIR: $PHP_INI_SCAN_DIR"
 debug_echo "'php --ini': $(php --ini)"
-
+# Chmod PHP INI scan directories to 755 (readable + traversable)
+IFS=':' read -ra dirs <<< "$PHP_INI_SCAN_DIR"; for dir in "${dirs[@]}"; do [[ -d "$dir" ]] && chmod 755 "$dir" 2>/dev/null; done
 if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
+    . /opt/redcap-docker/assets/scripts/get_php_ini_dirs.sh
     echo "Setup REDCap Cron Service..."
-    #  Dump the env to be able to feed it to busybox
-    printenv | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > /etc/container-environment.sh
-    chmod +x /etc/container-environment.sh
-    chown www-data:www-data /etc/container-environment.sh
+    #  Export the PHP env to be able to feed it to busybox
+    ENV_EXPORT_FILE="/etc/container-environment.sh"
+    printenv | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > $ENV_EXPORT_FILE
+    # Add the current php ini files to the env
+    current_ini_env=$(get_php_ini_dirs)
+    if grep -q "^export PHP_INI_SCAN_DIR=" "$ENV_EXPORT_FILE"; then
+       sed -i.bak "s|^export PHP_INI_SCAN_DIR=.*|export PHP_INI_SCAN_DIR=\"$current_ini_env\"|" "$ENV_EXPORT_FILE"
+    else
+        echo "export PHP_INI_SCAN_DIR=\"$current_ini_env\"" >> "$ENV_EXPORT_FILE"
+    fi
+    # make the file accesable
+    chmod +x $ENV_EXPORT_FILE
+    chown www-data:www-data $ENV_EXPORT_FILE
     # config msmtp
     /opt/redcap-docker/assets/scripts/startup-scripts/60_generate_msmtp_config.sh
     # config cronjob

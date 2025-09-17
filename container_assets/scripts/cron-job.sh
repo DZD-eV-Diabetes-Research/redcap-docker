@@ -18,7 +18,7 @@ debug_echo "CRON: 'php --ini': $(php --ini)"
 # run the cron job
 
 catch stdout stderr php -f ${APACHE_DOCUMENT_ROOT}/cron.php
-if [ -z "$stderr" ]; then
+if [ -z "$stderr" ] || { echo "$stderr" | grep -q "PHP Warning" && ! echo "$stderr" | grep -q "PHP Error"; }; then
     echo "#### Cron output ($datetime): $stdout"
     # redirect output to process with id 1 (which docker by default shows in the "docker compose logs")
     echo "0" >$CRON_HEALTH_STATE_FILE

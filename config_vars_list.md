@@ -367,48 +367,54 @@
 
 # DEBUG
 
-This creates some more verbose log messages in the docker scripts. Its primary intended for developement of this repo.
+| Variable | Default | Description                                            |
+| -------- | ------- | ------------------------------------------------------ |
+| `DEBUG`  | `false` | Enables debug mode. Set to `true` for verbose logging. |
 
-```env
-REDCAP_DOCKER_SCRIPTS_DEBUG
-```
 
-Default: `false`
+This creates some more verbose log messages in the docker scripts if set to true. Its primary intended for developement of this repo.
+
 
 # PHP
 
-```env
-TZ # default: UTC
-PHP_MEMORY_LIMIT # default: 2048M
-PHP_INI_SCAN_DIR # default: :/config/php/custom_inis
-```
+| Variable           | Default                   | Description                                                                     |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------- |
+| `TZ`               | `UTC`                     | The timezone of the PHP process. This influences the timestamps of the logfiles |
+| `PHP_MEMORY_LIMIT` | `2048M`                   | Maximum memory allowed for PHP scripts.                                         |
+| `PHP_INI_SCAN_DIR` | `/config/php/custom_inis` | Which dirs to look for config inis.                                             |
+
+
 # Apache
-```env
-SERVER_NAME # Default: localhost
-SERVER_ADMIN # Default: root
-SERVER_ALIAS # Default:localhost
-APACHE_RUN_HOME # Default: /var/www
-APACHE_DOCUMENT_ROOT # Default: /var/www/html
-APACHE_ERROR_LOG # Default: /dev/stdout
-APACHE_ACCESS_LOG # Default: /dev/stdout
-```
+
+| Variable               | Default         | Description                             |
+| ---------------------- | --------------- | --------------------------------------- |
+| `SERVER_NAME`          | `localhost`     | Maximum memory allowed for PHP scripts. |
+| `SERVER_ADMIN`         | `root`          | ...                                     |
+| `SERVER_ALIAS`         | `localhost`     | ...                                     |
+| `APACHE_RUN_HOME`      | `/var/www`      | ...                                     |
+| `APACHE_DOCUMENT_ROOT` | `/var/www/html` | ...                                     |
+| `APACHE_ERROR_LOG`     | `/dev/stdout`   | ...                                     |
+| `APACHE_ACCESS_LOG`    | `/dev/stdout`   | ...                                     |
 
 # www-data user and group ID
 
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `WWW_DATA_UID` | `33`    | ...         |
+| `WWW_DATA_GID` | `33`    | ...         |
+
 By default the system user that runs the apache process is www-data with the uid/gid `33`/`33`.
-You can changes this with the two env vars:
-
-`WWW_DATA_UID`  
-
-`WWW_DATA_GID`
-
+You can changes this with the two env vars `WWW_DATA_UID` and `WWW_DATA_GID`
 This way you could give the REDCap files the same ownership as your host system user.
 
 
 # Run custom or upgrade SQL Scripts at boot
 
+| Variable                                | Default                                   | Description |
+| --------------------------------------- | ----------------------------------------- | ----------- |
+| `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` | `/opt/redcap-docker/sql_scripts_run_once` | ...         |
 
-`AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` 
+
 
 With the env var `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` you can set a location to a local single file, a local directory or a remote http file or directory.
 
@@ -418,14 +424,20 @@ Each SQL file(s) will be remembered (by hash) and not run again at the following
 
 This can be handy for RedCap upgrade procedures, that need you to run a sql script. see the document [REDCAP_UPGRADE.md](/REDCAP_UPGRADE.md) for more info
   
-  
-Defaults to `/opt/redcap-docker/sql_scripts_run_once`
+It defaults to `/opt/redcap-docker/sql_scripts_run_once`
+
+
+
 
 # Fix REDCap source files/directory permissions
 
-`FIX_REDCAP_DIR_PERMISSIONS`
+| Variable                     | Default | Description |
+| ---------------------------- | ------- | ----------- |
+| `FIX_REDCAP_DIR_PERMISSIONS` | `true`  | ...         |
 
-Set this to false, if the container should not apply the user `www-data` to be the owner of the REDCap source directory and files on startup.
+
+
+Set `FIX_REDCAP_DIR_PERMISSIONS` to false, if the container should not apply the user `www-data` to be the owner of the REDCap source directory and files on startup.
 
 Defaults to `true`
 
@@ -433,60 +445,50 @@ Defaults to `true`
 > If you are not happy with the UID/GID of the user www-data have a look at [`WWW_DATA_UID`/`WWW_DATA_GID`](#www-data-user-and-group-id).
 
 
+
 # REDCap database connection environment variable
 
-```env
-DB_PORT     # Default: null
-DB_HOSTNAME # Default: ''
-DB_NAME     # Default: ''
-DB_USERNAME # Default: ''
-DB_PASSWORD # Default: ''
 
-# The path name to the key file.
-DB_SSL_KEY_PATH      # Default: ''
+| Variable               | Default | Description                                                                          |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `DB_PORT`              | `null`  | ...                                                                                  |
+| `DB_HOSTNAME`          | ``      | ...                                                                                  |
+| `DB_NAME`              | ``      | ...                                                                                  |
+| `DB_USERNAME`          | ``      | ...                                                                                  |
+| `DB_PASSWORD`          | ``      | ...                                                                                  |
+| `DB_SSL_KEY_PATH`      | ``      | The path name to the key file                                                        |
+| `DB_SSL_CERT_PATH`     | ``      | The path name to the certificate file.                                               |
+| `DB_SSL_CA_FILE_PATH`  | ``      | ...                                                                                  |
+| `DB_SSL_CA_DIR_PATH`   | ``      | The pathname to a directory that contains trusted SSL CA certificates in PEM format. |
+| `DB_SSL_ALGOS`         | `null`  | A list of allowable ciphers to use for SSL encryption.                               |
+| `DB_SALT`              | ``      | ...                                                                                  |
+| `DB_SSL_VERIFY_SERVER` | `false` | ...                                                                                  |
 
-# The path name to the certificate file.
-DB_SSL_CERT_PATH     # Default: ''
 
-# The path name to the certificate authority file.
-DB_SSL_CA_FILE_PATH  # Default: ''
 
-# The pathname to a directory that contains trusted SSL CA certificates in PEM format. 
-DB_SSL_CA_DIR_PATH  # Default: ''
-
-# A list of allowable ciphers to use for SSL encryption.
-DB_SSL_ALGOS         # Default: null
-
-DB_SSL_VERIFY_SERVER # Default = false
-
-DB_SALT # Default: ''
-```
 
 
 ## REDCap Data Transfer Services
-```env
-DTS_HOSTNAME
-DTS_DB
-DTS_USERNAME
-DTS_PASSWORD
-```
+
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `DTS_HOSTNAME` | ``      | ...         |
+| `DTS_DB`       | ``      | ...         |
+| `DTS_USERNAME` | ``      | ...         |
+| `DTS_PASSWORD` | ``      | ...         |
 
 # User provisioning
 
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `ENABLE_USER_PROV` | `true`      | switch to false to disable user provisoning completly         |
+| `USER_PROV_FILE_DIR`       | `/opt/redcap-docker/users`      | A path that will be scanned for json or yaml files with user data for the user provisioning         |
+| `USER_PROV_OVERWRITE_EXISTING` | `false`      | if set top true existing users in the REDCap database with the same username will be overwriten         |
+| `USER_PROV` | `[]`      | Multiple users data as json. see [User provisioning](USER_PROV.md) for details and format         |
+| `USER_PROV_*` | `null`      | Single User data as indexed json. e.g. `USER_PROV_1={"username": "user12"...` see [User provisioning](USER_PROV.md) for details and format         |
+
+
 This container image can prefill the database with table users. for more details have a look at [User provisioning](USER_PROV.md)
-
-Available env vars:
-
-
-`ENABLE_USER_PROV` default `true` -  siwtch to false to disable user provisoning completly
-
-`USER_PROV_FILE_DIR` default `/opt/redcap-docker/users` - A path that will be scanned for json or yaml files with user data for the user provisioning
-
-`USER_PROV_OVERWRITE_EXISTING` default `false` - if set top true existing users in the REDCap database with the same username will be overwriten
-
-`USER_PROV` default none - Multiple users data as json. see [User provisioning](USER_PROV.md) for details and format
-
-`USER_PROV_``*` default none -  User data as json. see [User provisioning](USER_PROV.md) for details and format
 
 
 # REDCap installation

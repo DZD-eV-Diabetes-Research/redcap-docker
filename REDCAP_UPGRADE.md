@@ -104,7 +104,7 @@ services:
     [...]
 ```
 
-> [!HINT]
+> [!TIP]
 > You can keep this mount permanently. The system tracks which SQL scripts have already run and won’t execute them again.
 
 ### Update
@@ -132,12 +132,6 @@ redcap-1       | [RUN CUSTOM BOOT SQLS] Try run file: '/opt/redcap-docker/sql_sc
 If no error messages appear, everything is fine.
 Now return to the "Easy Upgrade" page in REDCap and follow any remaining instructions.
 
-> [!HINT]
+> [!IMPORTANT]
 > Don’t forget to switch your REDCap system back from **offline** to **online** in the Control Center.
-
-```
-
----
-
-Would you like me to also **add a short “Quick Summary” section at the top** with just the commands and steps, so readers can get the update done fast without reading the full details?
 

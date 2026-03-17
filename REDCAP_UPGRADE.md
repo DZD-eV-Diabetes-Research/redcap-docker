@@ -56,8 +56,15 @@ Then restart your container.
 
 ### Introduction
 
-We recommend using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
+
+
+We ~~recommend~~ using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
 This automates the update process and is fully compatible with this container.
+
+> [!WARNING]  
+> Update Feb 2026: The REDCap consortium does not endorse the **Easy Upgrade** anymore. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/4 for a possible solution
+> The following manual is still working but be aware of the risks!
+
 
 From the 8.6.0 Changelog:
 

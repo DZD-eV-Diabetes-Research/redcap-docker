@@ -62,7 +62,7 @@ We ~~recommend~~ using the **Easy Upgrade** feature, available since REDCap vers
 This automates the update process and is fully compatible with this container.
 
 > [!WARNING]  
-> Update Feb 2026: The REDCap consortium does not endorse the **Easy Upgrade** anymore. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/4 for a possible solution
+> Update Feb 2026: The REDCap consortium does not endorse the **Easy Upgrade** anymore. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/4 for a possible future solution  
 > The following manual is still working but be aware of the risks!
 
 

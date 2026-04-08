@@ -29,7 +29,7 @@ services:
       MSMTP_tls_starttls: on
       MSMTP_syslog: on
       RCCONF_from_email: redcap-system@wy-corp.earth
-    restart: always
+    restart: "no"
     depends_on:
           db:
             condition: service_healthy
@@ -46,7 +46,7 @@ services:
         max-file: "3"
   db:
     image: mysql:lts
-    restart: always
+    restart: "no"
     cap_add:
       - SYS_NICE # CAP_SYS_NICE
     volumes:

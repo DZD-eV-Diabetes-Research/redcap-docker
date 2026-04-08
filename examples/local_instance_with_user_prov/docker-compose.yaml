@@ -36,7 +36,7 @@ services:
       - ./data/redcap:/var/www/html
       # Here you can throw in some sql script that run once at boot. this can be handy for red updates
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
-    restart: always
+    restart: "no"
     depends_on:
           db:
             condition: service_healthy
@@ -49,7 +49,7 @@ services:
         max-file: "3"
   db:
     image: mysql:lts
-    restart: always
+    restart: "no"
     cap_add:
       - SYS_NICE # CAP_SYS_NICE
     volumes:

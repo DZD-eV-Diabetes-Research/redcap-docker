@@ -24,7 +24,7 @@ services:
       REDCAP_DOCKER_SCRIPTS_DEBUG: true
       
       
-    restart: always
+    restart: "no"
     env_file:
       - .env
       - user_prov/users.env
@@ -70,7 +70,7 @@ services:
         max-file: "3"
   db:
     image: mysql:lts
-    restart: always
+    restart: "no"
     cap_add:
       - SYS_NICE # CAP_SYS_NICE
     volumes:

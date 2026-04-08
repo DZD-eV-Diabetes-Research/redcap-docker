@@ -20,7 +20,7 @@ services:
       RCCONF_project_contact_email: c.ferro@wyyu.earth
       REDCAP_DOCKER_SCRIPTS_DEBUG: true
 
-    restart: always
+    restart: "no"
     depends_on:
           db:
             condition: service_healthy
@@ -67,7 +67,7 @@ services:
         max-file: "3"
   db:
     image: mysql:lts
-    restart: always
+    restart: "no"
     cap_add:
       - SYS_NICE # CAP_SYS_NICE
     volumes:

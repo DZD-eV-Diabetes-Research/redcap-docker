@@ -56,8 +56,15 @@ Then restart your container.
 
 ### Introduction
 
-We recommend using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
+
+
+We ~~recommend~~ using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
 This automates the update process and is fully compatible with this container.
+
+> [!WARNING]  
+> Update Feb 2026: The REDCap consortium does not endorse the **Easy Upgrade** anymore. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/4 for a possible future solution  
+> The following manual is still working but be aware of the risks!
+
 
 From the 8.6.0 Changelog:
 
@@ -104,7 +111,7 @@ services:
     [...]
 ```
 
-> [!HINT]
+> [!TIP]
 > You can keep this mount permanently. The system tracks which SQL scripts have already run and won’t execute them again.
 
 ### Update
@@ -132,12 +139,6 @@ redcap-1       | [RUN CUSTOM BOOT SQLS] Try run file: '/opt/redcap-docker/sql_sc
 If no error messages appear, everything is fine.
 Now return to the "Easy Upgrade" page in REDCap and follow any remaining instructions.
 
-> [!HINT]
+> [!IMPORTANT]
 > Don’t forget to switch your REDCap system back from **offline** to **online** in the Control Center.
-
-```
-
----
-
-Would you like me to also **add a short “Quick Summary” section at the top** with just the commands and steps, so readers can get the update done fast without reading the full details?
 

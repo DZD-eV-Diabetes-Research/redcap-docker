@@ -71,6 +71,7 @@ This is our try, to containerize REDCap in a way, we can deploy a new instance, 
 # Ideas
 
 * Project provisioning
+* Automated data exports
 
 # Minimal example docker compose
 

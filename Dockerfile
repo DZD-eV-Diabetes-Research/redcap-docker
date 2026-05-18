@@ -25,6 +25,8 @@ RUN apt-get update -qq && \
     libyaml-dev \
     # cron req
     busybox-static \
+    # mysql client for upgrade backup/restore (mysqldump + mysql)
+    default-mysql-client \
     # yaml support for user prov
     && pecl install yaml \
     # INSTALL IMAGICK
@@ -96,6 +98,14 @@ ENV REDCAP_INSTALL_ENABLE=true
 ENV REDCAP_INSTALL_SQL_SCRIPT_PATH=/config/redcap/install/install.sql
 ENV REDCAP_SUSPEND_SITE_ADMIN=false
 
+# REDCap community portal credentials used by the in-place upgrader
+ENV REDCAP_COMMUNITY_USER=
+ENV REDCAP_COMMUNITY_PASSWORD=
+
+# Directory where the upgrader stores pre-upgrade database backups
+ENV REDCAP_UPGRADE_BACKUP_DIR=/opt/redcap-docker/backups
+RUN mkdir -p $REDCAP_UPGRADE_BACKUP_DIR
+
 # USER Provisioning
 ENV ENABLE_USER_PROV=true
 ENV USER_PROV_FILE_DIR=/opt/redcap-docker/users
@@ -112,6 +122,8 @@ ENV CRON_RUN_JOB_ON_START=false
 ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
 # register cron command
 RUN ln -s /opt/redcap-docker/assets/scripts/cron-job.sh /usr/bin/redcap-cron
+# register in-place upgrade command
+RUN ln -s /opt/redcap-docker/assets/scripts/redcap_upgrade.sh /usr/bin/redcap-upgrade
 # Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite

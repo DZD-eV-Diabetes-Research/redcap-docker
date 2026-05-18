@@ -1,184 +1,215 @@
 
 # redcap-docker
-Yet another try to containerize [REDCap](https://www.project-redcap.org/) but with a focus on automated deployments.
 
-**Status**: 🚧 This project is "work in progress" but we have a running ~~alpha~~ beta. I would appriciate your [feedback](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)  
+Yet another try to containerize [REDCap](https://www.project-redcap.org/) — but with a focus on **automated, hands-off deployments**.
+
+**Status**: Work in progress · beta  
 **Maintainer**: Tim Bleimehl, DZD  
-**Docker image**: https://hub.docker.com/r/dzdde/redcap-docker  
-**Source**: https://github.com/DZD-eV-Diabetes-Research/redcap-docker
-  
+**Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
+**Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)
+
+---
 
 - [redcap-docker](#redcap-docker)
-- [Disclaimer](#disclaimer)
-- [About / Motivation](#about--motivation)
-  - [Target Audience](#target-audience)
-- [Features](#features)
-- [Roadmap](#roadmap)
-- [Ideas](#ideas)
-- [Minimal example docker compose](#minimal-example-docker-compose)
-- [REDCap Updates](#redcap-updates)
-- [Container image details](#container-image-details)
-  - [Environment Variables](#environment-variables)
-    - [REDCap Application configuration](#redcap-application-configuration)
-    - [Email configuration](#email-configuration)
-    - [Cron mode](#cron-mode)
-  - [User provisioning](#user-provisioning)
-  - [Volume/Pathes](#volumepathes)
-    - [REDCap php scripts aka apache document root dir](#redcap-php-scripts-aka-apache-document-root-dir)
-    - [Custom php ini config](#custom-php-ini-config)
-    - [Custom apache virtual host directives](#custom-apache-virtual-host-directives)
-    - [Custom install SQL Script](#custom-install-sql-script)
-    - [User provisioning files](#user-provisioning-files)
-    - [REDCap file repository](#redcap-file-repository)
-  - [File Ownership](#file-ownership)
+  - [Disclaimer](#disclaimer)
+  - [About \& Motivation](#about--motivation)
+    - [Target Audience](#target-audience)
+  - [Features](#features)
+  - [Quick Start](#quick-start)
+  - [Container Reference](#container-reference)
+    - [Environment Variables](#environment-variables)
+      - [REDCap Application Configuration](#redcap-application-configuration)
+      - [Email Configuration](#email-configuration)
+      - [Cron Mode](#cron-mode)
+    - [Volumes \& Paths](#volumes--paths)
+      - [REDCap PHP scripts (Apache document root)](#redcap-php-scripts-apache-document-root)
+      - [Custom PHP INI configuration](#custom-php-ini-configuration)
+      - [Custom Apache virtual host directives](#custom-apache-virtual-host-directives)
+      - [Custom install SQL script *(optional)*](#custom-install-sql-script-optional)
+      - [User provisioning files](#user-provisioning-files)
+      - [REDCap file repository](#redcap-file-repository)
+    - [User Provisioning](#user-provisioning)
+    - [File Ownership](#file-ownership)
+  - [REDCap Updates \& Upgrades](#redcap-updates--upgrades)
+  - [Roadmap](#roadmap)
 
-# Disclaimer
+---
 
-This is not an official REDCap project.  
-We are only a institutional partner of the REDCap Consortium. But besides that we have no connection to REDCap. We are just REDCap users.  
-This project does not distribute REDCap and will never do. Its just a wrapper to help deploy REDCap.  
-Users still need to provide their own copy of REDCap.  
+## Disclaimer
+
+This is not an official REDCap project. We are an institutional partner of the REDCap Consortium, but beyond that we have no connection to REDCap — we are simply REDCap users.
+
+This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap.
 
 > [!CAUTION]
-> We are not responsible for any data loss or damage that may occur from the use of our container image. Use it at your own risk. Make backups!
+> We are not responsible for any data loss or damage that may occur from the use of this container image. Use it at your own risk. **Make backups.**
 
+---
 
-# About / Motivation
+## About & Motivation
 
-We drive our infrastructure with an emphasis on automation and reproducibility with containerization as our tool.
-While there are currently great solutions out there like Andys https://github.com/123andy/redcap-docker-compose (Which was a great help to create this repo), we were not able to adapt REDCap to our environemnt without manual intervention.  
-This is our try, to containerize REDCap in a way, we can deploy a new instance, without the need for manual intervention during setup.
+Our infrastructure emphasises automation and reproducibility through containerization. While excellent solutions like [Andy's redcap-docker-compose](https://github.com/123andy/redcap-docker-compose) exist and were a great help when building this repo, we could not adapt them to our environment without manual intervention during setup.
 
-## Target Audience
+This project is our attempt to containerize REDCap in a way that allows deploying a fresh instance with **zero manual steps**.
 
-* IT Operators: Professionals with knowledge of container operations who need to deploy and manage a REDCap instances.
-* REDCap Admins: Users familiar with Docker or Podman who require local instances of REDCap for testing or experimentation.
+### Target Audience
 
-# Features
+- **IT Operators** — professionals with container operations knowledge who need to deploy and manage REDCap instances.
+- **REDCap Admins** — users familiar with Docker or Podman who need local REDCap instances for testing or experimentation.
 
-* Automated installation without the need to copy and run REDCap generated SQL scripts
-* REDCap Database configuration via env vars
-* REDCap Application configuration via env vars
-* Automated basic routine task like deactivating the default admin (Optionaly)
-* Provide simple mail setup (msmtprc config via env vars)
-* "Cron mode" to run the same image as REDCap cronjob manager
-* User provisioning via env vars and/or yaml files
+---
 
-# Roadmap
+## Features
 
-* Update user admin priviledges for existing (also external like ldap or oauth2 ) users
+- Automated installation — no need to manually copy or run REDCap-generated SQL scripts
+- Database and application configuration via environment variables
+- Simple mail setup via environment variables (`msmtprc`-based)
+- Automated routine tasks such as deactivating the default admin (optional)
+- "Cron mode": run the same image as the REDCap cron job manager
+- User provisioning via environment variables and/or YAML files
+- 🧪 **[BETA]** Built-in server-side upgrader (`redcap-upgrade`) as a replacement for the deprecated **Easy Upgrade**. It checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [REDCap Updates & Upgrades](#redcap-updates--upgrades).
 
-# Ideas
+---
 
-* Project provisioning
-* Automated data exports
+## Quick Start
 
-# Minimal example docker compose
+> This guide assumes basic familiarity with `docker` and `docker compose` and that both are installed.
 
-> We assume some basic knowledge about `docker` and `docker compose` and that it is installed
+> [!IMPORTANT]
+> **Batteries not included.** Due to REDCap's licensing, you must provide the REDCap source code (PHP scripts) yourself.
 
+See the [minimal docker compose example](examples/local_instance_basic) for a working starting point you can bring up right away.
 
-> 🔋🛑 Batteries not included! Due to the way how REDCap is licensed, you still need to provide the REDCap source-code/php-scripts.
+---
 
-Have a look in the [example section for a minimal docker compose](examples/local_instance_basic)  that you can start right now.
+## Container Reference
 
+### Environment Variables
 
-# REDCap Updates
+See [config_vars_list.md](config_vars_list.md) for the full list of available variables.
 
-On how to update your REDCap with this container image see the dedicated page at [REDCAP_UPGRADE.md](/REDCAP_UPGRADE.md)
+#### REDCap Application Configuration
 
-# Container image details
+REDCap application settings can be configured via environment variables. Prefix any key from the `redcap_config` database table with `RCCONF_` to set it at startup.
 
-## Environment Variables
+Example: `RCCONF_auth_meth_global=table`
 
-see [config_vars_list.md](config_vars_list.md) for all available variables.
+See [REDCap application env vars](config_vars_list.md#redcap-application-config-vars) for a list of available options.
 
-### REDCap Application configuration
+#### Email Configuration
 
-You can configure the REDCap instance with env vars. Just prefix the config variables available in the REDCap database table `redcap_config` with `RCCONF_`
+See [config_vars_list.md — msmtp](config_vars_list.md#msmtp) for all mail-related variables.
 
-see [REDCap application env vars](config_vars_list.md#redcap-application-config-vars) for a list of (almost) all available options
+#### Cron Mode
 
-### Email configuration
+You can use the same Docker image to run the REDCap cron process. Set the environment variable `CRON_MODE=true`.
 
-see [config_vars_list.md#msmtp](config_vars_list.md#msmtp) for mail config vars
+> **Note:** You still need a separate container running the REDCap web server.
 
-### Cron mode
+- See [config_vars_list.md — cron](config_vars_list.md#cron) for all cron-related variables.
+- See the [cron example compose](examples/instance_with_cron) for a full setup alongside a REDCap web instance.
 
-you can use the same docker image to run the REDCap cron process.
-Just set the env var `CRON_MODE`to true.  
-  
-> HINT: You still need to run a second container with the REDCap webserver)
+---
 
-see [config_vars_list.md#cron](config_vars_list.md#msmtp) for all env var options  
-see [Cron example compose](examples/instance_with_cron) how to configure it next to a REDCap instance
+### Volumes & Paths
 
-## User provisioning
+#### REDCap PHP scripts (Apache document root)
 
-This container image can prefill your REDCap instance with table users based on json in the environemnt variable `USER_PROV`.
+The REDCap PHP scripts must be placed in:
 
-But there are also different options:
+```
+/var/www/html
+```
 
-See the manual at [USER_PROV.md](USER_PROV.md) for more details.  
-See the list of env vars concerning user provisiong at [USER_PROV.md](config_vars_list.md#user-provisioning) for more details.  
-Have a look at the [docker compose example](examples/local_instance_with_user_prov) how it works in action.  
+This path can be changed via the `APACHE_DOCUMENT_ROOT` environment variable.
 
-> [!IMPORTANT]  
-> If you are using user provisioning you also want to enable the table based [authentication method](config_vars_list.md#rcconf\_auth\_meth\_global) to `table`. env var: `RCCONF_auth_meth_global=table`.
+#### Custom PHP INI configuration
 
-## Volume/Pathes
+Drop any `.ini` files into this directory to extend the PHP configuration. See the [PHP ini reference](https://www.php.net/manual/en/ini.list.php) for all available settings.
 
-### REDCap php scripts aka apache document root dir
+```
+/config/php/custom_inis
+```
 
-This directory must contain the REDCap php scripts.
+Configurable via the `PHP_INI_SCAN_DIR` environment variable.
 
-`/var/www/html`
+#### Custom Apache virtual host directives
 
-This dir can be changed via env var `APACHE_DOCUMENT_ROOT`
+```
+/config/apache/custom.virtualhost
+```
 
-### Custom php ini config
+#### Custom install SQL script *(optional)*
 
-Put any custom php ini config in this directory to be included in the php configuration. See https://www.php.net/manual/en/ini.list.php for all config variables
+You can supply the REDCap installation SQL script generated by `http(s)://<yourredcapdomain>/install.php`:
 
-`/config/php/custom_inis`
+```
+/config/redcap/install/install.sql
+```
 
-This dir can be changed via env var `PHP_INI_SCAN_DIR`
+If this file exists and the `redcap_config` table is not yet present in the database, the script will be executed at startup. If no file is provided, a generic version is derived from the REDCap sources you supply.
 
-### Custom apache virtual host directives
+Configurable via the `REDCAP_INSTALL_SQL_SCRIPT_PATH` environment variable.
 
-`/config/apache/custom.virtualhost`
+#### User provisioning files
 
+```
+/opt/redcap-docker/users
+```
 
-### Custom install SQL Script
+This directory is scanned for user data to provision at startup. See [User Provisioning](#user-provisioning) for details.
 
-> This is optional
+#### REDCap file repository
 
-You can provide the REDCap installation script (generated by `http(s)://<myredcapdomain>/install.php`)
+By default, user-uploaded files are stored in the document root at `/var/www/html/edocs`. As recommended by the REDCap documentation, you may want to move this outside the web root.
 
-`/config/redcap/install/install.sql`
+Set `RCCONF_edoc_path` to any path of your choice (e.g. `RCCONF_edoc_path=/data`) and mount that path into the container.
 
-If the script is existent and REDCap is considered to be **not** installed (there is no `redcap_config` table in the database)
-We will run this script at startup.
+See the [custom edocs compose example](examples/local_instance_custom_edocs) for a working setup.
 
-This dir can be changed via env var `REDCAP_INSTALL_SQL_SCRIPT_PATH`
+---
 
-If the file is not provided, we will just pull a generic version it from the REDCap sources you provided.
+### User Provisioning
 
-### User provisioning files
+The container can pre-populate your REDCap instance with table-based users. The simplest way is to supply user data via the `USER_PROV` environment variable as JSON, but file-based provisioning is also supported.
 
-`/opt/redcap-docker/users` directory that will be scanned for user data to be provisioned. See [User provisioning](#user-provisioning) for more details.
+- Full documentation: [USER_PROV.md](USER_PROV.md)
+- Environment variable reference: [config_vars_list.md — user provisioning](config_vars_list.md#user-provisioning)
+- Working example: [docker compose example](examples/local_instance_with_user_prov)
 
-### REDCap file repository
+> [!IMPORTANT]
+> When using user provisioning you will almost certainly also want to set the [authentication method](config_vars_list.md#rcconf_auth_meth_global) to `table`:
+> ```
+> RCCONF_auth_meth_global=table
+> ```
 
-By the default the REDCap user uploaded filw will be saved into your document root dir `/var/www/html/edocs`. But as stated by the REDCap manual you may want to change that.  
+---
 
-This is easy with this container image, Just set `RCCONF_edoc_path` (e.g. `RCCONF_edoc_path=/data`) to the path of your choice and mount this path via docker to your host system.  
+### File Ownership
 
-Have a look at the [docker compose example](examples/local_instance_custom_edocs) how it works in action.
+If the default UID/GID of the container's internal Apache user does not suit your environment, see [`WWW_DATA_UID` / `WWW_DATA_GID`](config_vars_list.md) for how to override it.
 
+---
 
+## REDCap Updates & Upgrades
 
-## File Ownership
+> 🧪 **BETA** — The container ships a built-in upgrade command. Run it without arguments for an interactive wizard, or pass `--version X.X.X` for scripted upgrades.
 
-If you are not happy with the file ownership UID/GID of the containers internal apache run user, have a look at [`WWW_DATA_UID`/`WWW_DATA_GID`](#www-data-user-and-group-id).
+```bash
+docker compose exec -it redcap redcap-upgrade
+```
 
+See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for full documentation, including manual fallback procedures.
+
+---
+
+## Roadmap
+
+**Planned**
+- Update user admin privileges for existing users (including external users via LDAP or OAuth2)
+
+**Ideas under consideration**
+- Project provisioning
+- Automated data exports
+
+Feedback and contributions are welcome — [open an issue](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues) to start the conversation.

@@ -1,0 +1,41 @@
+name: Publish Beta Docker image
+
+on:
+  release:
+    types: [prereleased]
+
+jobs:
+  push_to_registry:
+    name: Push beta Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_DZD_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_DZD_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: dzdde/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
+          tags: |
+            # versioned tag from the release (e.g. v1.2.3-beta.1 → 1.2.3-beta.1)
+            type=semver,pattern={{version}}
+            # always also tag as 'beta' so it's the stable pointer to the latest pre-release
+            type=raw,value=beta
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

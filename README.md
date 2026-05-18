@@ -30,6 +30,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
       - [REDCap file repository](#redcap-file-repository)
     - [User Provisioning](#user-provisioning)
     - [File Ownership](#file-ownership)
+  - [Beta Channel](#beta-channel)
   - [REDCap Updates \& Upgrades](#redcap-updates--upgrades)
   - [Roadmap](#roadmap)
 
@@ -188,6 +189,21 @@ The container can pre-populate your REDCap instance with table-based users. The 
 ### File Ownership
 
 If the default UID/GID of the container's internal Apache user does not suit your environment, see [`WWW_DATA_UID` / `WWW_DATA_GID`](config_vars_list.md) for how to override it.
+
+---
+
+## Beta Channel
+
+Some features are released as beta before they land in a stable image. To try them, use the `beta` tag instead of `latest`:
+
+```yaml
+# docker-compose.yaml
+services:
+  redcap:
+    image: dzdde/redcap-docker:beta
+```
+
+Beta images are published automatically when a pre-release is created on GitHub. They may contain bugs — please [report issues](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues) if you find any.
 
 ---
 

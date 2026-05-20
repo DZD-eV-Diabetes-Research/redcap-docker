@@ -38,7 +38,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
 
 This is not an official REDCap project. We are an institutional partner of the REDCap Consortium, but beyond that we have no connection to REDCap - we are simple REDCap users.
 
-This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap, or a valid login to the REDCap community portal to download it automatically.
+This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap, or a valid login to the REDCap community portal to download it.
 
 > [!CAUTION]
 > We are not responsible for any data loss or damage that may occur from the use of this container image. Use it at your own risk. **Make backups.**

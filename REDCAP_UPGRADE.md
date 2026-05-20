@@ -1,88 +1,79 @@
 
-- [How to Update / Upgrade](#how-to-update--upgrade)
+# REDCap Updates & Upgrades
+
+- [REDCap Updates \& Upgrades](#redcap-updates--upgrades)
   - [Environment Update](#environment-update)
-    - [Docker Compose](#docker-compose)
-    - [Docker](#docker)
   - [REDCap Application Update](#redcap-application-update)
-    - [Introduction](#introduction)
-    - [Server-Side Upgrader (recommended)](#server-side-upgrader-recommended)
+    - [Method 1 — Automatic via REDCAP\_VERSION](#method-1--automatic-via-redcap_version)
+    - [Method 2 — Server-Side Upgrader (redcap-upgrade)](#method-2--server-side-upgrader-redcap-upgrade)
       - [Interactive wizard](#interactive-wizard)
-      - [Branch switching](#branch-switching)
       - [Non-interactive (scripted) upgrade](#non-interactive-scripted-upgrade)
       - [Using a locally pre-downloaded zip](#using-a-locally-pre-downloaded-zip)
+      - [Branch switching (LTS ↔ STD)](#branch-switching-lts--std)
       - [Preview without changes](#preview-without-changes)
       - [Backup and rollback](#backup-and-rollback)
       - [All options](#all-options)
-    - [Manual Updates](#manual-updates)
-    - [Mount /opt/redcap-docker/sql\_scripts\_run\_once](#mount-optredcap-dockersql_scripts_run_once)
-    - [Update](#update)
+    - [Method 3 — Manual SQL script](#method-3--manual-sql-script)
 
+---
 
-# How to Update / Upgrade
+There are two distinct kinds of updates:
 
-There are two kinds of updates:
+| Kind | What changes | How |
+|---|---|---|
+| **Environment** | OS, PHP, ImageMagick, other system packages | Pull new Docker image |
+| **Application** | REDCap PHP files and database schema | One of the methods below |
 
-- **Environment** – the operating system, PHP runtime, and third-party modules (e.g., ImageMagick).  
-- **Application** – the REDCap PHP files.  
-
-Both require different update/upgrade procedures.
-
+---
 
 ## Environment Update
 
-This process is straightforward because everything happens when rebuilding the Docker image.
-
-Simply pull the latest Docker image from Docker Hub.  
-
-You can check for new releases here:  
-- https://hub.docker.com/r/dzdde/redcap-docker/tags  
-- https://github.com/DZD-eV-Diabetes-Research/redcap-docker/releases  
-
-### Docker Compose
+Pull the latest image and restart:
 
 ```bash
 docker compose pull
-````
-
-Restart REDCap:
-
-```bash
 docker compose down && docker compose up -d
 ```
 
-### Docker
+Check [Docker Hub tags](https://hub.docker.com/r/dzdde/redcap-docker/tags) or [GitHub releases](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/releases) for what changed.
 
-If you’re using plain Docker, run:
-
-```bash
-docker pull dzdde/redcap-docker
-```
-
-Then restart your container.
+---
 
 ## REDCap Application Update
 
-### Introduction
+### Method 1 — Automatic via REDCAP_VERSION
 
+The fully automated path. Declare the desired version in your compose file and the container reconciles the state on every boot.
 
+```yaml
+services:
+  redcap:
+    environment:
+      REDCAP_VERSION: "14.9.5"
+      REDCAP_AUTO_UPGRADE: "true"           # required to enable auto-upgrade
+      REDCAP_COMMUNITY_USER: your_username
+      REDCAP_COMMUNITY_PASSWORD: your_password
+```
 
-We ~~recommend~~ using the **Easy Upgrade** feature, available since REDCap version **8.6.0**.
-This automates the update process and is fully compatible with this container.
+**Behaviour table:**
 
-> [!WARNING]  
-> Update Feb 2026: The REDCap consortium does not endorse the **Easy Upgrade** anymore. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/4 for a possible future solution  
-> The following manual is still working but be aware of the risks!
+| Installed vs desired | `REDCAP_AUTO_UPGRADE` | Action |
+|---|---|---|
+| Nothing installed | any | Download and install on first boot |
+| Same version | any | Skip — nothing to do |
+| Older installed | `true` | Auto-upgrade on boot |
+| Older installed | `false` (default) | Log warning, continue with existing version |
+| Newer installed | any | Skip — never auto-downgrade |
 
+> [!TIP]
+> The conservative default (`REDCAP_AUTO_UPGRADE=false`) means bumping `REDCAP_VERSION` in your compose file logs a warning but does **not** upgrade automatically. This lets you review before upgrading — either set the flag or run `redcap-upgrade` manually.
 
-From the 8.6.0 Changelog:
+> [!NOTE]
+> When auto-upgrading, a pre-upgrade database backup is always created automatically. See [Backup and rollback](#backup-and-rollback).
 
-> Administrators may now upgrade to a more recent version of REDCap in an easier and more automated fashion with just a couple of clicks. The Easy Upgrade process (if fully enabled) allows REDCap administrators to upgrade REDCap using only the REDCap user interface in the Control Center (i.e., direct access to the web server or database server is not required).
+---
 
-However, there is one caveat:
-
-> If a particular upgrade cannot complete via the Easy Upgrade process because it requires REDCap to be taken offline before executing the SQL upgrade script, the Easy Upgrade feature will still auto-download the REDCap upgrade file but redirect the administrator to the Upgrade Module to complete the upgrade manually. This occurs only in a small minority of upgrades.
-
-### Server-Side Upgrader (recommended)
+### Method 2 — Server-Side Upgrader (redcap-upgrade)
 
 > [!WARNING]
 > **This feature is currently in BETA.**
@@ -91,14 +82,12 @@ However, there is one caveat:
 > directory until you are confident the upgrade succeeded.
 > Please report any issues at https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues
 
-The container ships with a built-in upgrade command (`redcap-upgrade`) that handles
-the full upgrade process in-place — no container restart required.
+The container ships a built-in upgrade command that handles the full upgrade process in-place — no container restart required.
 
 It:
 1. Creates a **compressed database backup** before touching anything.
 2. Takes REDCap **offline** in the database.
-3. Downloads the target version zip from the REDCap community portal (or uses a
-   locally provided zip).
+3. Downloads the target version zip from the REDCap community portal (or uses a locally provided zip).
 4. Extracts the new `redcap_vX.X.X/` directory.
 5. Runs all relevant **SQL upgrade scripts** found in the zip.
 6. Installs the new version directory into the document root.
@@ -108,15 +97,13 @@ It:
 
 #### Interactive wizard
 
-The easiest way to upgrade is to call `redcap-upgrade` with **no arguments**.
-If stdin is a terminal, the wizard starts automatically:
+The easiest way to upgrade. Call `redcap-upgrade` with no arguments while attached to a terminal:
 
 ```bash
 docker compose exec -it redcap redcap-upgrade
 ```
 
-The wizard will fetch available versions from the REDCap community portal (no
-credentials needed for the version list) and show them grouped by release branch:
+The wizard fetches the available versions list (no credentials needed for that part) and walks you through the rest:
 
 ```
 === REDCap Upgrade Wizard ===
@@ -154,55 +141,18 @@ Password: (set via environment)
 Start upgrade? [Y/n]:
 ```
 
-During the download a live progress bar shows the download size and speed:
+During download a live progress bar is shown:
 
 ```
   [===============>             ]  54%   27.8 /  51.3 MB    4.2 MB/s
 ```
 
 > [!NOTE]
-> The `-it` flag on `docker compose exec` is required for the wizard to
-> receive keyboard input. Without it, Docker does not allocate a terminal
-> and the wizard will not start.
-
-#### Branch switching
-
-REDCap releases on two parallel tracks:
-
-| Branch | Description |
-|--------|-------------|
-| **LTS** | Long-term support — fewer, stability-focused releases |
-| **STD** | Standard — more frequent releases with new features |
-
-When you are already on the **latest version of your current branch**, the wizard
-detects this and asks whether you want to switch to a newer branch instead of
-silently recommending a version from a different track:
-
-```
-You are already on the latest LTS version (16.0.30).
-
-STD versions:
-  16.1.1  (2026-02-12)
-  ...
-  17.0.8  (2026-05-14)  <-- latest
-
-Note: switching branches is a one-way upgrade — you cannot go back to LTS without a rollback.
-
-Switch to a newer branch? [y/N]:
-```
-
-The default answer is **N** — pressing Enter exits without making any changes.
-If you confirm, the wizard continues normally with the latest version of the
-other branch as the default selection.
-
-> [!WARNING]
-> Switching from LTS to STD is effectively a one-way change. REDCap does not
-> support downgrading between major tracks without a full database restore.
-> Use the `--rollback` option if you need to revert after a branch switch.
+> The `-it` flag on `docker compose exec` is required. Without it Docker does not allocate a terminal and the wizard will not start.
 
 #### Non-interactive (scripted) upgrade
 
-Supply your community portal credentials once via your `docker-compose.yaml`:
+Set credentials once in your `docker-compose.yaml`:
 
 ```yaml
 services:
@@ -220,16 +170,42 @@ docker compose exec redcap redcap-upgrade --version 14.9.5
 
 #### Using a locally pre-downloaded zip
 
-If your server has no outbound internet access, copy the zip onto the volume mount
-first, then point the upgrader at it:
+For servers without outbound internet access:
 
 ```bash
-# Copy the zip into the REDCap data directory (which is already mounted)
-cp ~/Downloads/redcap_v14.9.5.zip ./data/redcap/redcap/
+# Copy the zip to the REDCap data volume (already mounted)
+cp ~/Downloads/redcap_v14.9.5.zip ./data/redcap/
 
-# Run the upgrade
+# Run the upgrade pointing at the local file
 docker compose exec redcap redcap-upgrade --zip /var/www/html/redcap_v14.9.5.zip
 ```
+
+#### Branch switching (LTS ↔ STD)
+
+REDCap releases on two tracks:
+
+| Branch | Description |
+|---|---|
+| **LTS** | Long-term support — fewer, stability-focused releases |
+| **STD** | Standard — more frequent releases with new features |
+
+When you are already on the latest version of your current branch, the wizard detects this and asks whether you want to switch to a newer branch:
+
+```
+You are already on the latest LTS version (16.0.30).
+
+STD versions:
+  16.1.1  (2026-02-12)
+  ...
+  17.0.8  (2026-05-14)  <-- latest
+
+Note: switching branches is a one-way upgrade — you cannot go back to LTS without a rollback.
+
+Switch to a newer branch? [y/N]:
+```
+
+> [!WARNING]
+> Switching from LTS to STD is effectively a one-way change. Use `--rollback` if you need to revert.
 
 #### Preview without changes
 
@@ -239,9 +215,7 @@ docker compose exec redcap redcap-upgrade --version 14.9.5 --dry-run
 
 #### Backup and rollback
 
-The upgrader creates a compressed database dump **before every upgrade** and
-stores it in `/opt/redcap-docker/backups/` (configurable via
-`REDCAP_UPGRADE_BACKUP_DIR` or `--backup-dir`).
+The upgrader creates a compressed database dump **before every upgrade** in `/opt/redcap-docker/backups/` (configurable via `REDCAP_UPGRADE_BACKUP_DIR` or `--backup-dir`).
 
 > [!TIP]
 > Mount the backup directory on the host so backups survive container restarts:
@@ -250,9 +224,7 @@ stores it in `/opt/redcap-docker/backups/` (configurable via
 >   - ./backups:/opt/redcap-docker/backups
 > ```
 
-If the SQL step fails mid-upgrade, the database is **automatically restored**
-from the backup. The old version PHP directory is always kept alongside the new
-one so a rollback restores both layers cleanly.
+If the SQL step fails mid-upgrade the database is **automatically restored** from the backup. The old version PHP directory is always kept so a rollback restores both layers cleanly.
 
 To manually roll back after a completed upgrade:
 
@@ -261,14 +233,9 @@ docker compose exec redcap redcap-upgrade \
     --rollback /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.5.sql.gz
 ```
 
-This restores the database and removes the newly installed `redcap_v14.9.5/`
-directory. The old `redcap_v14.8.0/` directory is still in place and becomes
-active again automatically.
-
-Once you are satisfied with the upgrade, clean up manually:
+Once satisfied, clean up manually:
 
 ```bash
-# Inside the container (or via exec):
 rm -rf /var/www/html/redcap_v14.8.0
 rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.5.sql.gz
 ```
@@ -282,6 +249,8 @@ rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.
 --community-password      Community portal password (or REDCAP_COMMUNITY_PASSWORD env var).
 --no-backup               Skip the pre-upgrade database backup (disables auto-rollback).
 --backup-dir <path>       Backup directory (env: REDCAP_UPGRADE_BACKUP_DIR).
+--backup-db-user <user>   Elevated DB user for the backup (e.g. root).
+--backup-db-password <p>  Password for --backup-db-user.
 --rollback <file>         Restore a backup and remove the version installed after it.
 --dry-run                 Show what would happen without making changes.
 --keep-old                Keep the previous version directory (default when backup is on).
@@ -291,82 +260,32 @@ rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.
 ```
 
 > [!NOTE]
-> The upgrader sets REDCap to offline mode for the duration of the upgrade and
-> restores it to online on completion (even on failure).
+> The upgrader sets REDCap to offline mode for the duration of the upgrade and restores it to online on completion (even on failure).
 
 > [!IMPORTANT]
-> SQL upgrade scripts shipped inside the zip are only run for versions strictly
-> newer than the currently installed version. If you are skipping multiple minor
-> versions, make sure the zip for your target version includes all intermediate
-> SQL files (REDCap normally ships them all in each release).
+> SQL upgrade scripts are only run for versions strictly newer than the currently installed version. If you skip multiple minor versions, make sure the zip for your target version includes all intermediate SQL files (REDCap normally ships them all in each release).
 
 ---
 
-### Manual Updates
+### Method 3 — Manual SQL script
 
-If you do not want to use the integrated updater you can also run your sql scripts by yourself if needed.
-
-In this case, you’ll see a message like this:
-
-![manual-update-ahead](/img/notice-pain-full-update.png)
-
-Fortunately, this container includes a feature that makes the process easier.
-By using the environment variable [`AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION`](/config_vars_list.md#run-custom-or-upgrade-sql-scripts-at-boot), you can simply drop the required SQL script into a directory, and it will be executed automatically at boot.
-
-The upgrader will then look like this:
-
-![upgrader-with-script](/img/upgrader-with-script.png)
-
-You can use **Option B** – download the SQL file and place it in a directory next to your `docker-compose.yaml` file.
-
-### Mount /opt/redcap-docker/sql_scripts_run_once
-
-For example, let’s say the SQL file is named `redcap_upgrade_150012.sql` and you move it to `./sql_scripts`.
-
-Make sure you mount this directory to `/opt/redcap-docker/sql_scripts_run_once` inside the container.
-
-Your REDCap container volumes may look like this:
+If the REDCap upgrade page requires you to run a SQL script manually, mount it into the container's run-once directory:
 
 ```yaml
 services:
   redcap:
-    [...]
     volumes:
-      # Mount the REDCap source/PHP scripts
-      - ./data/redcap:/var/www/html
-      # Mount SQL scripts to run once at boot (useful for manual updates)
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
-    [...]
+```
+
+Place the SQL file (e.g. `redcap_upgrade_150012.sql`) into `./sql_scripts/`. On next container restart it is executed automatically and tracked so it never runs twice.
+
+Check the logs for confirmation:
+
+```bash
+docker compose logs redcap | grep "RUN CUSTOM BOOT SQLS"
+# redcap-1  | [RUN CUSTOM BOOT SQLS] Try run file: '...redcap_upgrade_150012.sql'
 ```
 
 > [!TIP]
-> You can keep this mount permanently. The system tracks which SQL scripts have already run and won’t execute them again.
-
-### Update
-
-If the updater instructs you to do so, set your REDCap instance to **offline mode** in the settings.
-
-Then restart the container with:
-
-```bash
-docker compose down && docker compose pull && docker compose up -d
-```
-
-Check the logs with:
-
-```bash
-docker compose logs
-```
-
-You should see an entry like:
-
-```
-redcap-1       | [RUN CUSTOM BOOT SQLS] Try run file: '/opt/redcap-docker/sql_scripts_run_once/tmp/redcap_upgrade_150012.sql'
-```
-
-If no error messages appear, everything is fine.
-Now return to the "Easy Upgrade" page in REDCap and follow any remaining instructions.
-
-> [!IMPORTANT]
-> Don’t forget to switch your REDCap system back from **offline** to **online** in the Control Center.
-
+> You can keep this volume mount permanently. Already-run scripts are tracked by hash and never execute again.

@@ -80,6 +80,11 @@ RUN mv /opt/redcap-docker/assets/config/apache2/conf-enabled/* /etc/apache2/conf
     rm -r /opt/redcap-docker/assets/config/apache2
 
 
+# Desired REDCap version — when set the container auto-installs or auto-upgrades to this version.
+# Set REDCAP_AUTO_UPGRADE=true to also enable automatic upgrades on boot (default: false).
+ENV REDCAP_VERSION=
+ENV REDCAP_AUTO_UPGRADE=false
+
 ENV REDCAP_DOCKER_SCRIPTS_DEBUG=false
 ENV WWW_DATA_UID=33
 ENV WWW_DATA_GID=33
@@ -122,8 +127,9 @@ ENV CRON_RUN_JOB_ON_START=false
 ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
 # register cron command
 RUN ln -s /opt/redcap-docker/assets/scripts/cron-job.sh /usr/bin/redcap-cron
-# register in-place upgrade command
+# register in-place upgrade and install commands
 RUN ln -s /opt/redcap-docker/assets/scripts/redcap_upgrade.sh /usr/bin/redcap-upgrade
+RUN ln -s /opt/redcap-docker/assets/scripts/redcap_install.sh /usr/bin/redcap-install
 # Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite

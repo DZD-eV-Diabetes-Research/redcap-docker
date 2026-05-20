@@ -47,25 +47,29 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
 else
     echo "Try starting REDCap Docker Webserver..."
 
+    # DEPLOY CUSTOM DATABASE CONFIG (before startup scripts so the reconciler can connect)
+    mkdir -p ${APACHE_DOCUMENT_ROOT}
+    cp /opt/redcap-docker/assets/config/redcap/database.php ${APACHE_DOCUMENT_ROOT}/database.php
+
     # CHECK IF REDCAP FILES ARE EXISTENT #
 
     # Initialize the variable to false
     redcap_source_existent=false
 
-    # Check if there is any directory starting with "redcap_v" in /var/www/html/
+    # Check if there is any directory starting with "redcap_v" in the document root
     if find ${APACHE_DOCUMENT_ROOT} -maxdepth 1 -type d -name 'redcap_v*' | grep -q .; then
         redcap_source_existent=true
     fi
 
-    # TODO: DOwnload redcap if redcap_source_existent=false annd REDCAP_SOURCE_DOWNLOAD_URL is set
-    # Exit with an error if redcap_installed is false
-    if [ "$redcap_source_existent" = false ]; then
-        echo "Error: Can not find a copy of REDCap in ${APACHE_DOCUMENT_ROOT}."
+    # If no files and REDCAP_VERSION is set, the boot reconciler (080-redcap-version-reconciler.php)
+    # will download and extract the files during the PHP startup script phase below.
+    if [ "$redcap_source_existent" = false ] && [ -z "${REDCAP_VERSION}" ]; then
+        echo "Error: No REDCap files found in ${APACHE_DOCUMENT_ROOT}."
+        echo "Either mount your REDCap source to ${APACHE_DOCUMENT_ROOT}, or set"
+        echo "REDCAP_VERSION + REDCAP_COMMUNITY_USER + REDCAP_COMMUNITY_PASSWORD"
+        echo "to have the container download REDCap automatically."
         exit 1
     fi
-
-    # DEPLOY CUSTOM DATABASE CONFIG #
-    cp /opt/redcap-docker/assets/config/redcap/database.php ${APACHE_DOCUMENT_ROOT}/database.php
 
     # DEFAULT TO THE DOCKER DEFAULT CONFIG DIRECTORY
     [ -d /etc/container-config/apache2 ] && cp -RT /etc/container-config/apache2 /etc/apache2

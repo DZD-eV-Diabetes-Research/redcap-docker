@@ -1,7 +1,5 @@
 
-
-> TODO: Format this document better and add some more descriptions
-
+- [REDCap source download](#redcap-source-download)
 - [DEBUG](#debug)
 - [PHP](#php)
 - [Apache](#apache)
@@ -365,6 +363,19 @@
     - [RCCONF\_cache\_storage\_system](#rcconf_cache_storage_system)
 
 
+# REDCap source download
+
+When `REDCAP_VERSION` is set the container manages the REDCap source files automatically.
+See [README — Quick Start](README.md#quick-start) and [REDCAP_UPGRADE.md — Method 1](REDCAP_UPGRADE.md#method-1--automatic-via-redcap_version) for full documentation.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `REDCAP_VERSION` | `` | Desired REDCap version (e.g. `14.9.5`). When set, the container auto-installs on first boot and optionally auto-upgrades on subsequent boots. |
+| `REDCAP_AUTO_UPGRADE` | `false` | Set to `true` to allow the container to upgrade automatically when `REDCAP_VERSION` is bumped. Default is conservative — logs a warning but does not upgrade. |
+| `REDCAP_COMMUNITY_USER` | `` | REDCap community portal username used for downloading REDCap. Also read by `redcap-upgrade` and `redcap-install`. |
+| `REDCAP_COMMUNITY_PASSWORD` | `` | REDCap community portal password. |
+
+
 # DEBUG
 
 | Variable | Default | Description                                            |
@@ -518,7 +529,13 @@ It defaults to `/config/redcap/install/install.sql`
 
 # REDCap upgrade
 
-ToDo: This part is untested and undocumented yet.
+See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for full documentation.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `REDCAP_UPGRADE_BACKUP_DIR` | `/opt/redcap-docker/backups` | Directory where `redcap-upgrade` stores pre-upgrade database backups. |
+| `REDCAP_UPGRADE_BACKUP_DB_USER` | `` | Optional elevated database user for backups (e.g. `root`). Use when the application DB user lacks `mysqldump` privileges. |
+| `REDCAP_UPGRADE_BACKUP_DB_PASSWORD` | `` | Password for `REDCAP_UPGRADE_BACKUP_DB_USER`. |
 
 # REDCap Basic Admin tasks
 

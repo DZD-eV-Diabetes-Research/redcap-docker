@@ -63,12 +63,8 @@ function parse_args(array $argv): array
     $opts = [
         'version'            => null,
         'zip'                => null,
-        'community-user'     => getenv('REDCAP_COMMUNITY_USER')
-                                ?: getenv('RCCONF_redcap_updates_community_user')
-                                ?: null,
-        'community-password' => getenv('REDCAP_COMMUNITY_PASSWORD')
-                                ?: getenv('RCCONF_redcap_updates_community_password')
-                                ?: null,
+        'community-user'     => getenv('REDCAP_COMMUNITY_USER') ?: null,
+        'community-password' => getenv('REDCAP_COMMUNITY_PASSWORD') ?: null,
         'dry-run'            => false,
         'no-sql'             => false,
     ];

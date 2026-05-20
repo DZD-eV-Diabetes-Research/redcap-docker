@@ -84,6 +84,15 @@ RUN mv /opt/redcap-docker/assets/config/apache2/conf-enabled/* /etc/apache2/conf
 # Set REDCAP_AUTO_UPGRADE=true to also enable automatic upgrades on boot (default: false).
 ENV REDCAP_VERSION=
 ENV REDCAP_AUTO_UPGRADE=false
+# Disable REDCap's browser-based Easy Upgrade by keeping the webroot read-only for www-data.
+# Easy Upgrade requires the web process to write PHP files to the webroot, which is a security
+# risk on production servers. Set to true only if you specifically need the in-browser upgrade
+# tool — the container's own redcap-upgrade command does NOT require this to be enabled.
+ENV REDCAP_EASY_UPGRADE_ENABLE=false
+# Run a file-integrity check against a canonical REDCap download on every boot.
+# Disabled by default because it requires a download and slows startup.
+# Aborts boot if tampering is detected.
+ENV REDCAP_INTEGRITY_CHECK_ON_BOOT=false
 
 ENV REDCAP_DOCKER_SCRIPTS_DEBUG=false
 ENV WWW_DATA_UID=33
@@ -130,9 +139,12 @@ RUN ln -s /opt/redcap-docker/assets/scripts/cron-job.sh /usr/bin/redcap-cron
 # register in-place upgrade and install commands
 RUN ln -s /opt/redcap-docker/assets/scripts/redcap_upgrade.sh /usr/bin/redcap-upgrade
 RUN ln -s /opt/redcap-docker/assets/scripts/redcap_install.sh /usr/bin/redcap-install
+# register file integrity checker
+RUN ln -s /opt/redcap-docker/assets/scripts/redcap_integrity_check.sh /usr/bin/redcap-integrity-check
 # Enable apache extensions
 RUN a2enmod proxy_http
 RUN a2enmod rewrite
+RUN a2enmod headers
 
 # log mstmp (sendmail) to stdout
 ENV MSMTP_logfile=-

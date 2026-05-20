@@ -90,13 +90,8 @@ function parse_args(array $argv): array
     $opts = [
         'version'            => null,
         'zip'                => null,
-        // Credential resolution order: REDCAP_COMMUNITY_* → RCCONF_redcap_updates_* → null
-        'community-user'     => getenv('REDCAP_COMMUNITY_USER')
-                                ?: getenv('RCCONF_redcap_updates_community_user')
-                                ?: null,
-        'community-password' => getenv('REDCAP_COMMUNITY_PASSWORD')
-                                ?: getenv('RCCONF_redcap_updates_community_password')
-                                ?: null,
+        'community-user'     => getenv('REDCAP_COMMUNITY_USER') ?: null,
+        'community-password' => getenv('REDCAP_COMMUNITY_PASSWORD') ?: null,
         'no-backup'          => false,
         'backup-dir'         => getenv('REDCAP_UPGRADE_BACKUP_DIR')          ?: '/opt/redcap-docker/backups',
         'backup-db-user'     => getenv('REDCAP_UPGRADE_BACKUP_DB_USER')      ?: null,

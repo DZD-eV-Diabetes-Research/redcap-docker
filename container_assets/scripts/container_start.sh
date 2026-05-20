@@ -47,6 +47,31 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
 else
     echo "Try starting REDCap Docker Webserver..."
 
+    # ── Security advisory warnings ────────────────────────────────────────────
+    if [[ "${REDCAP_EASY_UPGRADE_ENABLE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
+        echo ""
+        echo "  [SECURITY] REDCAP_EASY_UPGRADE_ENABLE=true: the web process has write access"
+        echo "  [SECURITY] to the REDCap webroot. Not recommended for production — see SECURITY.md."
+        echo ""
+    fi
+
+    if [[ -n "${REDCAP_COMMUNITY_PASSWORD}" ]] && [[ -z "${REDCAP_COMMUNITY_PASSWORD_FILE}" ]]; then
+        echo "  [SECURITY] REDCAP_COMMUNITY_PASSWORD is set as a plain environment variable."
+        echo "  [SECURITY] Consider using REDCAP_COMMUNITY_PASSWORD_FILE (Docker Secrets) instead."
+        echo "  [SECURITY] See SECURITY.md for details."
+    fi
+
+    if [[ "${SERVER_NAME}" == "localhost" ]] || [[ "${SERVER_NAME}" == "127.0.0.1" ]]; then
+        echo "  [SECURITY] SERVER_NAME=${SERVER_NAME} — TLS is not configured. Use a reverse proxy"
+        echo "  [SECURITY] with HTTPS for any network-exposed deployment."
+    fi
+
+    if [[ "${RCCONF_redcap_base_url}" == http://* ]] && [[ "${SERVER_NAME}" != "localhost" ]] && [[ "${SERVER_NAME}" != "127.0.0.1" ]]; then
+        echo "  [SECURITY] RCCONF_redcap_base_url uses http:// — data will be transmitted unencrypted."
+        echo "  [SECURITY] Configure TLS via a reverse proxy and set the URL to https://..."
+    fi
+    # ─────────────────────────────────────────────────────────────────────────
+
     # DEPLOY CUSTOM DATABASE CONFIG (before startup scripts so the reconciler can connect)
     mkdir -p ${APACHE_DOCUMENT_ROOT}
     cp /opt/redcap-docker/assets/config/redcap/database.php ${APACHE_DOCUMENT_ROOT}/database.php
@@ -85,6 +110,23 @@ else
         echo "Run 'php -f ${cmds}'..."
         php -f ${cmds}
     done
+
+    # OPTIONAL: file integrity check before starting Apache
+    if [[ "${REDCAP_INTEGRITY_CHECK_ON_BOOT}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
+        echo "Running file integrity check (REDCAP_INTEGRITY_CHECK_ON_BOOT=true)..."
+        php -f /opt/redcap-docker/assets/scripts/redcap_integrity_check.php
+        integrity_exit=$?
+        if [[ $integrity_exit -eq 1 ]]; then
+            echo ""
+            echo "ERROR: File integrity check detected tampering. Refusing to start."
+            echo "       Review the output above, then set REDCAP_INTEGRITY_CHECK_ON_BOOT=false"
+            echo "       or resolve the detected differences before restarting."
+            exit 1
+        elif [[ $integrity_exit -eq 2 ]]; then
+            echo "WARNING: Integrity check could not complete (missing credentials or download failed)."
+            echo "         Continuing startup. Run 'redcap-integrity-check --help' for manual options."
+        fi
+    fi
 
     echo "Start REDCap now..."
     # START APACHE

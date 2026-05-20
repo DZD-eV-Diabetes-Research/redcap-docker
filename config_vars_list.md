@@ -149,8 +149,6 @@
     - [RCCONF\_azure\_app\_name](#rcconf_azure_app_name)
     - [RCCONF\_azure\_app\_secret](#rcconf_azure_app_secret)
     - [RCCONF\_azure\_container](#rcconf_azure_container)
-    - [RCCONF\_redcap\_updates\_community\_user](#rcconf_redcap_updates_community_user)
-    - [RCCONF\_redcap\_updates\_community\_password](#rcconf_redcap_updates_community_password)
     - [RCCONF\_redcap\_updates\_user](#rcconf_redcap_updates_user)
     - [RCCONF\_redcap\_updates\_password](#rcconf_redcap_updates_password)
     - [RCCONF\_redcap\_updates\_password\_encrypted](#rcconf_redcap_updates_password_encrypted)
@@ -1376,18 +1374,6 @@ Database default: ``
 ### RCCONF_azure_container
 ```
 RCCONF_azure_container
-```
-Database default: ``
-
-### RCCONF_redcap_updates_community_user
-```
-RCCONF_redcap_updates_community_user
-```
-Database default: ``
-
-### RCCONF_redcap_updates_community_password
-```
-RCCONF_redcap_updates_community_password
 ```
 Database default: ``
 

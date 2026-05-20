@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-# Entry-point for the REDCap in-place upgrader.
-# Run via:  docker compose exec redcap redcap-upgrade [OPTIONS]
+# Load _FILE secrets into the environment before handing off to PHP,
+# so REDCAP_COMMUNITY_PASSWORD_FILE etc. work when invoked via docker exec.
+. /opt/redcap-docker/assets/scripts/startup-scripts/05_load_secrets.sh
 exec php -f /opt/redcap-docker/assets/scripts/redcap_upgrader.php -- "$@"

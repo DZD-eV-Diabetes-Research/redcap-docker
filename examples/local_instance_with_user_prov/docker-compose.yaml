@@ -37,6 +37,16 @@ services:
       # Here you can throw in some sql script that run once at boot. this can be handy for red updates
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
     restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
     depends_on:
           db:
             condition: service_healthy

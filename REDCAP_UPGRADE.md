@@ -5,7 +5,7 @@
   - [Environment Update](#environment-update)
   - [REDCap Application Update](#redcap-application-update)
     - [Method 1 — Automatic via REDCAP\_VERSION](#method-1--automatic-via-redcap_version)
-    - [Method 2 — Server-Side Upgrader (redcap-upgrade)](#method-2--server-side-upgrader-redcap-upgrade)
+    - [Method 2 — Upgrader Script (redcap-upgrade)](#method-2--upgrader-script-redcap-upgrade)
       - [Interactive wizard](#interactive-wizard)
       - [Non-interactive (scripted) upgrade](#non-interactive-scripted-upgrade)
       - [Using a locally pre-downloaded zip](#using-a-locally-pre-downloaded-zip)
@@ -13,7 +13,7 @@
       - [Preview without changes](#preview-without-changes)
       - [Backup and rollback](#backup-and-rollback)
       - [All options](#all-options)
-    - [Method 3 — Manual SQL script](#method-3--manual-sql-script)
+    - [Method 3 — Fully manual update](#method-3--fully-manual-update)
 
 ---
 
@@ -23,6 +23,12 @@ There are two distinct kinds of updates:
 |---|---|---|
 | **Environment** | OS, PHP, ImageMagick, other system packages | Pull new Docker image |
 | **Application** | REDCap PHP files and database schema | One of the methods below |
+
+> [!NOTE]
+> **REDCap's browser-based "Easy Upgrade" is disabled by default** (`REDCAP_EASY_UPGRADE_ENABLE=false`).
+> Easy Upgrade requires the web process to write PHP files into the webroot, which is a security risk on production servers.
+> The upgrade methods documented here — `REDCAP_AUTO_UPGRADE`, `redcap-upgrade`, and the SQL script method — do **not** require Easy Upgrade to be enabled and are the recommended upgrade paths.
+> See [SECURITY.md — Read-only webroot and Easy Upgrade](SECURITY.md#read-only-webroot-and-easy-upgrade) for details.
 
 ---
 
@@ -42,6 +48,13 @@ Check [Docker Hub tags](https://hub.docker.com/r/dzdde/redcap-docker/tags) or [G
 ## REDCap Application Update
 
 ### Method 1 — Automatic via REDCAP_VERSION
+
+> [!WARNING]
+> **This feature is currently in BETA.**
+> It has been tested on a limited number of REDCap versions and MySQL configurations.
+> Always verify the post-upgrade backup before deleting it, and keep the old version
+> directory until you are confident the upgrade succeeded.
+> Please report any issues at https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues
 
 The fully automated path. Declare the desired version in your compose file and the container reconciles the state on every boot.
 
@@ -73,7 +86,7 @@ services:
 
 ---
 
-### Method 2 — Server-Side Upgrader (redcap-upgrade)
+### Method 2 — Upgrader Script (redcap-upgrade)
 
 > [!WARNING]
 > **This feature is currently in BETA.**
@@ -267,25 +280,66 @@ rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.
 
 ---
 
-### Method 3 — Manual SQL script
+### Method 3 — Fully manual update
 
-If the REDCap upgrade page requires you to run a SQL script manually, mount it into the container's run-once directory:
+Use this when you have no community portal credentials, prefer full control, or the other methods are not an option.
+
+**Step 1 — Download the new REDCap version**
+
+Log in to the [REDCap community portal](https://redcap.vumc.org/community/) and download the zip for the target version (e.g. `redcap14.9.5.zip`).
+
+**Step 2 — Extract and copy the files to your volume**
+
+The REDCap volume mount on the host (e.g. `./data/redcap`) is the container's document root. Extract the new version directory there alongside the existing one:
+
+```bash
+unzip redcap14.9.5.zip -d ./data/redcap/
+```
+
+After extraction you should have both the old and new version directories on disk:
+
+```
+./data/redcap/
+  redcap_v14.8.0/    ← old version, keep until you are satisfied
+  redcap_v14.9.5/    ← new version
+  database.php
+```
+
+**Step 3 — Run any required SQL upgrade scripts**
+
+Some REDCap versions ship a SQL upgrade script that must be executed against the database. Check the REDCap upgrade page inside your running instance — it will tell you if a SQL script is required.
+
+If one is needed, copy it into a directory that is mounted as the run-once SQL location:
 
 ```yaml
+# docker-compose.yaml
 services:
   redcap:
     volumes:
-      - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
+      - ./data/redcap:/var/www/html
+      - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once  # add this
 ```
 
-Place the SQL file (e.g. `redcap_upgrade_150012.sql`) into `./sql_scripts/`. On next container restart it is executed automatically and tracked so it never runs twice.
+```bash
+# Place the SQL file from the REDCap zip into that directory
+cp ./data/redcap/redcap_v14.9.5/Resources/sql/upgrade_redcap_v14.9.5.sql ./sql_scripts/
+```
 
-Check the logs for confirmation:
+Then restart the container. The script is executed automatically on boot and tracked by hash so it never runs twice:
 
 ```bash
+docker compose down && docker compose up -d
 docker compose logs redcap | grep "RUN CUSTOM BOOT SQLS"
-# redcap-1  | [RUN CUSTOM BOOT SQLS] Try run file: '...redcap_upgrade_150012.sql'
+# redcap-1  | [RUN CUSTOM BOOT SQLS] Try run file: '...upgrade_redcap_v14.9.5.sql'
 ```
 
 > [!TIP]
-> You can keep this volume mount permanently. Already-run scripts are tracked by hash and never execute again.
+> You can keep the `sql_scripts_run_once` volume mount permanently. Scripts are tracked by hash and will never execute again on subsequent restarts.
+
+**Step 4 — Clean up the old version**
+
+Once you have verified the new version is working correctly, remove the old version directory from the host volume:
+
+```bash
+rm -rf ./data/redcap/redcap_v14.8.0
+```

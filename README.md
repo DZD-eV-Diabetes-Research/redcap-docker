@@ -3,7 +3,7 @@
 
 Yet another try to containerize [REDCap](https://www.project-redcap.org/) — but with a focus on **automated, hands-off deployments**.
 
-**Status**: Work in progress · beta  
+**Status**: Usable - beta  
 **Maintainer**: Tim Bleimehl, DZD  
 **Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
 **Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)
@@ -14,6 +14,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
   - [Disclaimer](#disclaimer)
   - [About \& Motivation](#about--motivation)
   - [Features](#features)
+  - [Security](#security)
   - [Quick Start](#quick-start)
     - [Option A — Auto-install via community portal](#option-a--auto-install-via-community-portal)
     - [Option B — Mount your own REDCap files](#option-b--mount-your-own-redcap-files)
@@ -35,7 +36,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
 
 ## Disclaimer
 
-This is not an official REDCap project. We are an institutional partner of the REDCap Consortium, but beyond that we have no connection to REDCap — we are simply REDCap users.
+This is not an official REDCap project. We are an institutional partner of the REDCap Consortium, but beyond that we have no connection to REDCap - we are simple REDCap users.
 
 This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap, or a valid login to the REDCap community portal to download it automatically.
 
@@ -59,14 +60,31 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 ## Features
 
-- **Auto-install** — set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
+- 🧪 **[BETA](#beta-channel)**  **Auto-install/upgrade/update** Set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
+- 🧪 **[BETA](#beta-channel)** **Manual upgrade/update-wizard** (`redcap-upgrade`) Checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
+- 🧪 **[BETA](#beta-channel)** **Security-hardened by default** — read-only webroot, HTTP security headers, PHP hardening, Docker Secrets support. REDCap's browser-based Easy Upgrade is disabled by default (see [Security](#security)).
+- 🧪 **[BETA](#beta-channel)** **Automated testing** We run an automated testing rig, to validate security and functionality before every change and/or release (see [Testing](tests/README.md)).
 - Database and application configuration entirely via environment variables
-- Automated DB schema installation — no need to manually run install SQL scripts
+- Automated DB schema installation . No need to manually run install SQL scripts
 - Simple mail setup via environment variables (`msmtprc`-based)
 - Automated routine tasks such as deactivating the default admin (optional)
 - "Cron mode": run the same image as the REDCap cron job manager
 - User provisioning via environment variables and/or YAML files
-- 🧪 **[BETA]** Built-in server-side upgrader (`redcap-upgrade`) — checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
+
+
+---
+
+## Security
+
+The container ships with several hardening defaults:
+
+- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path.
+- **HTTP security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` — sent on every response.
+- **PHP hardening** — `expose_php = Off`, `display_errors = Off`.
+- **Docker Secrets support** — sensitive variables (`DB_PASSWORD`, `DB_SALT`, `REDCAP_COMMUNITY_PASSWORD`) can be loaded from files via `_FILE` variants to avoid plaintext env vars.
+- **File integrity checker** — `redcap-integrity-check` compares the running installation against a canonical download to detect injected or modified PHP files.
+
+Full details, configuration options, and production hardening guidance: [SECURITY.md](SECURITY.md)
 
 ---
 
@@ -180,6 +198,7 @@ See [config_vars_list.md](config_vars_list.md) for the full variable reference.
 | **Cron** | `CRON_MODE`, `CRON_INTERVAL`, `CRON_RUN_JOB_ON_START` |
 | **User provisioning** | `USER_PROV`, `USER_PROV_FILE_DIR`, `USER_PROV_OVERWRITE_EXISTING` |
 | **Upgrades** | `REDCAP_UPGRADE_BACKUP_DIR`, `REDCAP_UPGRADE_BACKUP_DB_USER` |
+| **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
 | **Server** | `SERVER_NAME`, `APACHE_DOCUMENT_ROOT`, `WWW_DATA_UID`, `WWW_DATA_GID` |
 
 #### REDCap application settings

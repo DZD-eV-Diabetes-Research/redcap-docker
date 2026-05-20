@@ -25,12 +25,8 @@ if (!$desired_version || trim($desired_version) === '') {
 
 $desired_version  = trim($desired_version);
 $doc_root         = getenv('APACHE_DOCUMENT_ROOT') ?: '/var/www/html';
-$community_user   = getenv('REDCAP_COMMUNITY_USER')
-                    ?: getenv('RCCONF_redcap_updates_community_user')
-                    ?: null;
-$community_pass   = getenv('REDCAP_COMMUNITY_PASSWORD')
-                    ?: getenv('RCCONF_redcap_updates_community_password')
-                    ?: null;
+$community_user   = getenv('REDCAP_COMMUNITY_USER') ?: null;
+$community_pass   = getenv('REDCAP_COMMUNITY_PASSWORD') ?: null;
 $auto_upgrade     = filter_var(getenv('REDCAP_AUTO_UPGRADE') ?: 'false', FILTER_VALIDATE_BOOLEAN);
 
 $version_dirs = get_existent_redcap_version_dirs($doc_root);

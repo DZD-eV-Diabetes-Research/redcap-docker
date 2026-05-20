@@ -19,6 +19,20 @@ services:
       RCCONF_project_contact_name: Colette Ferro
       RCCONF_project_contact_email: c.ferro@wyyu.earth
     restart: "no"
+    # Recommended container security options
+    security_opt:
+      - no-new-privileges:true
+    # Minimal Linux capabilities needed for startup (chown/uid-remap) and Apache
+    # to drop from root to www-data. Remove NET_BIND_SERVICE if you map to a
+    # non-privileged host port (e.g. "8080:80").
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
     depends_on:
           db:
             condition: service_healthy

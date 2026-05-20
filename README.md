@@ -19,11 +19,16 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
     - [Option B — Mount your own REDCap files](#option-b--mount-your-own-redcap-files)
   - [Container Reference](#container-reference)
     - [Environment Variables](#environment-variables)
+      - [REDCap application settings](#redcap-application-settings)
+      - [Email](#email)
+      - [Cron mode](#cron-mode)
     - [Volumes \& Paths](#volumes--paths)
+      - [REDCap file repository](#redcap-file-repository)
     - [User Provisioning](#user-provisioning)
     - [File Ownership](#file-ownership)
   - [Updates \& Upgrades](#updates--upgrades)
   - [Beta Channel](#beta-channel)
+  - [Contributing \& Development](#contributing--development)
   - [Roadmap](#roadmap)
 
 ---
@@ -320,6 +325,15 @@ services:
 ```
 
 Beta images are published automatically when a pre-release is created on GitHub. They may contain bugs — please [report issues](https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues).
+
+---
+
+## Contributing & Development
+
+See [DEV_README.md](DEV_README.md) for the project structure, where to add new features, and how to run the integration tests.
+
+> [!WARNING]
+> **The integration tests download REDCap from the community portal.** You need to provide a Community portal login.Each full run downloads exactly 2 versions. Do not run the full suite repeatedly in a short period — automated downloads may conflict with the REDCap Consortium's usage policies. Run targeted tests during development and reserve full runs for pre-release verification.
 
 ---
 

@@ -1,3 +1,11 @@
 data/
 .env
 dev_compose/sql_scripts/*
+
+# Integration test credentials — copy from tests/.env.example and fill in locally
+tests/.env
+
+# pytest cache
+.pytest_cache/
+__pycache__/
+*.pyc

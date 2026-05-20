@@ -67,18 +67,29 @@ if ($installed !== null && version_compare($installed, $desired_version, '<')) {
         $installed, $desired_version);
 
     // Apache is not yet running, so offline mode is unnecessary.
-    $cmd_parts = [
-        'redcap-upgrade',
-        '--version', escapeshellarg($desired_version),
-        '--no-offline',
-    ];
-    if ($community_user) {
-        $cmd_parts[] = '--community-user';
-        $cmd_parts[] = escapeshellarg($community_user);
-    }
-    if ($community_pass) {
-        $cmd_parts[] = '--community-password';
-        $cmd_parts[] = escapeshellarg($community_pass);
+    // If REDCAP_ZIP_PATH points to a pre-downloaded zip, use it to avoid a download.
+    $zip_path = getenv('REDCAP_ZIP_PATH') ?: null;
+    if ($zip_path && file_exists($zip_path)) {
+        $cmd_parts = [
+            'redcap-upgrade',
+            '--zip', escapeshellarg($zip_path),
+            '--version', escapeshellarg($desired_version),
+            '--no-offline',
+        ];
+    } else {
+        $cmd_parts = [
+            'redcap-upgrade',
+            '--version', escapeshellarg($desired_version),
+            '--no-offline',
+        ];
+        if ($community_user) {
+            $cmd_parts[] = '--community-user';
+            $cmd_parts[] = escapeshellarg($community_user);
+        }
+        if ($community_pass) {
+            $cmd_parts[] = '--community-password';
+            $cmd_parts[] = escapeshellarg($community_pass);
+        }
     }
 
     passthru(implode(' ', $cmd_parts), $exit_code);

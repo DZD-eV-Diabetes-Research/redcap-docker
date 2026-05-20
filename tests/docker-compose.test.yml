@@ -1,0 +1,16 @@
+services:
+  test-runner:
+    build:
+      context: .          # tests/ directory
+      dockerfile: Dockerfile
+    volumes:
+      # DooD: share the host Docker socket so the test runner can spin up
+      # MySQL + REDCap containers as siblings on the host daemon.
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # Allow run-tests.sh (or the shell) to override the image under test.
+      # Takes precedence over the same key in env_file below.
+      - REDCAP_DOCKER_IMAGE
+    env_file:
+      - .env              # tests/.env — copy from .env.example and fill in
+    restart: "no"

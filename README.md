@@ -8,6 +8,11 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
 **Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
 **Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)
 
+
+> [!IMPORTANT]
+> If you find this tool useful and decide to test it, we would greatly appreciate your feedback. So far, we have only limited data on its usage in other environments. Feel free to leave your feedback in the [GitHub repository issues](
+https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)
+
 ---
 
 - [redcap-docker](#redcap-docker)

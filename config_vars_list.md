@@ -19,346 +19,75 @@
 - [Cron](#cron)
 - [REDCap Application Config vars](#redcap-application-config-vars)
   - [APPLY\_RCCONF\_VARIABLES](#apply_rcconf_variables)
-  - [Possible config variables](#possible-config-variables)
-    - [RCCONF\_mtb\_enabled](#rcconf_mtb_enabled)
-    - [RCCONF\_cache\_files\_filesystem\_path](#rcconf_cache_files_filesystem_path)
-    - [RCCONF\_allow\_auto\_variable\_naming](#rcconf_allow_auto_variable_naming)
-    - [RCCONF\_mailgun\_api\_endpoint](#rcconf_mailgun_api_endpoint)
-    - [RCCONF\_openid\_connect\_additional\_scope](#rcconf_openid_connect_additional_scope)
-    - [RCCONF\_read\_replica\_enable](#rcconf_read_replica_enable)
-    - [RCCONF\_azure\_comm\_api\_endpoint](#rcconf_azure_comm_api_endpoint)
-    - [RCCONF\_azure\_comm\_api\_key](#rcconf_azure_comm_api_key)
-    - [RCCONF\_fhir\_custom\_auth\_params](#rcconf_fhir_custom_auth_params)
-    - [RCCONF\_fhir\_custom\_mapping\_file\_id](#rcconf_fhir_custom_mapping_file_id)
-    - [RCCONF\_oauth2\_azure\_ad\_tenant](#rcconf_oauth2_azure_ad_tenant)
-    - [RCCONF\_display\_inline\_pdf\_in\_pdf](#rcconf_display_inline_pdf_in_pdf)
-    - [RCCONF\_mosio\_enabled\_global](#rcconf_mosio_enabled_global)
-    - [RCCONF\_mosio\_display\_info\_project\_setup](#rcconf_mosio_display_info_project_setup)
-    - [RCCONF\_mosio\_enabled\_by\_super\_users\_only](#rcconf_mosio_enabled_by_super_users_only)
-    - [RCCONF\_rich\_text\_attachment\_embed\_enabled](#rcconf_rich_text_attachment_embed_enabled)
-    - [RCCONF\_oauth2\_azure\_ad\_name](#rcconf_oauth2_azure_ad_name)
-    - [RCCONF\_admin\_email\_external\_user\_creation](#rcconf_admin_email_external_user_creation)
-    - [RCCONF\_user\_welcome\_email\_external\_user\_creation](#rcconf_user_welcome_email_external_user_creation)
-    - [RCCONF\_openid\_connect\_response\_type](#rcconf_openid_connect_response_type)
-    - [RCCONF\_restricted\_upload\_file\_types](#rcconf_restricted_upload_file_types)
-    - [RCCONF\_file\_repository\_allow\_public\_link](#rcconf_file_repository_allow_public_link)
-    - [RCCONF\_file\_repository\_total\_size](#rcconf_file_repository_total_size)
-    - [RCCONF\_contact\_admin\_button\_url](#rcconf_contact_admin_button_url)
-    - [RCCONF\_rich\_text\_image\_embed\_enabled](#rcconf_rich_text_image_embed_enabled)
-    - [RCCONF\_two\_factor\_auth\_enforce\_table\_users\_only](#rcconf_two_factor_auth_enforce_table_users_only)
-    - [RCCONF\_openid\_connect\_username\_attribute](#rcconf_openid_connect_username_attribute)
-    - [RCCONF\_calendar\_feed\_enabled\_global](#rcconf_calendar_feed_enabled_global)
-    - [RCCONF\_sendgrid\_enabled\_global](#rcconf_sendgrid_enabled_global)
-    - [RCCONF\_sendgrid\_enabled\_by\_super\_users\_only](#rcconf_sendgrid_enabled_by_super_users_only)
-    - [RCCONF\_sendgrid\_display\_info\_project\_setup](#rcconf_sendgrid_display_info_project_setup)
-    - [RCCONF\_two\_factor\_auth\_esign\_pin](#rcconf_two_factor_auth_esign_pin)
-    - [RCCONF\_esignature\_enabled\_global](#rcconf_esignature_enabled_global)
-    - [RCCONF\_openid\_connect\_name](#rcconf_openid_connect_name)
-    - [RCCONF\_openid\_connect\_primary\_admin](#rcconf_openid_connect_primary_admin)
-    - [RCCONF\_openid\_connect\_secondary\_admin](#rcconf_openid_connect_secondary_admin)
-    - [RCCONF\_openid\_connect\_provider\_url](#rcconf_openid_connect_provider_url)
-    - [RCCONF\_openid\_connect\_metadata\_url](#rcconf_openid_connect_metadata_url)
-    - [RCCONF\_openid\_connect\_client\_id](#rcconf_openid_connect_client_id)
-    - [RCCONF\_openid\_connect\_client\_secret](#rcconf_openid_connect_client_secret)
-    - [RCCONF\_database\_query\_tool\_enabled](#rcconf_database_query_tool_enabled)
-    - [RCCONF\_amazon\_s3\_endpoint\_url](#rcconf_amazon_s3_endpoint_url)
-    - [RCCONF\_new\_form\_default\_prod\_user\_access](#rcconf_new_form_default_prod_user_access)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_authtype](#rcconf_file_upload_vault_filesystem_authtype)
-    - [RCCONF\_pdf\_econsent\_filesystem\_authtype](#rcconf_pdf_econsent_filesystem_authtype)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_authtype](#rcconf_record_locking_pdf_vault_filesystem_authtype)
-    - [RCCONF\_config\_settings\_key](#rcconf_config_settings_key)
-    - [RCCONF\_oauth2\_azure\_ad\_username\_attribute](#rcconf_oauth2_azure_ad_username_attribute)
-    - [RCCONF\_oauth2\_azure\_ad\_endpoint\_version](#rcconf_oauth2_azure_ad_endpoint_version)
-    - [RCCONF\_pdf\_econsent\_filesystem\_container](#rcconf_pdf_econsent_filesystem_container)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_container](#rcconf_record_locking_pdf_vault_filesystem_container)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_container](#rcconf_file_upload_vault_filesystem_container)
-    - [RCCONF\_google\_cloud\_storage\_api\_bucket\_name](#rcconf_google_cloud_storage_api_bucket_name)
-    - [RCCONF\_google\_cloud\_storage\_api\_project\_id](#rcconf_google_cloud_storage_api_project_id)
-    - [RCCONF\_google\_cloud\_storage\_api\_service\_account](#rcconf_google_cloud_storage_api_service_account)
-    - [RCCONF\_google\_cloud\_storage\_api\_use\_project\_subfolder](#rcconf_google_cloud_storage_api_use_project_subfolder)
-    - [RCCONF\_override\_system\_bundle\_ca](#rcconf_override_system_bundle_ca)
-    - [RCCONF\_fhir\_break\_the\_glass\_department\_type](#rcconf_fhir_break_the_glass_department_type)
-    - [RCCONF\_fhir\_break\_the\_glass\_patient\_type](#rcconf_fhir_break_the_glass_patient_type)
-    - [RCCONF\_email\_logging\_enable\_global](#rcconf_email_logging_enable_global)
-    - [RCCONF\_email\_logging\_install\_time](#rcconf_email_logging_install_time)
-    - [RCCONF\_protected\_email\_mode\_global](#rcconf_protected_email_mode_global)
-    - [RCCONF\_password\_length](#rcconf_password_length)
-    - [RCCONF\_password\_complexity](#rcconf_password_complexity)
-    - [RCCONF\_reports\_allow\_public](#rcconf_reports_allow_public)
-    - [RCCONF\_mailgun\_api\_key](#rcconf_mailgun_api_key)
-    - [RCCONF\_mailgun\_domain\_name](#rcconf_mailgun_domain_name)
-    - [RCCONF\_db\_binlog\_format](#rcconf_db_binlog_format)
-    - [RCCONF\_default\_csv\_delimiter](#rcconf_default_csv_delimiter)
-    - [RCCONF\_project\_dashboard\_allow\_public](#rcconf_project_dashboard_allow_public)
-    - [RCCONF\_project\_dashboard\_min\_data\_points](#rcconf_project_dashboard_min_data_points)
-    - [RCCONF\_oauth2\_azure\_ad\_client\_id](#rcconf_oauth2_azure_ad_client_id)
-    - [RCCONF\_oauth2\_azure\_ad\_client\_secret](#rcconf_oauth2_azure_ad_client_secret)
-    - [RCCONF\_oauth2\_azure\_ad\_primary\_admin](#rcconf_oauth2_azure_ad_primary_admin)
-    - [RCCONF\_oauth2\_azure\_ad\_secondary\_admin](#rcconf_oauth2_azure_ad_secondary_admin)
-    - [RCCONF\_fhir\_cdp\_allow\_auto\_adjudication](#rcconf_fhir_cdp_allow_auto_adjudication)
-    - [RCCONF\_field\_bank\_enabled](#rcconf_field_bank_enabled)
-    - [RCCONF\_sendgrid\_api\_key](#rcconf_sendgrid_api_key)
-    - [RCCONF\_fhir\_break\_the\_glass\_enabled](#rcconf_fhir_break_the_glass_enabled)
-    - [RCCONF\_fhir\_break\_the\_glass\_ehr\_usertype](#rcconf_fhir_break_the_glass_ehr_usertype)
-    - [RCCONF\_fhir\_break\_the\_glass\_token\_usertype](#rcconf_fhir_break_the_glass_token_usertype)
-    - [RCCONF\_fhir\_break\_the\_glass\_token\_username](#rcconf_fhir_break_the_glass_token_username)
-    - [RCCONF\_fhir\_break\_the\_glass\_token\_password](#rcconf_fhir_break_the_glass_token_password)
-    - [RCCONF\_fhir\_break\_the\_glass\_username\_token\_base\_url](#rcconf_fhir_break_the_glass_username_token_base_url)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_type](#rcconf_record_locking_pdf_vault_filesystem_type)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_host](#rcconf_record_locking_pdf_vault_filesystem_host)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_username](#rcconf_record_locking_pdf_vault_filesystem_username)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_password](#rcconf_record_locking_pdf_vault_filesystem_password)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_path](#rcconf_record_locking_pdf_vault_filesystem_path)
-    - [RCCONF\_record\_locking\_pdf\_vault\_filesystem\_private\_key\_path](#rcconf_record_locking_pdf_vault_filesystem_private_key_path)
-    - [RCCONF\_mandrill\_api\_key](#rcconf_mandrill_api_key)
-    - [RCCONF\_shibboleth\_table\_config](#rcconf_shibboleth_table_config)
-    - [RCCONF\_survey\_pid\_create\_project](#rcconf_survey_pid_create_project)
-    - [RCCONF\_survey\_pid\_move\_to\_prod\_status](#rcconf_survey_pid_move_to_prod_status)
-    - [RCCONF\_survey\_pid\_move\_to\_analysis\_status](#rcconf_survey_pid_move_to_analysis_status)
-    - [RCCONF\_survey\_pid\_mark\_completed](#rcconf_survey_pid_mark_completed)
-    - [RCCONF\_email\_alerts\_converter\_enabled](#rcconf_email_alerts_converter_enabled)
-    - [RCCONF\_use\_email\_display\_name](#rcconf_use_email_display_name)
-    - [RCCONF\_alerts\_allow\_phone\_variables](#rcconf_alerts_allow_phone_variables)
-    - [RCCONF\_alerts\_allow\_phone\_freeform](#rcconf_alerts_allow_phone_freeform)
-    - [RCCONF\_fhir\_standalone\_authentication\_flow](#rcconf_fhir_standalone_authentication_flow)
-    - [RCCONF\_external\_modules\_allow\_activation\_user\_request](#rcconf_external_modules_allow_activation_user_request)
-    - [RCCONF\_dkim\_private\_key](#rcconf_dkim_private_key)
-    - [RCCONF\_enable\_url\_shortener\_redcap](#rcconf_enable_url_shortener_redcap)
-    - [RCCONF\_from\_email\_domain\_exclude](#rcconf_from_email_domain_exclude)
-    - [RCCONF\_fhir\_include\_email\_address](#rcconf_fhir_include_email_address)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_type](#rcconf_file_upload_vault_filesystem_type)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_host](#rcconf_file_upload_vault_filesystem_host)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_username](#rcconf_file_upload_vault_filesystem_username)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_password](#rcconf_file_upload_vault_filesystem_password)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_path](#rcconf_file_upload_vault_filesystem_path)
-    - [RCCONF\_file\_upload\_vault\_filesystem\_private\_key\_path](#rcconf_file_upload_vault_filesystem_private_key_path)
-    - [RCCONF\_file\_upload\_versioning\_enabled](#rcconf_file_upload_versioning_enabled)
-    - [RCCONF\_file\_upload\_versioning\_global\_enabled](#rcconf_file_upload_versioning_global_enabled)
-    - [RCCONF\_allow\_outbound\_http](#rcconf_allow_outbound_http)
-    - [RCCONF\_drw\_upload\_option\_enabled](#rcconf_drw_upload_option_enabled)
-    - [RCCONF\_pdf\_econsent\_system\_custom\_text](#rcconf_pdf_econsent_system_custom_text)
-    - [RCCONF\_alerts\_email\_freeform\_domain\_allowlist](#rcconf_alerts_email_freeform_domain_allowlist)
-    - [RCCONF\_alerts\_allow\_email\_variables](#rcconf_alerts_allow_email_variables)
-    - [RCCONF\_alerts\_allow\_email\_freeform](#rcconf_alerts_allow_email_freeform)
-    - [RCCONF\_azure\_quickstart](#rcconf_azure_quickstart)
-    - [RCCONF\_google\_recaptcha\_site\_key](#rcconf_google_recaptcha_site_key)
-    - [RCCONF\_google\_recaptcha\_secret\_key](#rcconf_google_recaptcha_secret_key)
-    - [RCCONF\_aws\_quickstart](#rcconf_aws_quickstart)
-    - [RCCONF\_user\_messaging\_prevent\_admin\_messaging](#rcconf_user_messaging_prevent_admin_messaging)
-    - [RCCONF\_homepage\_announcement\_login](#rcconf_homepage_announcement_login)
-    - [RCCONF\_azure\_app\_name](#rcconf_azure_app_name)
-    - [RCCONF\_azure\_app\_secret](#rcconf_azure_app_secret)
-    - [RCCONF\_azure\_container](#rcconf_azure_container)
-    - [RCCONF\_redcap\_updates\_user](#rcconf_redcap_updates_user)
-    - [RCCONF\_redcap\_updates\_password](#rcconf_redcap_updates_password)
-    - [RCCONF\_redcap\_updates\_password\_encrypted](#rcconf_redcap_updates_password_encrypted)
-    - [RCCONF\_redcap\_updates\_available](#rcconf_redcap_updates_available)
-    - [RCCONF\_redcap\_updates\_available\_last\_check](#rcconf_redcap_updates_available_last_check)
-    - [RCCONF\_realtime\_webservice\_convert\_timestamp\_from\_gmt](#rcconf_realtime_webservice_convert_timestamp_from_gmt)
-    - [RCCONF\_fhir\_convert\_timestamp\_from\_gmt](#rcconf_fhir_convert_timestamp_from_gmt)
-    - [RCCONF\_db\_collation](#rcconf_db_collation)
-    - [RCCONF\_db\_character\_set](#rcconf_db_character_set)
-    - [RCCONF\_external\_modules\_updates\_available](#rcconf_external_modules_updates_available)
-    - [RCCONF\_external\_modules\_updates\_available\_last\_check](#rcconf_external_modules_updates_available_last_check)
-    - [RCCONF\_pdf\_econsent\_system\_ip](#rcconf_pdf_econsent_system_ip)
-    - [RCCONF\_pdf\_econsent\_filesystem\_type](#rcconf_pdf_econsent_filesystem_type)
-    - [RCCONF\_pdf\_econsent\_filesystem\_host](#rcconf_pdf_econsent_filesystem_host)
-    - [RCCONF\_pdf\_econsent\_filesystem\_username](#rcconf_pdf_econsent_filesystem_username)
-    - [RCCONF\_pdf\_econsent\_filesystem\_password](#rcconf_pdf_econsent_filesystem_password)
-    - [RCCONF\_pdf\_econsent\_filesystem\_path](#rcconf_pdf_econsent_filesystem_path)
-    - [RCCONF\_pdf\_econsent\_filesystem\_private\_key\_path](#rcconf_pdf_econsent_filesystem_private_key_path)
-    - [RCCONF\_pdf\_econsent\_system\_enabled](#rcconf_pdf_econsent_system_enabled)
-    - [RCCONF\_enable\_edit\_prod\_repeating\_setup](#rcconf_enable_edit_prod_repeating_setup)
-    - [RCCONF\_user\_sponsor\_set\_expiration\_days](#rcconf_user_sponsor_set_expiration_days)
-    - [RCCONF\_user\_sponsor\_dashboard\_enable](#rcconf_user_sponsor_dashboard_enable)
-    - [RCCONF\_clickjacking\_prevention](#rcconf_clickjacking_prevention)
-    - [RCCONF\_external\_module\_alt\_paths](#rcconf_external_module_alt_paths)
-    - [RCCONF\_aafAccessUrl](#rcconf_aafaccessurl)
-    - [RCCONF\_aafAllowLocalsCreateDB](#rcconf_aafallowlocalscreatedb)
-    - [RCCONF\_aafAud](#rcconf_aafaud)
-    - [RCCONF\_aafDisplayOnEmailUsers](#rcconf_aafdisplayonemailusers)
-    - [RCCONF\_aafIss](#rcconf_aafiss)
-    - [RCCONF\_aafPrimaryField](#rcconf_aafprimaryfield)
-    - [RCCONF\_aafScopeTarget](#rcconf_aafscopetarget)
-    - [RCCONF\_external\_modules\_project\_custom\_text](#rcconf_external_modules_project_custom_text)
-    - [RCCONF\_is\_development\_server](#rcconf_is_development_server)
-    - [RCCONF\_fhir\_data\_mart\_create\_project](#rcconf_fhir_data_mart_create_project)
-    - [RCCONF\_fhir\_data\_fetch\_interval](#rcconf_fhir_data_fetch_interval)
-    - [RCCONF\_fhir\_url\_user\_access](#rcconf_fhir_url_user_access)
-    - [RCCONF\_fhir\_custom\_text](#rcconf_fhir_custom_text)
-    - [RCCONF\_fhir\_display\_info\_project\_setup](#rcconf_fhir_display_info_project_setup)
-    - [RCCONF\_fhir\_source\_system\_custom\_name](#rcconf_fhir_source_system_custom_name)
-    - [RCCONF\_fhir\_user\_rights\_super\_users\_only](#rcconf_fhir_user_rights_super_users_only)
-    - [RCCONF\_fhir\_stop\_fetch\_inactivity\_days](#rcconf_fhir_stop_fetch_inactivity_days)
-    - [RCCONF\_fhir\_ddp\_enabled](#rcconf_fhir_ddp_enabled)
-    - [RCCONF\_api\_token\_request\_type](#rcconf_api_token_request_type)
-    - [RCCONF\_fhir\_endpoint\_authorize\_url](#rcconf_fhir_endpoint_authorize_url)
-    - [RCCONF\_fhir\_endpoint\_token\_url](#rcconf_fhir_endpoint_token_url)
-    - [RCCONF\_fhir\_ehr\_mrn\_identifier](#rcconf_fhir_ehr_mrn_identifier)
-    - [RCCONF\_fhir\_identity\_provider](#rcconf_fhir_identity_provider)
-    - [RCCONF\_fhir\_client\_id](#rcconf_fhir_client_id)
-    - [RCCONF\_fhir\_client\_secret](#rcconf_fhir_client_secret)
-    - [RCCONF\_fhir\_endpoint\_base\_url](#rcconf_fhir_endpoint_base_url)
-    - [RCCONF\_report\_stats\_url](#rcconf_report_stats_url)
-    - [RCCONF\_user\_messaging\_enabled](#rcconf_user_messaging_enabled)
-    - [RCCONF\_auto\_prod\_changes\_check\_identifiers](#rcconf_auto_prod_changes_check_identifiers)
-    - [RCCONF\_bioportal\_api\_url](#rcconf_bioportal_api_url)
-    - [RCCONF\_send\_emails\_admin\_tasks](#rcconf_send_emails_admin_tasks)
-    - [RCCONF\_display\_project\_xml\_backup\_option](#rcconf_display_project_xml_backup_option)
-    - [RCCONF\_cross\_domain\_access\_control](#rcconf_cross_domain_access_control)
-    - [RCCONF\_google\_cloud\_storage\_edocs\_bucket](#rcconf_google_cloud_storage_edocs_bucket)
-    - [RCCONF\_google\_cloud\_storage\_temp\_bucket](#rcconf_google_cloud_storage_temp_bucket)
-    - [RCCONF\_amazon\_s3\_endpoint](#rcconf_amazon_s3_endpoint)
-    - [RCCONF\_proxy\_username\_password](#rcconf_proxy_username_password)
-    - [RCCONF\_homepage\_contact\_url](#rcconf_homepage_contact_url)
-    - [RCCONF\_bioportal\_api\_token](#rcconf_bioportal_api_token)
-    - [RCCONF\_two\_factor\_auth\_ip\_range\_alt](#rcconf_two_factor_auth_ip_range_alt)
-    - [RCCONF\_two\_factor\_auth\_trust\_period\_days\_alt](#rcconf_two_factor_auth_trust_period_days_alt)
-    - [RCCONF\_two\_factor\_auth\_trust\_period\_days](#rcconf_two_factor_auth_trust_period_days)
-    - [RCCONF\_two\_factor\_auth\_email\_enabled](#rcconf_two_factor_auth_email_enabled)
-    - [RCCONF\_two\_factor\_auth\_authenticator\_enabled](#rcconf_two_factor_auth_authenticator_enabled)
-    - [RCCONF\_two\_factor\_auth\_ip\_check\_enabled](#rcconf_two_factor_auth_ip_check_enabled)
-    - [RCCONF\_two\_factor\_auth\_ip\_range](#rcconf_two_factor_auth_ip_range)
-    - [RCCONF\_two\_factor\_auth\_ip\_range\_include\_private](#rcconf_two_factor_auth_ip_range_include_private)
-    - [RCCONF\_two\_factor\_auth\_duo\_enabled](#rcconf_two_factor_auth_duo_enabled)
-    - [RCCONF\_two\_factor\_auth\_duo\_ikey](#rcconf_two_factor_auth_duo_ikey)
-    - [RCCONF\_two\_factor\_auth\_duo\_skey](#rcconf_two_factor_auth_duo_skey)
-    - [RCCONF\_two\_factor\_auth\_duo\_hostname](#rcconf_two_factor_auth_duo_hostname)
-    - [RCCONF\_bioportal\_ontology\_list\_cache\_time](#rcconf_bioportal_ontology_list_cache_time)
-    - [RCCONF\_bioportal\_ontology\_list](#rcconf_bioportal_ontology_list)
-    - [RCCONF\_redcap\_survey\_base\_url](#rcconf_redcap_survey_base_url)
-    - [RCCONF\_enable\_ontology\_auto\_suggest](#rcconf_enable_ontology_auto_suggest)
-    - [RCCONF\_enable\_survey\_text\_to\_speech](#rcconf_enable_survey_text_to_speech)
-    - [RCCONF\_enable\_field\_attachment\_video\_url](#rcconf_enable_field_attachment_video_url)
-    - [RCCONF\_google\_oauth2\_client\_id](#rcconf_google_oauth2_client_id)
-    - [RCCONF\_google\_oauth2\_client\_secret](#rcconf_google_oauth2_client_secret)
-    - [RCCONF\_two\_factor\_auth\_twilio\_enabled](#rcconf_two_factor_auth_twilio_enabled)
-    - [RCCONF\_two\_factor\_auth\_twilio\_account\_sid](#rcconf_two_factor_auth_twilio_account_sid)
-    - [RCCONF\_two\_factor\_auth\_twilio\_auth\_token](#rcconf_two_factor_auth_twilio_auth_token)
-    - [RCCONF\_two\_factor\_auth\_twilio\_from\_number](#rcconf_two_factor_auth_twilio_from_number)
-    - [RCCONF\_two\_factor\_auth\_twilio\_from\_number\_voice\_alt](#rcconf_two_factor_auth_twilio_from_number_voice_alt)
-    - [RCCONF\_two\_factor\_auth\_enabled](#rcconf_two_factor_auth_enabled)
-    - [RCCONF\_allow\_kill\_mysql\_process](#rcconf_allow_kill_mysql_process)
-    - [RCCONF\_mobile\_app\_enabled](#rcconf_mobile_app_enabled)
-    - [RCCONF\_mycap\_enabled\_global](#rcconf_mycap_enabled_global)
-    - [RCCONF\_mycap\_enable\_type](#rcconf_mycap_enable_type)
-    - [RCCONF\_twilio\_display\_info\_project\_setup](#rcconf_twilio_display_info_project_setup)
-    - [RCCONF\_twilio\_enabled\_global](#rcconf_twilio_enabled_global)
-    - [RCCONF\_twilio\_enabled\_by\_super\_users\_only](#rcconf_twilio_enabled_by_super_users_only)
-    - [RCCONF\_field\_comment\_log\_enabled\_default](#rcconf_field_comment_log_enabled_default)
-    - [RCCONF\_from\_email](#rcconf_from_email)
-    - [RCCONF\_promis\_enabled](#rcconf_promis_enabled)
-    - [RCCONF\_promis\_api\_base\_url](#rcconf_promis_api_base_url)
-    - [RCCONF\_sams\_logout](#rcconf_sams_logout)
-    - [RCCONF\_promis\_registration\_id](#rcconf_promis_registration_id)
-    - [RCCONF\_promis\_token](#rcconf_promis_token)
-    - [RCCONF\_hook\_functions\_file](#rcconf_hook_functions_file)
-    - [RCCONF\_project\_encoding](#rcconf_project_encoding)
-    - [RCCONF\_default\_datetime\_format](#rcconf_default_datetime_format)
-    - [RCCONF\_default\_number\_format\_decimal](#rcconf_default_number_format_decimal)
-    - [RCCONF\_default\_number\_format\_thousands\_sep](#rcconf_default_number_format_thousands_sep)
-    - [RCCONF\_homepage\_announcement](#rcconf_homepage_announcement)
-    - [RCCONF\_password\_algo](#rcconf_password_algo)
-    - [RCCONF\_password\_recovery\_custom\_text](#rcconf_password_recovery_custom_text)
-    - [RCCONF\_user\_access\_dashboard\_enable](#rcconf_user_access_dashboard_enable)
-    - [RCCONF\_user\_access\_dashboard\_custom\_notification](#rcconf_user_access_dashboard_custom_notification)
-    - [RCCONF\_suspend\_users\_inactive\_send\_email](#rcconf_suspend_users_inactive_send_email)
-    - [RCCONF\_suspend\_users\_inactive\_days](#rcconf_suspend_users_inactive_days)
-    - [RCCONF\_suspend\_users\_inactive\_type](#rcconf_suspend_users_inactive_type)
-    - [RCCONF\_page\_hit\_threshold\_per\_minute](#rcconf_page_hit_threshold_per_minute)
-    - [RCCONF\_enable\_http\_compression](#rcconf_enable_http_compression)
-    - [RCCONF\_realtime\_webservice\_data\_fetch\_interval](#rcconf_realtime_webservice_data_fetch_interval)
-    - [RCCONF\_realtime\_webservice\_url\_metadata](#rcconf_realtime_webservice_url_metadata)
-    - [RCCONF\_realtime\_webservice\_url\_data](#rcconf_realtime_webservice_url_data)
-    - [RCCONF\_realtime\_webservice\_url\_user\_access](#rcconf_realtime_webservice_url_user_access)
-    - [RCCONF\_realtime\_webservice\_global\_enabled](#rcconf_realtime_webservice_global_enabled)
-    - [RCCONF\_realtime\_webservice\_custom\_text](#rcconf_realtime_webservice_custom_text)
-    - [RCCONF\_realtime\_webservice\_display\_info\_project\_setup](#rcconf_realtime_webservice_display_info_project_setup)
-    - [RCCONF\_realtime\_webservice\_source\_system\_custom\_name](#rcconf_realtime_webservice_source_system_custom_name)
-    - [RCCONF\_realtime\_webservice\_user\_rights\_super\_users\_only](#rcconf_realtime_webservice_user_rights_super_users_only)
-    - [RCCONF\_realtime\_webservice\_stop\_fetch\_inactivity\_days](#rcconf_realtime_webservice_stop_fetch_inactivity_days)
-    - [RCCONF\_amazon\_s3\_key](#rcconf_amazon_s3_key)
-    - [RCCONF\_amazon\_s3\_secret](#rcconf_amazon_s3_secret)
-    - [RCCONF\_amazon\_s3\_bucket](#rcconf_amazon_s3_bucket)
-    - [RCCONF\_system\_offline\_message](#rcconf_system_offline_message)
-    - [RCCONF\_openid\_provider\_url](#rcconf_openid_provider_url)
-    - [RCCONF\_openid\_provider\_name](#rcconf_openid_provider_name)
-    - [RCCONF\_file\_attachment\_upload\_max](#rcconf_file_attachment_upload_max)
-    - [RCCONF\_data\_entry\_trigger\_enabled](#rcconf_data_entry_trigger_enabled)
-    - [RCCONF\_redcap\_base\_url\_display\_error\_on\_mismatch](#rcconf_redcap_base_url_display_error_on_mismatch)
-    - [RCCONF\_email\_domain\_allowlist](#rcconf_email_domain_allowlist)
-    - [RCCONF\_helpfaq\_custom\_text](#rcconf_helpfaq_custom_text)
-    - [RCCONF\_randomization\_global](#rcconf_randomization_global)
-    - [RCCONF\_login\_custom\_text](#rcconf_login_custom_text)
-    - [RCCONF\_auto\_prod\_changes](#rcconf_auto_prod_changes)
-    - [RCCONF\_enable\_edit\_prod\_events](#rcconf_enable_edit_prod_events)
-    - [RCCONF\_allow\_create\_db\_default](#rcconf_allow_create_db_default)
-    - [RCCONF\_api\_enabled](#rcconf_api_enabled)
-    - [RCCONF\_auth\_meth\_global](#rcconf_auth_meth_global)
-    - [RCCONF\_auto\_report\_stats](#rcconf_auto_report_stats)
-    - [RCCONF\_autologout\_timer](#rcconf_autologout_timer)
-    - [RCCONF\_certify\_text\_create](#rcconf_certify_text_create)
-    - [RCCONF\_certify\_text\_prod](#rcconf_certify_text_prod)
-    - [RCCONF\_homepage\_custom\_text](#rcconf_homepage_custom_text)
-    - [RCCONF\_dts\_enabled\_global](#rcconf_dts_enabled_global)
-    - [RCCONF\_display\_project\_logo\_institution](#rcconf_display_project_logo_institution)
-    - [RCCONF\_display\_today\_now\_button](#rcconf_display_today_now_button)
-    - [RCCONF\_edoc\_field\_option\_enabled](#rcconf_edoc_field_option_enabled)
-    - [RCCONF\_edoc\_upload\_max](#rcconf_edoc_upload_max)
-    - [RCCONF\_edoc\_storage\_option](#rcconf_edoc_storage_option)
-    - [RCCONF\_file\_repository\_upload\_max](#rcconf_file_repository_upload_max)
-    - [RCCONF\_file\_repository\_enabled](#rcconf_file_repository_enabled)
-    - [RCCONF\_edoc\_path](#rcconf_edoc_path)
-    - [RCCONF\_enable\_edit\_survey\_response](#rcconf_enable_edit_survey_response)
-    - [RCCONF\_enable\_plotting](#rcconf_enable_plotting)
-    - [RCCONF\_enable\_plotting\_survey\_results](#rcconf_enable_plotting_survey_results)
-    - [RCCONF\_enable\_projecttype\_singlesurvey](#rcconf_enable_projecttype_singlesurvey)
-    - [RCCONF\_enable\_projecttype\_forms](#rcconf_enable_projecttype_forms)
-    - [RCCONF\_enable\_projecttype\_singlesurveyforms](#rcconf_enable_projecttype_singlesurveyforms)
-    - [RCCONF\_enable\_url\_shortener](#rcconf_enable_url_shortener)
-    - [RCCONF\_enable\_user\_allowlist](#rcconf_enable_user_allowlist)
-    - [RCCONF\_logout\_fail\_limit](#rcconf_logout_fail_limit)
-    - [RCCONF\_logout\_fail\_window](#rcconf_logout_fail_window)
-    - [RCCONF\_footer\_links](#rcconf_footer_links)
-    - [RCCONF\_footer\_text](#rcconf_footer_text)
-    - [RCCONF\_google\_translate\_enabled](#rcconf_google_translate_enabled)
-    - [RCCONF\_googlemap\_key](#rcconf_googlemap_key)
-    - [RCCONF\_grant\_cite](#rcconf_grant_cite)
-    - [RCCONF\_headerlogo](#rcconf_headerlogo)
-    - [RCCONF\_homepage\_contact](#rcconf_homepage_contact)
-    - [RCCONF\_homepage\_contact\_email](#rcconf_homepage_contact_email)
-    - [RCCONF\_homepage\_grant\_cite](#rcconf_homepage_grant_cite)
-    - [RCCONF\_identifier\_keywords](#rcconf_identifier_keywords)
-    - [RCCONF\_institution](#rcconf_institution)
-    - [RCCONF\_language\_global](#rcconf_language_global)
-    - [RCCONF\_login\_autocomplete\_disable](#rcconf_login_autocomplete_disable)
-    - [RCCONF\_login\_logo](#rcconf_login_logo)
-    - [RCCONF\_my\_profile\_enable\_edit](#rcconf_my_profile_enable_edit)
-    - [RCCONF\_my\_profile\_enable\_primary\_email\_edit](#rcconf_my_profile_enable_primary_email_edit)
-    - [RCCONF\_password\_history\_limit](#rcconf_password_history_limit)
-    - [RCCONF\_password\_reset\_duration](#rcconf_password_reset_duration)
-    - [RCCONF\_project\_contact\_email](#rcconf_project_contact_email)
-    - [RCCONF\_project\_contact\_name](#rcconf_project_contact_name)
-    - [RCCONF\_project\_language](#rcconf_project_language)
-    - [RCCONF\_proxy\_hostname](#rcconf_proxy_hostname)
-    - [RCCONF\_pub\_matching\_enabled](#rcconf_pub_matching_enabled)
-    - [RCCONF\_redcap\_base\_url](#rcconf_redcap_base_url)
-    - [RCCONF\_pub\_matching\_emails](#rcconf_pub_matching_emails)
-    - [RCCONF\_pub\_matching\_email\_days](#rcconf_pub_matching_email_days)
-    - [RCCONF\_pub\_matching\_email\_limit](#rcconf_pub_matching_email_limit)
-    - [RCCONF\_pub\_matching\_email\_text](#rcconf_pub_matching_email_text)
-    - [RCCONF\_pub\_matching\_email\_subject](#rcconf_pub_matching_email_subject)
-    - [RCCONF\_pub\_matching\_institution](#rcconf_pub_matching_institution)
-    - [RCCONF\_sendit\_enabled](#rcconf_sendit_enabled)
-    - [RCCONF\_sendit\_upload\_max](#rcconf_sendit_upload_max)
-    - [RCCONF\_shared\_library\_enabled](#rcconf_shared_library_enabled)
-    - [RCCONF\_shibboleth\_logout](#rcconf_shibboleth_logout)
-    - [RCCONF\_shibboleth\_username\_field](#rcconf_shibboleth_username_field)
-    - [RCCONF\_site\_org\_type](#rcconf_site_org_type)
-    - [RCCONF\_superusers\_only\_create\_project](#rcconf_superusers_only_create_project)
-    - [RCCONF\_superusers\_only\_move\_to\_prod](#rcconf_superusers_only_move_to_prod)
-    - [RCCONF\_system\_offline](#rcconf_system_offline)
-    - [RCCONF\_cache\_storage\_system](#rcconf_cache_storage_system)
+  - [Type reference](#type-reference)
+  - [General \& Identity](#general--identity)
+  - [System Status \& Maintenance](#system-status--maintenance)
+  - [Authentication](#authentication)
+    - [Global Authentication Method](#global-authentication-method)
+    - [Table-based Authentication](#table-based-authentication)
+    - [Shibboleth Authentication](#shibboleth-authentication)
+    - [OpenID Connect](#openid-connect)
+    - [Azure Active Directory (OAuth2)](#azure-active-directory-oauth2)
+    - [Google OAuth2](#google-oauth2)
+    - [AAF (Australian Access Federation)](#aaf-australian-access-federation)
+    - [SAMS Authentication](#sams-authentication)
+  - [Two-Factor Authentication (2FA)](#two-factor-authentication-2fa)
+  - [UI \& Branding](#ui--branding)
+  - [Email \& Notifications](#email--notifications)
+    - [General Email Settings](#general-email-settings)
+    - [Alerts Settings](#alerts-settings)
+    - [Mailgun](#mailgun)
+    - [Mandrill](#mandrill)
+    - [SendGrid](#sendgrid)
+    - [Azure Communication Services](#azure-communication-services)
+  - [User Management](#user-management)
+    - [Project \& Account Creation](#project--account-creation)
+    - [User Activity \& Suspension](#user-activity--suspension)
+    - [User Access Dashboard](#user-access-dashboard)
+    - [User Sponsor](#user-sponsor)
+    - [User Profile](#user-profile)
+    - [Messaging \& Statistics](#messaging--statistics)
+  - [Project Settings \& Workflow](#project-settings--workflow)
+  - [File Storage](#file-storage)
+    - [General File Upload Settings](#general-file-upload-settings)
+    - [File Repository](#file-repository)
+    - [Local Storage](#local-storage)
+    - [Amazon S3](#amazon-s3)
+    - [Azure Blob Storage](#azure-blob-storage)
+    - [Google Cloud Storage](#google-cloud-storage)
+    - [File Upload Vault (WebDAV/SFTP)](#file-upload-vault-webdavsftp)
+    - [PDF eConsent Vault (WebDAV/SFTP)](#pdf-econsent-vault-webdavsftp)
+    - [Record Locking PDF Vault (WebDAV/SFTP)](#record-locking-pdf-vault-webdavsftp)
+  - [PDF eConsent System](#pdf-econsent-system)
+  - [Modules \& Features](#modules--features)
+    - [REDCap API](#redcap-api)
+    - [REDCap Mobile App \& MyCap](#redcap-mobile-app--mycap)
+    - [Surveys \& Data Collection](#surveys--data-collection)
+    - [Data Visualization](#data-visualization)
+    - [Rich Text Editor Features](#rich-text-editor-features)
+    - [External Modules](#external-modules)
+    - [Randomization](#randomization)
+    - [REDCap Shared Library](#redcap-shared-library)
+    - [E-Signature](#e-signature)
+    - [Field Bank](#field-bank)
+    - [Calendar \& Feed](#calendar--feed)
+    - [Data Transfer Services (DTS)](#data-transfer-services-dts)
+    - [Send-It](#send-it)
+    - [Data Entry](#data-entry)
+    - [Ontology / BioPortal](#ontology--bioportal)
+    - [PROMIS / CATs](#promis--cats)
+    - [MTB](#mtb)
+  - [Twilio SMS/Voice](#twilio-smsvoice)
+  - [Mosio SMS](#mosio-sms)
+  - [FHIR / EHR Integration (DDP)](#fhir--ehr-integration-ddp)
+    - [Connection Settings](#connection-settings)
+    - [Display \& Access](#display--access)
+    - [Data Fetch Behavior](#data-fetch-behavior)
+    - [Custom Mapping \& Auth](#custom-mapping--auth)
+    - [Break-the-Glass (Emergency Access)](#break-the-glass-emergency-access)
+  - [Real-time Webservice (Legacy DDP)](#real-time-webservice-legacy-ddp)
+  - [Publication Matching](#publication-matching)
+  - [REDCap Updates \& Versioning](#redcap-updates--versioning)
 
 
 # REDCap source download
@@ -476,7 +205,6 @@ Defaults to `true`
 
 
 
-
 ## REDCap Data Transfer Services
 
 | Variable       | Default | Description |
@@ -585,2058 +313,728 @@ see the [cron example](examples/instance_with_cron) for a docker compose exmaple
 
 # REDCap Application Config vars
 
-This container instance enables you to set any configuration variable that is in the table `redcap_config` (AFAIK: everything you can set in the Webinterface as admin in the "Control Center"). this way we are able to create REDCap deployments in a modern manner. 
+This container enables you to set any configuration variable from the `redcap_config` database table — everything configurable in the REDCap web UI under **Control Center** — as a `RCCONF_*` environment variable.
+
+The environment variable name is always `RCCONF_` + the `field_name` from `redcap_config`.  
+Example: the database field `auth_meth_global` becomes the environment variable `RCCONF_auth_meth_global`.
 
 ## APPLY_RCCONF_VARIABLES
 
-If `APPLY_RCCONF_VARIABLES` is set to true, the env var config variables, that are supplied to the container, will be set on every container start (overwriting any configurations that were set via webinterface since last boot of the instance).
-If you only want to apply the config (via env vars) once, set `APPLY_RCCONF_VARIABLES` to `false` after setting up your REDCap instance.
-
-
 ```env
-APPLY_RCCONF_VARIABLES # Default: False
-```
-
-## Possible config variables
-(As of REDCap version `14.0.30`)
-(completeness not guaranteed)
-
-Unfortunately there is no central documentation for all REDCap config variables. if you want to find out what a config variable does; examining the "Control Center" in a running REDCap instance is a good start.
-
-### RCCONF_mtb_enabled
-```
-RCCONF_mtb_enabled
-```
-Database default: `0`
-
-### RCCONF_cache_files_filesystem_path
-```
-RCCONF_cache_files_filesystem_path
-```
- Database default: ``
-
-### RCCONF_allow_auto_variable_naming 
-```
-RCCONF_allow_auto_variable_naming 
-```
-Database default: `2`
-
-### RCCONF_mailgun_api_endpoint 
-```
-RCCONF_mailgun_api_endpoint 
-```
-Database default: ``
-
-### RCCONF_openid_connect_additional_scope
-```
-RCCONF_openid_connect_additional_scope
-```
-Database default: ``
-
-### RCCONF_read_replica_enable
-```
-RCCONF_read_replica_enable
-```
-Database default: `0`
-
-### RCCONF_azure_comm_api_endpoint
-```
-RCCONF_azure_comm_api_endpoint
-```
-Database default: ``
-
-### RCCONF_azure_comm_api_key 
-```
-RCCONF_azure_comm_api_key 
-```
-Database default: ``
-
-### RCCONF_fhir_custom_auth_params
-```
-RCCONF_fhir_custom_auth_params
-```
-Database default: ``
-
-### RCCONF_fhir_custom_mapping_file_id
-```
-RCCONF_fhir_custom_mapping_file_id
-```
-Database default: ``
-
-### RCCONF_oauth2_azure_ad_tenant 
-```
-RCCONF_oauth2_azure_ad_tenant 
-```
-Database default: `common`
-
-### RCCONF_display_inline_pdf_in_pdf
-```
-RCCONF_display_inline_pdf_in_pdf
-```
-Database default: `1`
-
-### RCCONF_mosio_enabled_global 
-```
-RCCONF_mosio_enabled_global 
-```
-Database default: `1`
-
-### RCCONF_mosio_display_info_project_setup 
-```
-RCCONF_mosio_display_info_project_setup 
-```
-Database default: `0`
-
-### RCCONF_mosio_enabled_by_super_users_only
-```
-RCCONF_mosio_enabled_by_super_users_only
-```
-Database default: `0`
-
-### RCCONF_rich_text_attachment_embed_enabled 
-```
-RCCONF_rich_text_attachment_embed_enabled 
-```
-Database default: `1`
-
-### RCCONF_oauth2_azure_ad_name 
-```
-RCCONF_oauth2_azure_ad_name 
-```
-Database default: ``
-
-### RCCONF_admin_email_external_user_creation 
-```
-RCCONF_admin_email_external_user_creation 
-```
-Database default: `0`
-
-### RCCONF_user_welcome_email_external_user_creation
-```
-RCCONF_user_welcome_email_external_user_creation
-```
-Database default: `0`
-
-### RCCONF_openid_connect_response_type 
-```
-RCCONF_openid_connect_response_type 
-```
-Database default: `query`
-
-### RCCONF_restricted_upload_file_types 
-```
-RCCONF_restricted_upload_file_types 
-```
-Database default: `ade, adp, apk, appx, appxbundle, bat, cab, chm, cmd, com, cpl, diagcab, diagcfg, diagpack, dll, dmg, ex, exe, hta, img, ins, iso, isp, jar, jnlp, js, jse, lib, lnk, mde, msc, msi, msix, msixbundle, msp, mst, nsh, php, pif, ps1, scr, sct, shb, sys, vb, vbe, vbs, vhd, vxd, wsc, wsf, wsh, xll`
-
-### RCCONF_file_repository_allow_public_link
-```
-RCCONF_file_repository_allow_public_link
-```
-Database default: `1`
-
-### RCCONF_file_repository_total_size 
-```
-RCCONF_file_repository_total_size 
-```
-Database default: ``
-
-### RCCONF_contact_admin_button_url 
-```
-RCCONF_contact_admin_button_url 
-```
-Database default: ``
-
-### RCCONF_rich_text_image_embed_enabled
-```
-RCCONF_rich_text_image_embed_enabled
-```
-Database default: `1`
-
-### RCCONF_two_factor_auth_enforce_table_users_only 
-```
-RCCONF_two_factor_auth_enforce_table_users_only 
-```
-Database default: `0`
-
-### RCCONF_openid_connect_username_attribute
-```
-RCCONF_openid_connect_username_attribute
-```
-Database default: `username`
-
-### RCCONF_calendar_feed_enabled_global 
-```
-RCCONF_calendar_feed_enabled_global 
-```
-Database default: `1`
-
-### RCCONF_sendgrid_enabled_global
-```
-RCCONF_sendgrid_enabled_global
-```
-Database default: 1
-
-### RCCONF_sendgrid_enabled_by_super_users_only 
-```
-RCCONF_sendgrid_enabled_by_super_users_only 
-```
-Database default: 0
-
-### RCCONF_sendgrid_display_info_project_setup
-```
-RCCONF_sendgrid_display_info_project_setup
-```
-Database default: 0
-
-### RCCONF_two_factor_auth_esign_pin
-```
-RCCONF_two_factor_auth_esign_pin
-```
-Database default: `0`
-
-### RCCONF_esignature_enabled_global
-```
-RCCONF_esignature_enabled_global
-```
-Database default: `1`
-
-### RCCONF_openid_connect_name
-```
-RCCONF_openid_connect_name
-```
-Database default: ``
-
-### RCCONF_openid_connect_primary_admin 
-```
-RCCONF_openid_connect_primary_admin 
-```
-Database default: ``
-
-### RCCONF_openid_connect_secondary_admin 
-```
-RCCONF_openid_connect_secondary_admin 
-```
-Database default: ``
-
-### RCCONF_openid_connect_provider_url
-```
-RCCONF_openid_connect_provider_url
-```
-Database default: ``
-
-### RCCONF_openid_connect_metadata_url
-```
-RCCONF_openid_connect_metadata_url
-```
-Database default: ``
-
-### RCCONF_openid_connect_client_id 
-```
-RCCONF_openid_connect_client_id 
-```
-Database default: ``
-
-### RCCONF_openid_connect_client_secret 
-```
-RCCONF_openid_connect_client_secret 
-```
-Database default: ``
-
-### RCCONF_database_query_tool_enabled
-```
-RCCONF_database_query_tool_enabled
-```
-Database default: `0`
-
-### RCCONF_amazon_s3_endpoint_url 
-```
-RCCONF_amazon_s3_endpoint_url 
-```
-Database default: ``
-
-### RCCONF_new_form_default_prod_user_access
-```
-RCCONF_new_form_default_prod_user_access
-```
-Database default: `1`
-
-### RCCONF_file_upload_vault_filesystem_authtype
-```
-RCCONF_file_upload_vault_filesystem_authtype
-```
-Database default: `AUTH_DIGEST`
-
-### RCCONF_pdf_econsent_filesystem_authtype 
-```
-RCCONF_pdf_econsent_filesystem_authtype 
-```
-Database default: `AUTH_DIGEST`
-
-### RCCONF_record_locking_pdf_vault_filesystem_authtype 
-```
-RCCONF_record_locking_pdf_vault_filesystem_authtype 
-```
-Database default: `AUTH_DIGEST`
-
-### RCCONF_config_settings_key
-```
-RCCONF_config_settings_key
-```
-Database default: ``
-
-### RCCONF_oauth2_azure_ad_username_attribute 
-```
-RCCONF_oauth2_azure_ad_username_attribute 
-```
-Database default: `userPrincipalName`
-
-### RCCONF_oauth2_azure_ad_endpoint_version 
-```
-RCCONF_oauth2_azure_ad_endpoint_version 
-```
-Database default: `V1`
-
-### RCCONF_pdf_econsent_filesystem_container
-```
-RCCONF_pdf_econsent_filesystem_container
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_container
-```
-RCCONF_record_locking_pdf_vault_filesystem_container
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_container 
-```
-RCCONF_file_upload_vault_filesystem_container 
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_api_bucket_name 
-```
-RCCONF_google_cloud_storage_api_bucket_name 
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_api_project_id
-```
-RCCONF_google_cloud_storage_api_project_id
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_api_service_account 
-```
-RCCONF_google_cloud_storage_api_service_account 
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_api_use_project_subfolder 
-```
-RCCONF_google_cloud_storage_api_use_project_subfolder 
-```
-Database default: `1`
-
-### RCCONF_override_system_bundle_ca
-```
-RCCONF_override_system_bundle_ca
-```
-Database default: `1`
-
-### RCCONF_fhir_break_the_glass_department_type 
-```
-RCCONF_fhir_break_the_glass_department_type 
-```
-Database default: ``
-
-### RCCONF_fhir_break_the_glass_patient_type
-```
-RCCONF_fhir_break_the_glass_patient_type
-```
-Database default: ``
-
-### RCCONF_email_logging_enable_global
-```
-RCCONF_email_logging_enable_global
-```
-Database default: `1`
-
-### RCCONF_email_logging_install_time 
-```
-RCCONF_email_logging_install_time 
-```
-Database default: now()
-
-### RCCONF_protected_email_mode_global
-```
-RCCONF_protected_email_mode_global
-```
-Database default: `1`
-
-### RCCONF_password_length
-```
-RCCONF_password_length
-```
-Database default: `9`
-
-### RCCONF_password_complexity
-```
-RCCONF_password_complexity
-```
-Database default: `1`
-
-### RCCONF_reports_allow_public 
-```
-RCCONF_reports_allow_public 
-```
-Database default: `1`
-
-### RCCONF_mailgun_api_key
-```
-RCCONF_mailgun_api_key
-```
-Database default: ``
-
-### RCCONF_mailgun_domain_name
-```
-RCCONF_mailgun_domain_name
-```
-Database default: ``
-
-### RCCONF_db_binlog_format 
-```
-RCCONF_db_binlog_format 
-```
-Database default: ``
-
-### RCCONF_default_csv_delimiter
-```
-RCCONF_default_csv_delimiter
-```
-Database default: `,`
-
-### RCCONF_project_dashboard_allow_public 
-```
-RCCONF_project_dashboard_allow_public 
-```
-Database default: `1`
-
-### RCCONF_project_dashboard_min_data_points
-```
-RCCONF_project_dashboard_min_data_points
-```
-Database default: `5`
-
-### RCCONF_oauth2_azure_ad_client_id
-```
-RCCONF_oauth2_azure_ad_client_id
-```
-Database default: ``
-
-### RCCONF_oauth2_azure_ad_client_secret
-```
-RCCONF_oauth2_azure_ad_client_secret
-```
-Database default: ``
-
-### RCCONF_oauth2_azure_ad_primary_admin
-```
-RCCONF_oauth2_azure_ad_primary_admin
-```
-Database default: ``
-
-### RCCONF_oauth2_azure_ad_secondary_admin
-```
-RCCONF_oauth2_azure_ad_secondary_admin
-```
-Database default: ``
-
-### RCCONF_fhir_cdp_allow_auto_adjudication 
-```
-RCCONF_fhir_cdp_allow_auto_adjudication 
-```
-Database default: `1`
-
-### RCCONF_field_bank_enabled 
-```
-RCCONF_field_bank_enabled 
-```
-Database default: `1`
-
-### RCCONF_sendgrid_api_key 
-```
-RCCONF_sendgrid_api_key 
-```
-Database default: ``
-
-### RCCONF_fhir_break_the_glass_enabled 
-```
-RCCONF_fhir_break_the_glass_enabled 
-```
-Database default: ``
-
-### RCCONF_fhir_break_the_glass_ehr_usertype
-```
-RCCONF_fhir_break_the_glass_ehr_usertype
-```
-Database default: `SystemLogin`
-
-### RCCONF_fhir_break_the_glass_token_usertype
-```
-RCCONF_fhir_break_the_glass_token_usertype
-```
-Database default: `EMP`
-
-### RCCONF_fhir_break_the_glass_token_username
-```
-RCCONF_fhir_break_the_glass_token_username
-```
-Database default: ``
-
-### RCCONF_fhir_break_the_glass_token_password
-```
-RCCONF_fhir_break_the_glass_token_password
-```
-Database default: ``
-
-### RCCONF_fhir_break_the_glass_username_token_base_url 
-```
-RCCONF_fhir_break_the_glass_username_token_base_url 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_type 
-```
-RCCONF_record_locking_pdf_vault_filesystem_type 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_host 
-```
-RCCONF_record_locking_pdf_vault_filesystem_host 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_username 
-```
-RCCONF_record_locking_pdf_vault_filesystem_username 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_password 
-```
-RCCONF_record_locking_pdf_vault_filesystem_password 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_path 
-```
-RCCONF_record_locking_pdf_vault_filesystem_path 
-```
-Database default: ``
-
-### RCCONF_record_locking_pdf_vault_filesystem_private_key_path 
-```
-RCCONF_record_locking_pdf_vault_filesystem_private_key_path 
-```
-Database default: ``
-
-### RCCONF_mandrill_api_key 
-```
-RCCONF_mandrill_api_key 
-```
-Database default: ``
-
-### RCCONF_shibboleth_table_config
-```
-RCCONF_shibboleth_table_config
-```
-Database default: `{\"splash_default\":\"non-inst-login\",\"table_login_option\":\"Use local REDCap login\",\"institutions\":[{\"login_option\":\"Shibboleth Login\",\"login_text\":\"Click the image below to login using Shibboleth\",\"login_image\":\"https:\/\/wiki.shibboleth.net\/confluence\/download\/attachments\/131074\/atl.site.logo?version=2&modificationDate=1502412080059&api=v2\",\"login_url\":\"\"}]}`
-
-### RCCONF_survey_pid_create_project
-```
-RCCONF_survey_pid_create_project
-```
-Database default: ``
-
-### RCCONF_survey_pid_move_to_prod_status 
-```
-RCCONF_survey_pid_move_to_prod_status 
-```
-Database default: ``
-
-### RCCONF_survey_pid_move_to_analysis_status 
-```
-RCCONF_survey_pid_move_to_analysis_status 
-```
-Database default: ``
-
-### RCCONF_survey_pid_mark_completed
-```
-RCCONF_survey_pid_mark_completed
-```
-Database default: ``
-
-### RCCONF_email_alerts_converter_enabled 
-```
-RCCONF_email_alerts_converter_enabled 
-```
-Database default: `0`
-
-### RCCONF_use_email_display_name 
-```
-RCCONF_use_email_display_name 
-```
-Database default: `1`
-
-### RCCONF_alerts_allow_phone_variables 
-```
-RCCONF_alerts_allow_phone_variables 
-```
-Database default: `1`
-
-### RCCONF_alerts_allow_phone_freeform
-```
-RCCONF_alerts_allow_phone_freeform
-```
-Database default: `1`
-
-### RCCONF_fhir_standalone_authentication_flow
-```
-RCCONF_fhir_standalone_authentication_flow
-```
-Database default: `standalone_launch`
-
-### RCCONF_external_modules_allow_activation_user_request 
-```
-RCCONF_external_modules_allow_activation_user_request 
-```
-Database default: `1`
-
-### RCCONF_dkim_private_key 
-```
-RCCONF_dkim_private_key 
-```
-Database default: ``
-
-### RCCONF_enable_url_shortener_redcap
-```
-RCCONF_enable_url_shortener_redcap
-```
-Database default: `1`
-
-### RCCONF_from_email_domain_exclude
-```
-RCCONF_from_email_domain_exclude
-```
-Database default: ``
-
-### RCCONF_fhir_include_email_address 
-```
-RCCONF_fhir_include_email_address 
-```
-Database default: `0`
-
-### RCCONF_file_upload_vault_filesystem_type
-```
-RCCONF_file_upload_vault_filesystem_type
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_host
-```
-RCCONF_file_upload_vault_filesystem_host
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_username
-```
-RCCONF_file_upload_vault_filesystem_username
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_password
-```
-RCCONF_file_upload_vault_filesystem_password
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_path
-```
-RCCONF_file_upload_vault_filesystem_path
-```
-Database default: ``
-
-### RCCONF_file_upload_vault_filesystem_private_key_path
-```
-RCCONF_file_upload_vault_filesystem_private_key_path
-```
-Database default: ``
-
-### RCCONF_file_upload_versioning_enabled 
-```
-RCCONF_file_upload_versioning_enabled 
-```
-Database default: `1`
-
-### RCCONF_file_upload_versioning_global_enabled
-```
-RCCONF_file_upload_versioning_global_enabled
-```
-Database default: `1`
-
-### RCCONF_allow_outbound_http
-```
-RCCONF_allow_outbound_http
-```
-Database default: `1`
-
-### RCCONF_drw_upload_option_enabled
-```
-RCCONF_drw_upload_option_enabled
-```
-Database default: `1`
-
-### RCCONF_pdf_econsent_system_custom_text
-```
-RCCONF_pdf_econsent_system_custom_text
-```
-Database default: ``
-
-### RCCONF_alerts_email_freeform_domain_allowlist 
-```
-RCCONF_alerts_email_freeform_domain_allowlist 
-```
-Database default: ``
-
-### RCCONF_alerts_allow_email_variables 
-```
-RCCONF_alerts_allow_email_variables 
-```
-Database default: `1`
-
-### RCCONF_alerts_allow_email_freeform
-```
-RCCONF_alerts_allow_email_freeform
-```
-Database default: `1`
-
-### RCCONF_azure_quickstart 
-```
-RCCONF_azure_quickstart 
-```
-Database default: `0`
-
-### RCCONF_google_recaptcha_site_key
-```
-RCCONF_google_recaptcha_site_key
-```
-Database default: ``
-
-### RCCONF_google_recaptcha_secret_key
-```
-RCCONF_google_recaptcha_secret_key
-```
-Database default: ``
-
-### RCCONF_aws_quickstart 
-```
-RCCONF_aws_quickstart 
-```
-Database default: `0`
-
-### RCCONF_user_messaging_prevent_admin_messaging 
-```
-RCCONF_user_messaging_prevent_admin_messaging 
-```
-Database default: `0`
-
-### RCCONF_homepage_announcement_login
-```
-RCCONF_homepage_announcement_login
-```
-Database default: `1`
-
-### RCCONF_azure_app_name 
-```
-RCCONF_azure_app_name 
-```
-Database default: ``
-
-### RCCONF_azure_app_secret 
-```
-RCCONF_azure_app_secret 
-```
-Database default: ``
-
-### RCCONF_azure_container
-```
-RCCONF_azure_container
-```
-Database default: ``
-
-### RCCONF_redcap_updates_user
-```
-RCCONF_redcap_updates_user
-```
-Database default: ``
-
-### RCCONF_redcap_updates_password
-```
-RCCONF_redcap_updates_password
-```
-Database default: ``
-
-### RCCONF_redcap_updates_password_encrypted
-```
-RCCONF_redcap_updates_password_encrypted
-```
-Database default: `1`
-
-### RCCONF_redcap_updates_available 
-```
-RCCONF_redcap_updates_available 
-```
-Database default: ``
-
-### RCCONF_redcap_updates_available_last_check
-```
-RCCONF_redcap_updates_available_last_check
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_convert_timestamp_from_gmt 
-```
-RCCONF_realtime_webservice_convert_timestamp_from_gmt 
-```
-Database default: `0`
-
-### RCCONF_fhir_convert_timestamp_from_gmt
-```
-RCCONF_fhir_convert_timestamp_from_gmt
-```
-Database default: `0`
-
-### RCCONF_db_collation 
-```
-RCCONF_db_collation 
-```
-Database default: `utf8mb4_unicode_ci`
-
-### RCCONF_db_character_set 
-```
-RCCONF_db_character_set 
-```
-Database default: `utf8mb4`
-
-### RCCONF_external_modules_updates_available 
-```
-RCCONF_external_modules_updates_available 
-```
-Database default: ``
-
-### RCCONF_external_modules_updates_available_last_check
-```
-RCCONF_external_modules_updates_available_last_check
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_system_ip 
-```
-RCCONF_pdf_econsent_system_ip 
-```
-Database default: `1`
-
-### RCCONF_pdf_econsent_filesystem_type 
-```
-RCCONF_pdf_econsent_filesystem_type 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_filesystem_host 
-```
-RCCONF_pdf_econsent_filesystem_host 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_filesystem_username 
-```
-RCCONF_pdf_econsent_filesystem_username 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_filesystem_password 
-```
-RCCONF_pdf_econsent_filesystem_password 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_filesystem_path 
-```
-RCCONF_pdf_econsent_filesystem_path 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_filesystem_private_key_path 
-```
-RCCONF_pdf_econsent_filesystem_private_key_path 
-```
-Database default: ``
-
-### RCCONF_pdf_econsent_system_enabled
-```
-RCCONF_pdf_econsent_system_enabled
-```
-Database default: `1`
-
-### RCCONF_enable_edit_prod_repeating_setup 
-```
-RCCONF_enable_edit_prod_repeating_setup 
-```
-Database default: `1`
-
-### RCCONF_user_sponsor_set_expiration_days 
-```
-RCCONF_user_sponsor_set_expiration_days 
-```
-Database default: `365`
-
-### RCCONF_user_sponsor_dashboard_enable
-```
-RCCONF_user_sponsor_dashboard_enable
-```
-Database default: `1`
-
-### RCCONF_clickjacking_prevention
-```
-RCCONF_clickjacking_prevention
-```
-Database default: `0`
-
-### RCCONF_external_module_alt_paths
-```
-RCCONF_external_module_alt_paths
-```
-Database default: ``
-
-### RCCONF_aafAccessUrl 
-```
-RCCONF_aafAccessUrl 
-```
-Database default: ``
-
-### RCCONF_aafAllowLocalsCreateDB 
-```
-RCCONF_aafAllowLocalsCreateDB 
-```
-Database default: ``
-
-### RCCONF_aafAud 
-```
-RCCONF_aafAud 
-```
-Database default: ``
-
-### RCCONF_aafDisplayOnEmailUsers 
-```
-RCCONF_aafDisplayOnEmailUsers 
-```
-Database default: ``
-
-### RCCONF_aafIss 
-```
-RCCONF_aafIss 
-```
-Database default: ``
-
-### RCCONF_aafPrimaryField
-```
-RCCONF_aafPrimaryField
-```
-Database default: ``
-
-### RCCONF_aafScopeTarget 
-```
-RCCONF_aafScopeTarget 
-```
-Database default: ``
-
-### RCCONF_external_modules_project_custom_text 
-```
-RCCONF_external_modules_project_custom_text 
-```
-Database default: ``
-
-### RCCONF_is_development_server
-```
-RCCONF_is_development_server
-```
-Database default: `0`
-
-### RCCONF_fhir_data_mart_create_project
-```
-RCCONF_fhir_data_mart_create_project
-```
-Database default: `0`
-
-### RCCONF_fhir_data_fetch_interval 
-```
-RCCONF_fhir_data_fetch_interval 
-```
-Database default: `24`
-
-### RCCONF_fhir_url_user_access 
-```
-RCCONF_fhir_url_user_access 
-```
-Database default: ``
-
-### RCCONF_fhir_custom_text 
-```
-RCCONF_fhir_custom_text 
-```
-Database default: ``
-
-### RCCONF_fhir_display_info_project_setup
-```
-RCCONF_fhir_display_info_project_setup
-```
-Database default: `1`
-
-### RCCONF_fhir_source_system_custom_name 
-```
-RCCONF_fhir_source_system_custom_name 
-```
-Database default: `EHR`
-
-### RCCONF_fhir_user_rights_super_users_only
-```
-RCCONF_fhir_user_rights_super_users_only
-```
-Database default: `1`
-
-### RCCONF_fhir_stop_fetch_inactivity_days
-```
-RCCONF_fhir_stop_fetch_inactivity_days
-```
-Database default: `7`
-
-### RCCONF_fhir_ddp_enabled 
-```
-RCCONF_fhir_ddp_enabled 
-```
-Database default: `0`
-
-### RCCONF_api_token_request_type 
-```
-RCCONF_api_token_request_type 
-```
-Database default: `admin_approve`
-
-### RCCONF_fhir_endpoint_authorize_url
-```
-RCCONF_fhir_endpoint_authorize_url
-```
-Database default: ``
-
-### RCCONF_fhir_endpoint_token_url
-```
-RCCONF_fhir_endpoint_token_url
-```
-Database default: ``
-
-### RCCONF_fhir_ehr_mrn_identifier
-```
-RCCONF_fhir_ehr_mrn_identifier
-```
-Database default: ``
-
-### RCCONF_fhir_identity_provider 
-```
-RCCONF_fhir_identity_provider 
-```
-Database default: ``
-
-### RCCONF_fhir_client_id 
-```
-RCCONF_fhir_client_id 
-```
-Database default: ``
-
-### RCCONF_fhir_client_secret 
-```
-RCCONF_fhir_client_secret 
-```
-Database default: ``
-
-### RCCONF_fhir_endpoint_base_url 
-```
-RCCONF_fhir_endpoint_base_url 
-```
-Database default: ``
-
-### RCCONF_report_stats_url 
-```
-RCCONF_report_stats_url 
-```
-Database default: ``
-
-### RCCONF_user_messaging_enabled 
-```
-RCCONF_user_messaging_enabled 
-```
-Database default: `1`
-
-### RCCONF_auto_prod_changes_check_identifiers
-```
-RCCONF_auto_prod_changes_check_identifiers
-```
-Database default: `0`
-
-### RCCONF_bioportal_api_url
-```
-RCCONF_bioportal_api_url
-```
-Database default: `https://data.bioontology.org/`
-
-### RCCONF_send_emails_admin_tasks
-```
-RCCONF_send_emails_admin_tasks
-```
-Database default: `1`
-
-### RCCONF_display_project_xml_backup_option
-```
-RCCONF_display_project_xml_backup_option
-```
-Database default: `1`
-
-### RCCONF_cross_domain_access_control
-```
-RCCONF_cross_domain_access_control
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_edocs_bucket
-```
-RCCONF_google_cloud_storage_edocs_bucket
-```
-Database default: ``
-
-### RCCONF_google_cloud_storage_temp_bucket 
-```
-RCCONF_google_cloud_storage_temp_bucket 
-```
-Database default: ``
-
-### RCCONF_amazon_s3_endpoint 
-```
-RCCONF_amazon_s3_endpoint 
-```
-Database default: ``
-
-### RCCONF_proxy_username_password
-```
-RCCONF_proxy_username_password
-```
-Database default: ``
-
-### RCCONF_homepage_contact_url 
-```
-RCCONF_homepage_contact_url 
-```
-Database default: ``
-
-### RCCONF_bioportal_api_token
-```
-RCCONF_bioportal_api_token
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_ip_range_alt 
-```
-RCCONF_two_factor_auth_ip_range_alt 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_trust_period_days_alt
-```
-RCCONF_two_factor_auth_trust_period_days_alt
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_trust_period_days
-```
-RCCONF_two_factor_auth_trust_period_days
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_email_enabled
-```
-RCCONF_two_factor_auth_email_enabled
-```
-Database default: `1`
-
-### RCCONF_two_factor_auth_authenticator_enabled
-```
-RCCONF_two_factor_auth_authenticator_enabled
-```
-Database default: `1`
-
-### RCCONF_two_factor_auth_ip_check_enabled 
-```
-RCCONF_two_factor_auth_ip_check_enabled 
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_ip_range 
-```
-RCCONF_two_factor_auth_ip_range 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_ip_range_include_private 
-```
-RCCONF_two_factor_auth_ip_range_include_private 
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_duo_enabled
-```
-RCCONF_two_factor_auth_duo_enabled
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_duo_ikey 
-```
-RCCONF_two_factor_auth_duo_ikey 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_duo_skey 
-```
-RCCONF_two_factor_auth_duo_skey 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_duo_hostname 
-```
-RCCONF_two_factor_auth_duo_hostname 
-```
-Database default: ``
-
-### RCCONF_bioportal_ontology_list_cache_time 
-```
-RCCONF_bioportal_ontology_list_cache_time 
-```
-Database default: ``
-
-### RCCONF_bioportal_ontology_list
-```
-RCCONF_bioportal_ontology_list
-```
-Database default: ``
-
-### RCCONF_redcap_survey_base_url 
-```
-RCCONF_redcap_survey_base_url 
-```
-Database default: ``
-
-### RCCONF_enable_ontology_auto_suggest 
-```
-RCCONF_enable_ontology_auto_suggest 
-```
-Database default: `1`
-
-### RCCONF_enable_survey_text_to_speech 
-```
-RCCONF_enable_survey_text_to_speech 
-```
-Database default: `1`
-
-### RCCONF_enable_field_attachment_video_url
-```
-RCCONF_enable_field_attachment_video_url
-```
-Database default: `1`
-
-### RCCONF_google_oauth2_client_id
-```
-RCCONF_google_oauth2_client_id
-```
-Database default: ``
-
-### RCCONF_google_oauth2_client_secret
-```
-RCCONF_google_oauth2_client_secret
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_twilio_enabled 
-```
-RCCONF_two_factor_auth_twilio_enabled 
-```
-Database default: `0`
-
-### RCCONF_two_factor_auth_twilio_account_sid 
-```
-RCCONF_two_factor_auth_twilio_account_sid 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_twilio_auth_token
-```
-RCCONF_two_factor_auth_twilio_auth_token
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_twilio_from_number 
-```
-RCCONF_two_factor_auth_twilio_from_number 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_twilio_from_number_voice_alt 
-```
-RCCONF_two_factor_auth_twilio_from_number_voice_alt 
-```
-Database default: ``
-
-### RCCONF_two_factor_auth_enabled
-```
-RCCONF_two_factor_auth_enabled
-```
-Database default: `0`
-
-### RCCONF_allow_kill_mysql_process 
-```
-RCCONF_allow_kill_mysql_process 
-```
-Database default: `0`
-
-### RCCONF_mobile_app_enabled 
-```
-RCCONF_mobile_app_enabled 
-```
-Database default: `1`
-
-### RCCONF_mycap_enabled_global 
-```
-RCCONF_mycap_enabled_global 
-```
-Database default: `1`
-
-### RCCONF_mycap_enable_type
-```
-RCCONF_mycap_enable_type
-```
-Database default: `admin`
-
-### RCCONF_twilio_display_info_project_setup
-```
-RCCONF_twilio_display_info_project_setup
-```
-Database default: `0`
-
-### RCCONF_twilio_enabled_global
-```
-RCCONF_twilio_enabled_global
-```
-Database default: `1`
-
-### RCCONF_twilio_enabled_by_super_users_only 
-```
-RCCONF_twilio_enabled_by_super_users_only 
-```
-Database default: `0`
-
-### RCCONF_field_comment_log_enabled_default
-```
-RCCONF_field_comment_log_enabled_default
-```
-Database default: `1`
-
-### RCCONF_from_email 
-```
-RCCONF_from_email 
-```
-Database default: ``
-
-### RCCONF_promis_enabled 
-```
-RCCONF_promis_enabled 
-```
-Database default: `1`
-
-### RCCONF_promis_api_base_url
-```
-RCCONF_promis_api_base_url
-```
-Database default: `https://www.redcap-cats.org/promis_api/`
-
-### RCCONF_sams_logout
-```
-RCCONF_sams_logout
-```
-Database default: ``
-
-### RCCONF_promis_registration_id 
-```
-RCCONF_promis_registration_id 
-```
-Database default: ``
-
-### RCCONF_promis_token 
-```
-RCCONF_promis_token 
-```
-Database default: ``
-
-### RCCONF_hook_functions_file
-```
-RCCONF_hook_functions_file
-```
-Database default: ``
-
-### RCCONF_project_encoding 
-```
-RCCONF_project_encoding 
-```
-Database default: ``
-
-### RCCONF_default_datetime_format
-```
-RCCONF_default_datetime_format
-```
-Database default: `M/D/Y_12`
-
-Allowed values:
-`M-D-Y_24`, `M-D-Y_12`, `M/D/Y_24`, `M/D/Y_12`, `M.D.Y_24`, `M.D.Y_12`, `D-M-Y_24`, `D-M-Y_12`, `D/M/Y_24`, `D/M/Y_12`, `D.M.Y_24`, `D.M.Y_12`, `Y-M-D_24`, `Y-M-D_12`, `Y/M/D_24`, `Y/M/D_12`, `Y.M.D_24`, `Y.M.D_12`
-
-### RCCONF_default_number_format_decimal
-```
-RCCONF_default_number_format_decimal
-```
-Database default: `.`
-
-### RCCONF_default_number_format_thousands_sep
-```
-RCCONF_default_number_format_thousands_sep
-```
-Database default: `,`
-
-### RCCONF_homepage_announcement
-```
-RCCONF_homepage_announcement
-```
-Database default: ``
-
-### RCCONF_password_algo
-```
-RCCONF_password_algo
-```
-Database default: `md5`
-
-### RCCONF_password_recovery_custom_text
-```
-RCCONF_password_recovery_custom_text
-```
-Database default: ``
-
-### RCCONF_user_access_dashboard_enable 
-```
-RCCONF_user_access_dashboard_enable 
-```
-Database default: `1`
-
-### RCCONF_user_access_dashboard_custom_notification
-```
-RCCONF_user_access_dashboard_custom_notification
-```
-Database default: ``
-
-### RCCONF_suspend_users_inactive_send_email
-```
-RCCONF_suspend_users_inactive_send_email
-```
-Database default: 1
-
-### RCCONF_suspend_users_inactive_days
-```
-RCCONF_suspend_users_inactive_days
-```
-Database default: 180
-
-### RCCONF_suspend_users_inactive_type
-```
-RCCONF_suspend_users_inactive_type
-```
-Database default: ``
-
-### RCCONF_page_hit_threshold_per_minute
-```
-RCCONF_page_hit_threshold_per_minute
-```
-Database default: `600`
-
-### RCCONF_enable_http_compression
-```
-RCCONF_enable_http_compression
-```
-Database default: `1`
-
-### RCCONF_realtime_webservice_data_fetch_interval
-```
-RCCONF_realtime_webservice_data_fetch_interval
-```
-Database default: `24`
-
-### RCCONF_realtime_webservice_url_metadata 
-```
-RCCONF_realtime_webservice_url_metadata 
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_url_data 
-```
-RCCONF_realtime_webservice_url_data 
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_url_user_access
-```
-RCCONF_realtime_webservice_url_user_access
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_global_enabled 
-```
-RCCONF_realtime_webservice_global_enabled 
-```
-Database default: `0`
-
-### RCCONF_realtime_webservice_custom_text
-```
-RCCONF_realtime_webservice_custom_text
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_display_info_project_setup 
-```
-RCCONF_realtime_webservice_display_info_project_setup 
-```
-Database default: `1`
-
-### RCCONF_realtime_webservice_source_system_custom_name
-```
-RCCONF_realtime_webservice_source_system_custom_name
-```
-Database default: ``
-
-### RCCONF_realtime_webservice_user_rights_super_users_only 
-```
-RCCONF_realtime_webservice_user_rights_super_users_only 
-```
-Database default: `1`
-
-### RCCONF_realtime_webservice_stop_fetch_inactivity_days 
-```
-RCCONF_realtime_webservice_stop_fetch_inactivity_days 
-```
-Database default: `7`
-
-### RCCONF_amazon_s3_key
-```
-RCCONF_amazon_s3_key
-```
-Database default: ``
-
-### RCCONF_amazon_s3_secret 
-```
-RCCONF_amazon_s3_secret 
-```
-Database default: ``
-
-### RCCONF_amazon_s3_bucket 
-```
-RCCONF_amazon_s3_bucket 
-```
-Database default: ``
-
-### RCCONF_system_offline_message 
-```
-RCCONF_system_offline_message 
-```
-Database default: ``
-
-### RCCONF_openid_provider_url
-```
-RCCONF_openid_provider_url
-```
-Database default: ``
-
-### RCCONF_openid_provider_name 
-```
-RCCONF_openid_provider_name 
-```
-Database default: ``
-
-### RCCONF_file_attachment_upload_max 
-```
-RCCONF_file_attachment_upload_max 
-```
-Database default: ``
-
-### RCCONF_data_entry_trigger_enabled 
-```
-RCCONF_data_entry_trigger_enabled 
-```
-Database default: `1`
-
-### RCCONF_redcap_base_url_display_error_on_mismatch
-```
-RCCONF_redcap_base_url_display_error_on_mismatch
-```
-Database default: `1`
-
-### RCCONF_email_domain_allowlist 
-```
-RCCONF_email_domain_allowlist 
-```
-Database default: ``
-
-### RCCONF_helpfaq_custom_text
-```
-RCCONF_helpfaq_custom_text
-```
-Database default: ``
-
-### RCCONF_randomization_global 
-```
-RCCONF_randomization_global 
-```
-Database default: `1`
-
-### RCCONF_login_custom_text
-```
-RCCONF_login_custom_text
-```
-Database default: ``
-
-### RCCONF_auto_prod_changes
-```
-RCCONF_auto_prod_changes
-```
-Database default: `4`
-
-### RCCONF_enable_edit_prod_events
-```
-RCCONF_enable_edit_prod_events
-```
-Database default: `1`
-
-### RCCONF_allow_create_db_default
-```
-RCCONF_allow_create_db_default
-```
-Database default: `1`
-
-### RCCONF_api_enabled
-```
-RCCONF_api_enabled
-```
-Database default: `1`
-
-### RCCONF_auth_meth_global 
-```
-RCCONF_auth_meth_global 
-```
-Database default: `none` valid values: `none`, `table`,`ldap`, `ldap_table`, `shibboleth`, `shibboleth_table`, `openid_google`, `oauth2_azure_ad`, `oauth2_azure_ad_table`, `rsa`, `sams`, `aaf`, `aaf_table`, `openid_connect`, `openid_connect_table`
-
-### RCCONF_auto_report_stats
-```
-RCCONF_auto_report_stats
-```
-Database default: `1`
-
-### RCCONF_autologout_timer 
-```
-RCCONF_autologout_timer 
-```
-Database default: `30`
-
-### RCCONF_certify_text_create
-```
-RCCONF_certify_text_create
-```
-Database default: ``
-
-### RCCONF_certify_text_prod
-```
-RCCONF_certify_text_prod
-```
-Database default: ``
-
-### RCCONF_homepage_custom_text 
-```
-RCCONF_homepage_custom_text 
-```
-Database default: ``
-
-### RCCONF_dts_enabled_global 
-```
-RCCONF_dts_enabled_global 
-```
-Database default: `0`
-
-### RCCONF_display_project_logo_institution 
-```
-RCCONF_display_project_logo_institution 
-```
-Database default: `0`
-
-### RCCONF_display_today_now_button 
-```
-RCCONF_display_today_now_button 
-```
-Database default: `1`
-
-### RCCONF_edoc_field_option_enabled
-```
-RCCONF_edoc_field_option_enabled
-```
-Database default: `1`
-
-### RCCONF_edoc_upload_max
-```
-RCCONF_edoc_upload_max
-```
-Database default: ``
-
-### RCCONF_edoc_storage_option
-```
-RCCONF_edoc_storage_option
-```
-Database default: `0`
-
-### RCCONF_file_repository_upload_max 
-```
-RCCONF_file_repository_upload_max 
-```
-Database default: ``
-
-### RCCONF_file_repository_enabled
-```
-RCCONF_file_repository_enabled
-```
-Database default: `1`
-
-### RCCONF_edoc_path
-```
-RCCONF_edoc_path
-```
-Database default: ``
-
-### RCCONF_enable_edit_survey_response
-```
-RCCONF_enable_edit_survey_response
-```
-Database default: `1`
-
-### RCCONF_enable_plotting
-```
-RCCONF_enable_plotting
-```
-Database default: `2`
-
-### RCCONF_enable_plotting_survey_results 
-```
-RCCONF_enable_plotting_survey_results 
-```
-Database default: `1`
-
-### RCCONF_enable_projecttype_singlesurvey
-```
-RCCONF_enable_projecttype_singlesurvey
-```
-Database default: `1`
-
-### RCCONF_enable_projecttype_forms 
-```
-RCCONF_enable_projecttype_forms 
-```
-Database default: `1`
-
-### RCCONF_enable_projecttype_singlesurveyforms 
-```
-RCCONF_enable_projecttype_singlesurveyforms 
-```
-Database default: `1`
-
-### RCCONF_enable_url_shortener 
-```
-RCCONF_enable_url_shortener 
-```
-Database default: `1`
-
-### RCCONF_enable_user_allowlist
-```
-RCCONF_enable_user_allowlist
-```
-Database default: `0`
-
-### RCCONF_logout_fail_limit
-```
-RCCONF_logout_fail_limit
-```
-Database default: `5`
-
-### RCCONF_logout_fail_window 
-```
-RCCONF_logout_fail_window 
-```
-Database default: `15`
-
-### RCCONF_footer_links 
-```
-RCCONF_footer_links 
-```
-Database default: ``
-
-### RCCONF_footer_text
-```
-RCCONF_footer_text
-```
-Database default: ``
-
-### RCCONF_google_translate_enabled 
-```
-RCCONF_google_translate_enabled 
-```
-Database default: `0`
-
-### RCCONF_googlemap_key
-```
-RCCONF_googlemap_key
-```
-Database default: ``
-
-### RCCONF_grant_cite 
-```
-RCCONF_grant_cite 
-```
-Database default: ``
-
-### RCCONF_headerlogo 
-```
-RCCONF_headerlogo 
-```
-Database default: ``
-
-### RCCONF_homepage_contact 
-```
-RCCONF_homepage_contact 
-```
-Database default: ``
-
-### RCCONF_homepage_contact_email 
-```
-RCCONF_homepage_contact_email 
-```
-Database default: ``
-
-### RCCONF_homepage_grant_cite
-```
-RCCONF_homepage_grant_cite
-```
-Database default: ``
-
-### RCCONF_identifier_keywords
-```
-RCCONF_identifier_keywords
-```
-Database default: `name, street, address, city, county, precinct, zip, postal, date, phone, fax, mail, ssn, social security, mrn, dob, dod, medical, record, id, age`
-
-### RCCONF_institution
-```
-RCCONF_institution
-```
-Database default: ``
-
-### RCCONF_language_global
-```
-RCCONF_language_global
-```
-Database default: `English`
-
-### RCCONF_login_autocomplete_disable 
-```
-RCCONF_login_autocomplete_disable 
-```
-Database default: `0`
-
-### RCCONF_login_logo 
-```
-RCCONF_login_logo 
-```
-Database default: ``
-
-### RCCONF_my_profile_enable_edit 
-```
-RCCONF_my_profile_enable_edit 
-```
-Database default: `1`
-
-### RCCONF_my_profile_enable_primary_email_edit 
-```
-RCCONF_my_profile_enable_primary_email_edit 
-```
-Database default: `1`
-
-### RCCONF_password_history_limit 
-```
-RCCONF_password_history_limit 
-```
-Database default: `0`
-
-### RCCONF_password_reset_duration
-```
-RCCONF_password_reset_duration
-```
-Database default: `0`
-
-### RCCONF_project_contact_email
-```
-RCCONF_project_contact_email
-```
-Database default: ``
-
-### RCCONF_project_contact_name 
-```
-RCCONF_project_contact_name 
-```
-Database default: ``
-
-### RCCONF_project_language 
-```
-RCCONF_project_language 
-```
-Database default: `English`
-
-### RCCONF_proxy_hostname 
-```
-RCCONF_proxy_hostname 
-```
-Database default: ``
-
-### RCCONF_pub_matching_enabled 
-```
-RCCONF_pub_matching_enabled 
-```
-Database default: `0`
-
-### RCCONF_redcap_base_url
-```
-RCCONF_redcap_base_url
-```
-Database default: ``
-
-### RCCONF_pub_matching_emails
-```
-RCCONF_pub_matching_emails
-```
-Database default: `0`
-
-### RCCONF_pub_matching_email_days
-```
-RCCONF_pub_matching_email_days
-```
-Database default: `7`
-
-### RCCONF_pub_matching_email_limit 
-```
-RCCONF_pub_matching_email_limit 
-```
-Database default: `3`
-
-### RCCONF_pub_matching_email_text
-```
-RCCONF_pub_matching_email_text
-```
-Database default: ``
-
-### RCCONF_pub_matching_email_subject 
-```
-RCCONF_pub_matching_email_subject 
-```
-Database default: ``
-
-### RCCONF_pub_matching_institution 
-```
-RCCONF_pub_matching_institution 
-```
-Database default: `Vanderbilt\nMeharry`
-
-### RCCONF_sendit_enabled 
-```
-RCCONF_sendit_enabled 
-```
-Database default: `1`
-
-### RCCONF_sendit_upload_max
-```
-RCCONF_sendit_upload_max
-```
-Database default: ``
-
-### RCCONF_shared_library_enabled 
-```
-RCCONF_shared_library_enabled 
-```
-Database default: `1`
-
-### RCCONF_shibboleth_logout
-```
-RCCONF_shibboleth_logout
-```
-Database default: ``
-
-### RCCONF_shibboleth_username_field
-```
-RCCONF_shibboleth_username_field
-```
-Database default: `none`
-
-### RCCONF_site_org_type
-```
-RCCONF_site_org_type
-```
-Database default: ``
-
-### RCCONF_superusers_only_create_project 
-```
-RCCONF_superusers_only_create_project 
-```
-Database default: `0`
-
-### RCCONF_superusers_only_move_to_prod 
-```
-RCCONF_superusers_only_move_to_prod 
-```
-Database default: `1`
-
-### RCCONF_system_offline 
-```
-RCCONF_system_offline 
-```
-Database default: `0`
-
-### RCCONF_cache_storage_system 
-```
-RCCONF_cache_storage_system 
-```
-Database default: `file`
-
+APPLY_RCCONF_VARIABLES # Default: false
+```
+
+If set to `true`, all supplied `RCCONF_*` environment variables are written to the database on **every container start**, overwriting any changes made via the web interface since the last boot.
+
+Set to `false` after initial setup if you want the configuration to be applied only once.
+
+## Type reference
+
+| Type | Meaning |
+|---|---|
+| `boolean` | `0` = disabled/false, `1` = enabled/true |
+| `integer` | A whole number |
+| `string` | Free-form text |
+| `enum` | One of a fixed set of values (see *Allowed Values* column) |
+| `URL` | A full URL (e.g. `https://example.com/path/`) |
+| `path` | A filesystem path on the container/server |
+| `email` | A single email address |
+| `secret` | Sensitive credential (key, password, token) — handle with care |
+| `JSON` | A JSON-encoded string |
+
+---
+
+## General & Identity
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_institution` | string | `` | Free text | Name of the institution running REDCap, displayed across the UI. |
+| `RCCONF_site_org_type` | string | `` | Free text | Organization type/sub-unit within the institution (optional). |
+| `RCCONF_redcap_base_url` | URL | `` | e.g. `https://redcap.example.com/redcap/` | Public base URL of this REDCap installation; used in links sent by email and in the API. |
+| `RCCONF_redcap_base_url_display_error_on_mismatch` | boolean | `1` | `0`, `1` | Show a warning in the Control Center when the detected request URL differs from `redcap_base_url`. |
+| `RCCONF_redcap_survey_base_url` | URL | `` | Full URL | Alternate base URL for survey links when surveys are served from a different domain. |
+| `RCCONF_is_development_server` | boolean | `0` | `0`, `1` | Marks this instance as a dev/test server. May affect certain behaviors and display a banner. |
+| `RCCONF_language_global` | string | `English` | Language name (e.g. `English`, `Deutsch`) | Global UI language for all REDCap pages. |
+| `RCCONF_project_language` | string | `English` | Language name | Default language for newly created projects. |
+| `RCCONF_project_encoding` | enum | `` | `` (default ANSI/UTF-8), `Shift_JIS` | Character encoding for PDF and CSV exports in projects. |
+| `RCCONF_default_datetime_format` | enum | `M/D/Y_12` | `M-D-Y_24`, `M-D-Y_12`, `M/D/Y_24`, `M/D/Y_12`, `M.D.Y_24`, `M.D.Y_12`, `D-M-Y_24`, `D-M-Y_12`, `D/M/Y_24`, `D/M/Y_12`, `D.M.Y_24`, `D.M.Y_12`, `Y-M-D_24`, `Y-M-D_12`, `Y/M/D_24`, `Y/M/D_12`, `Y.M.D_24`, `Y.M.D_12` | Default date/time display format for new users. |
+| `RCCONF_default_number_format_decimal` | enum | `.` | `.` or `,` | Default decimal separator for numbers. |
+| `RCCONF_default_number_format_thousands_sep` | enum | `,` | `,`, `.`, `` (none) | Default thousands separator for numbers. |
+| `RCCONF_default_csv_delimiter` | enum | `,` | `,`, `;`, `\t` (tab) | Default column delimiter for CSV exports. |
+
+---
+
+## System Status & Maintenance
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_system_offline` | boolean | `0` | `0`, `1` | Put REDCap in offline mode — normal users are denied access to all pages; admins can still log in. |
+| `RCCONF_system_offline_message` | string | `` | HTML allowed | Custom message displayed to users when the system is offline. |
+| `RCCONF_enable_http_compression` | boolean | `1` | `0`, `1` | Enable gzip HTTP compression of HTML pages, making pages load 2–5× faster. |
+| `RCCONF_page_hit_threshold_per_minute` | integer | `600` | e.g. `600` | Rate limiter: maximum web requests per minute from a single IP. Exceeding this bans the IP and notifies admins. |
+| `RCCONF_allow_outbound_http` | boolean | `1` | `0`, `1` | Allow REDCap to make outbound HTTP/HTTPS requests (required by FHIR endpoints, API integrations, etc.). |
+| `RCCONF_override_system_bundle_ca` | boolean | `1` | `0`, `1` | Use REDCap's bundled CA store instead of the server's system CA bundle when verifying TLS certificates for outbound requests. |
+| `RCCONF_cross_domain_access_control` | string | `` | Comma-separated domains | Domains added to `Access-Control-Allow-Origin` for CORS. Leave blank to disable. |
+| `RCCONF_clickjacking_prevention` | boolean | `0` | `0`, `1` | Adds `X-Frame-Options: SAMEORIGIN` response header to prevent clickjacking. |
+| `RCCONF_allow_kill_mysql_process` | boolean | `0` | `0`, `1` | Allow REDCap to forcibly terminate long-running MySQL queries. |
+| `RCCONF_db_binlog_format` | enum | `` | `ROW`, `MIXED`, `STATEMENT`, `` (server default) | MySQL binary log format used by REDCap. |
+| `RCCONF_db_collation` | string | `utf8mb4_unicode_ci` | MySQL collation name | Database collation used by REDCap. |
+| `RCCONF_db_character_set` | string | `utf8mb4` | MySQL charset name | Database character set used by REDCap. |
+| `RCCONF_read_replica_enable` | boolean | `0` | `0`, `1` | Enable read-replica database support (requires additional DB configuration). |
+| `RCCONF_proxy_hostname` | string | `` | `[http://]host:port` | Outbound HTTP proxy server. Append a colon and port number; prepend `http://` or `https://`. |
+| `RCCONF_proxy_username_password` | secret | `` | `username:password` | Credentials for the outbound HTTP proxy (if required). |
+| `RCCONF_cache_storage_system` | enum | `file` | `file`, `redis` | Caching backend for REDCap internal caches. |
+| `RCCONF_cache_files_filesystem_path` | path | `` | Server path | Directory for file-based cache storage when `cache_storage_system=file`. |
+| `RCCONF_hook_functions_file` | path | `` | Full server path | Full path to the PHP file containing REDCap hook functions. |
+| `RCCONF_auto_report_stats` | boolean | `1` | `0`, `1` | Automatically send anonymous usage statistics to the REDCap Consortium. |
+| `RCCONF_report_stats_url` | URL | `` | Full URL | URL endpoint to which REDCap submits consortium statistics. |
+| `RCCONF_send_emails_admin_tasks` | boolean | `1` | `0`, `1` | Send email notifications to administrators for routine admin tasks (e.g. cron errors). |
+| `RCCONF_autologout_timer` | integer | `30` | Minutes; `0` = disabled | Auto-logout users after this many minutes of inactivity (with a 2-minute warning). |
+
+---
+
+## Authentication
+
+### Global Authentication Method
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_auth_meth_global` | enum | `none` | `none`, `table`, `ldap`, `ldap_table`, `shibboleth`, `shibboleth_table`, `openid_google`, `oauth2_azure_ad`, `oauth2_azure_ad_table`, `rsa`, `sams`, `aaf`, `aaf_table`, `openid_connect`, `openid_connect_table` | Global authentication method. `none` = no login required. `table` = built-in username/password. `*_table` variants allow a local-login fallback. |
+| `RCCONF_config_settings_key` | secret | `` | Arbitrary string | Encryption key used to protect sensitive config values stored in the database. |
+
+### Table-based Authentication
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_password_algo` | enum | `md5` | `md5`, `phpass` | Password hashing algorithm. `phpass` (bcrypt) is strongly recommended over `md5`. |
+| `RCCONF_password_length` | integer | `9` | ≥ 1 | Minimum required password length for table-based accounts. |
+| `RCCONF_password_complexity` | boolean | `1` | `0`, `1` | Require mixed-case letters, numbers, and symbols in passwords. |
+| `RCCONF_password_history_limit` | integer | `0` | `0` = disabled | Prevent reuse of the N most recent passwords. |
+| `RCCONF_password_reset_duration` | integer | `0` | Days; `0` = disabled | Force users to change their password every N days. |
+| `RCCONF_password_recovery_custom_text` | string | `` | HTML | Custom text shown on the password recovery page. |
+| `RCCONF_login_autocomplete_disable` | boolean | `0` | `0`, `1` | Disable browser autocomplete on username/password fields (increases security on shared computers). |
+| `RCCONF_logout_fail_limit` | integer | `5` | `0` = disabled | Number of consecutive failed login attempts before the account is temporarily locked. |
+| `RCCONF_logout_fail_window` | integer | `15` | Minutes | Duration of the lockout period after too many failed login attempts. |
+| `RCCONF_enable_user_allowlist` | boolean | `0` | `0`, `1` | When enabled, only users on an explicit allowlist may access REDCap. |
+| `RCCONF_email_domain_allowlist` | string | `` | One domain per line (e.g. `vanderbilt.edu`) | Restrict user account email addresses to only the listed domains. |
+
+### Shibboleth Authentication
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_shibboleth_username_field` | string | `none` | Apache env-var name, or `none` | Name of the Apache/Shibboleth environment variable that contains the authenticated username (e.g. `REMOTE_USER`). |
+| `RCCONF_shibboleth_logout` | URL | `` | Full URL | Redirect target for single-logout with the Shibboleth IdP. |
+| `RCCONF_shibboleth_table_config` | JSON | *(complex default)* | JSON object | Configures the mixed Shibboleth + table-based login splash screen (institution list, login options). |
+
+### OpenID Connect
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_openid_connect_name` | string | `` | Free text | Display name for the OpenID Connect provider shown on the login page. |
+| `RCCONF_openid_connect_provider_url` | URL | `` | Full URL | OpenID Connect issuer URL. |
+| `RCCONF_openid_connect_metadata_url` | URL | `` | Full URL | URL to the provider's `.well-known/openid-configuration` document. |
+| `RCCONF_openid_connect_client_id` | string | `` | OAuth2 client ID | Client ID registered with the OpenID Connect provider. |
+| `RCCONF_openid_connect_client_secret` | secret | `` | OAuth2 client secret | Client secret registered with the OpenID Connect provider. |
+| `RCCONF_openid_connect_username_attribute` | string | `username` | JWT/userinfo claim name | Claim used as the REDCap username. |
+| `RCCONF_openid_connect_additional_scope` | string | `` | Space-separated scope names | Additional OAuth2 scopes to request beyond `openid`. |
+| `RCCONF_openid_connect_response_type` | enum | `query` | `query`, `form_post` | How the authorization code is returned from the provider. |
+| `RCCONF_openid_connect_primary_admin` | string | `` | REDCap username | Username that is automatically granted super-user rights when logging in via this provider. |
+| `RCCONF_openid_connect_secondary_admin` | string | `` | REDCap username | Secondary username granted admin rights via this provider. |
+| `RCCONF_openid_provider_url` | URL | `` | Full URL | Legacy OpenID 2.0 provider URL (distinct from OpenID Connect). |
+| `RCCONF_openid_provider_name` | string | `` | Free text | Display name for the legacy OpenID 2.0 provider. |
+
+### Azure Active Directory (OAuth2)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_oauth2_azure_ad_name` | string | `` | Free text | Display name for the Azure AD login button on the login page. |
+| `RCCONF_oauth2_azure_ad_tenant` | string | `common` | Tenant GUID, domain, or `common` | Azure AD tenant. Use `common` for multi-tenant apps or a specific tenant ID/domain. |
+| `RCCONF_oauth2_azure_ad_client_id` | string | `` | UUID | Azure AD application (client) ID. |
+| `RCCONF_oauth2_azure_ad_client_secret` | secret | `` | String | Azure AD application client secret. |
+| `RCCONF_oauth2_azure_ad_username_attribute` | string | `userPrincipalName` | Claim name | Azure AD claim used as the REDCap username (e.g. `userPrincipalName`, `mail`). |
+| `RCCONF_oauth2_azure_ad_endpoint_version` | enum | `V1` | `V1`, `V2` | Azure AD OAuth2 endpoint version. Use `V2` for modern app registrations. |
+| `RCCONF_oauth2_azure_ad_primary_admin` | string | `` | REDCap username | Username automatically granted admin rights when logging in via Azure AD. |
+| `RCCONF_oauth2_azure_ad_secondary_admin` | string | `` | REDCap username | Secondary username granted admin rights via Azure AD. |
+
+### Google OAuth2
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_google_oauth2_client_id` | string | `` | OAuth2 client ID | Google OAuth2 client ID for `openid_google` authentication. |
+| `RCCONF_google_oauth2_client_secret` | secret | `` | OAuth2 client secret | Google OAuth2 client secret. |
+
+### AAF (Australian Access Federation)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_aafAccessUrl` | URL | `` | Full URL | AAF Rapid Connect access URL. |
+| `RCCONF_aafAud` | string | `` | URL | AAF audience (`aud` claim) — typically this application's base URL. |
+| `RCCONF_aafIss` | string | `` | URL | AAF issuer URL (`iss` claim). |
+| `RCCONF_aafPrimaryField` | string | `` | Claim name | AAF attribute used as the REDCap username. |
+| `RCCONF_aafScopeTarget` | string | `` | String | AAF scope target. |
+| `RCCONF_aafAllowLocalsCreateDB` | boolean | `` | `0`, `1` | Allow locally authenticated (non-AAF) users to create projects. |
+| `RCCONF_aafDisplayOnEmailUsers` | boolean | `` | `0`, `1` | Show the AAF login option to email-identified users. |
+
+### SAMS Authentication
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_sams_logout` | URL | `` | Full URL | URL for the SAMS single-logout endpoint. |
+
+---
+
+## Two-Factor Authentication (2FA)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_two_factor_auth_enabled` | boolean | `0` | `0`, `1` | Enable two-factor authentication globally. |
+| `RCCONF_two_factor_auth_enforce_table_users_only` | boolean | `0` | `0`, `1` | Enforce 2FA only for table-based (local) users, not external-auth users. |
+| `RCCONF_two_factor_auth_esign_pin` | boolean | `0` | `0`, `1` | Require 2FA verification for e-signature actions. |
+| `RCCONF_two_factor_auth_email_enabled` | boolean | `1` | `0`, `1` | Allow users to use email OTP for 2FA. |
+| `RCCONF_two_factor_auth_authenticator_enabled` | boolean | `1` | `0`, `1` | Allow users to use a TOTP authenticator app for 2FA. |
+| `RCCONF_two_factor_auth_ip_check_enabled` | boolean | `0` | `0`, `1` | Skip 2FA for connections from trusted IP ranges (defined by the fields below). |
+| `RCCONF_two_factor_auth_ip_range` | string | `` | CIDR ranges, one per line | Primary set of IP ranges (CIDR notation) exempt from 2FA. |
+| `RCCONF_two_factor_auth_ip_range_alt` | string | `` | CIDR ranges, one per line | Secondary set of IP ranges exempt from 2FA (with a separate trust period). |
+| `RCCONF_two_factor_auth_ip_range_include_private` | boolean | `0` | `0`, `1` | Automatically exempt all RFC 1918 private IP ranges from 2FA. |
+| `RCCONF_two_factor_auth_trust_period_days` | integer | `0` | Days; `0` = ask every login | Days a browser/device is trusted before 2FA is required again (primary IP range). |
+| `RCCONF_two_factor_auth_trust_period_days_alt` | integer | `0` | Days; `0` = ask every login | Trust period for the alternate IP range. |
+| `RCCONF_two_factor_auth_twilio_enabled` | boolean | `0` | `0`, `1` | Allow users to use Twilio SMS/voice for 2FA. |
+| `RCCONF_two_factor_auth_twilio_account_sid` | string | `` | Twilio Account SID | Twilio account SID for 2FA SMS delivery. |
+| `RCCONF_two_factor_auth_twilio_auth_token` | secret | `` | Twilio Auth Token | Twilio authentication token for 2FA SMS delivery. |
+| `RCCONF_two_factor_auth_twilio_from_number` | string | `` | E.164 format (e.g. `+15551234567`) | Twilio number used as the SMS sender for 2FA codes. |
+| `RCCONF_two_factor_auth_twilio_from_number_voice_alt` | string | `` | E.164 format | Alternative Twilio number used for voice-call 2FA delivery. |
+| `RCCONF_two_factor_auth_duo_enabled` | boolean | `0` | `0`, `1` | Enable Duo Security for 2FA. |
+| `RCCONF_two_factor_auth_duo_ikey` | string | `` | Duo Integration Key | Duo integration key (from the Duo Admin Panel). |
+| `RCCONF_two_factor_auth_duo_skey` | secret | `` | Duo Secret Key | Duo secret key. |
+| `RCCONF_two_factor_auth_duo_hostname` | string | `` | e.g. `api-XXXXXXXX.duosecurity.com` | Duo API hostname. |
+
+---
+
+## UI & Branding
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_headerlogo` | URL | `` | Full URL (max 650 px wide) | Logo image displayed in the REDCap page header. |
+| `RCCONF_login_logo` | URL | `` | Full URL (max 750 px wide) | Logo image displayed on the login page. |
+| `RCCONF_login_custom_text` | string | `` | HTML | Custom HTML displayed above the login form (below the login logo, if set). |
+| `RCCONF_homepage_custom_text` | string | `` | HTML | Custom HTML shown on the REDCap home page. |
+| `RCCONF_homepage_announcement` | string | `` | HTML | Announcement text at the top of the Home and My Projects pages. Useful for downtime notices, training announcements, etc. |
+| `RCCONF_homepage_announcement_login` | boolean | `1` | `0`, `1` | Also show the homepage announcement on the login page. |
+| `RCCONF_homepage_contact` | string | `` | Free text | Contact person name displayed on the home page. |
+| `RCCONF_homepage_contact_email` | email | `` | Email address | Contact email address on the home page. |
+| `RCCONF_homepage_contact_url` | URL | `` | Full URL | URL for the contact link on the home page. |
+| `RCCONF_homepage_grant_cite` | string | `` | Free text | Grant citation text shown on the home page. |
+| `RCCONF_grant_cite` | string | `` | Free text | Global grant citation (fallback when no project-level value is set). |
+| `RCCONF_contact_admin_button_url` | URL | `` | Full URL | Destination for the "Contact REDCap Administrator" button. If blank, defaults to composing an email. |
+| `RCCONF_helpfaq_custom_text` | string | `` | HTML | Custom text shown at the top of the Help & FAQ page. |
+| `RCCONF_footer_links` | string | `` | One `URL,Link text` per line | Links displayed at the bottom of project pages. |
+| `RCCONF_footer_text` | string | `` | HTML | Custom text displayed below the footer links. |
+| `RCCONF_certify_text_create` | string | `` | HTML | Pop-up certification text that users must read before creating or copying a project. |
+| `RCCONF_certify_text_prod` | string | `` | HTML | Pop-up certification text that users must read before moving a project to production. |
+| `RCCONF_google_translate_enabled` | boolean | `0` | `0`, `1` | Show the Google Translate widget on REDCap pages. |
+| `RCCONF_googlemap_key` | secret | `` | Google Maps API key | API key for Google Maps integration (used by mapping-enabled fields). |
+| `RCCONF_display_project_logo_institution` | boolean | `0` | `0`, `1` | Display the institution logo and name at the top of every project page. |
+| `RCCONF_display_today_now_button` | boolean | `1` | `0`, `1` | Show a "Today" / "Now" quick-fill button next to date and time fields. |
+| `RCCONF_enable_url_shortener` | boolean | `1` | `0`, `1` | Enable URL shortening for survey and project links within projects. |
+| `RCCONF_enable_url_shortener_redcap` | boolean | `1` | `0`, `1` | Enable the URL Shortener page in the Control Center (site-wide shortener). Separate from per-project shortening. |
+
+---
+
+## Email & Notifications
+
+### General Email Settings
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_from_email` | email | `` | Email address | The global "From" address for all system emails sent by REDCap. |
+| `RCCONF_from_email_domain_exclude` | string | `` | Comma-separated domains | Email domains blocked from being used as the "From" address in alerts/invitations. |
+| `RCCONF_use_email_display_name` | boolean | `1` | `0`, `1` | Include a display name (e.g. "John Smith via REDCap") in the From header of outgoing emails. |
+| `RCCONF_dkim_private_key` | secret | `` | PEM-encoded RSA private key | DKIM private key for signing outgoing emails, improving deliverability and reducing spam-folder placement. |
+| `RCCONF_email_logging_enable_global` | boolean | `1` | `0`, `1` | Log all emails sent by REDCap to the email log visible in the Control Center. |
+| `RCCONF_email_logging_install_time` | string | `now()` | MySQL datetime | Timestamp when email logging was first enabled. Set automatically at install time. |
+| `RCCONF_protected_email_mode_global` | boolean | `1` | `0`, `1` | Enable "Protected Email Mode" — certain automated emails are suppressed or redirected to protect participant privacy. |
+| `RCCONF_email_alerts_converter_enabled` | boolean | `0` | `0`, `1` | Enable the automatic conversion of legacy email alerts to the newer Alerts & Notifications system. |
+
+### Alerts Settings
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_alerts_allow_email_variables` | boolean | `1` | `0`, `1` | Allow alerts to use a project field value as the recipient email address (via piping). |
+| `RCCONF_alerts_allow_email_freeform` | boolean | `1` | `0`, `1` | Allow alerts to send to arbitrary freeform email addresses. |
+| `RCCONF_alerts_email_freeform_domain_allowlist` | string | `` | Comma-separated domains | When set, freeform alert recipient addresses must match one of these domains. |
+| `RCCONF_alerts_allow_phone_variables` | boolean | `1` | `0`, `1` | Allow alerts to use a field value as the SMS recipient phone number. |
+| `RCCONF_alerts_allow_phone_freeform` | boolean | `1` | `0`, `1` | Allow alerts to send SMS to arbitrary freeform phone numbers. |
+
+### Mailgun
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_mailgun_api_key` | secret | `` | Mailgun API key | API key for sending transactional email via Mailgun. |
+| `RCCONF_mailgun_api_endpoint` | URL | `` | e.g. `https://api.mailgun.net/` or `https://api.eu.mailgun.net/` | Mailgun API base URL. Use the EU endpoint for EU data-residency requirements. |
+| `RCCONF_mailgun_domain_name` | string | `` | e.g. `mg.example.com` | Mailgun sending domain. |
+
+### Mandrill
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_mandrill_api_key` | secret | `` | Mandrill API key | API key for sending email via Mandrill (Mailchimp Transactional Email). |
+
+### SendGrid
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_sendgrid_enabled_global` | boolean | `1` | `0`, `1` | Enable SendGrid as an email delivery option globally. |
+| `RCCONF_sendgrid_enabled_by_super_users_only` | boolean | `0` | `0`, `1` | Restrict SendGrid usage to projects enabled by super users only. |
+| `RCCONF_sendgrid_display_info_project_setup` | boolean | `0` | `0`, `1` | Show SendGrid setup information on the Project Setup page. Requires `sendgrid_enabled_by_super_users_only=1`. |
+| `RCCONF_sendgrid_api_key` | secret | `` | SendGrid API key | API key for sending email via SendGrid. |
+
+### Azure Communication Services
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_azure_comm_api_endpoint` | URL | `` | Full URL | Azure Communication Services endpoint URL for email delivery. |
+| `RCCONF_azure_comm_api_key` | secret | `` | Access key | Azure Communication Services access key. |
+
+---
+
+## User Management
+
+### Project & Account Creation
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_allow_create_db_default` | boolean | `1` | `0`, `1` | Default permission for new users to create projects. Can be overridden per user. |
+| `RCCONF_superusers_only_create_project` | boolean | `0` | `0`, `1` | Restrict project creation to administrators/super-users only. Regular users get a "Request" option. |
+| `RCCONF_superusers_only_move_to_prod` | boolean | `1` | `0`, `1` | Restrict moving projects to production to administrators only. Regular users get a "Request" option. |
+| `RCCONF_new_form_default_prod_user_access` | boolean | `1` | `0`, `1` | When a new instrument is added to a production project, automatically grant all existing users access to it. |
+| `RCCONF_admin_email_external_user_creation` | boolean | `0` | `0`, `1` | Email an admin notification when a new user account is created via external authentication. |
+| `RCCONF_user_welcome_email_external_user_creation` | boolean | `0` | `0`, `1` | Send a welcome email to the user when their account is created via external authentication. |
+
+### User Activity & Suspension
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_suspend_users_inactive_type` | enum | `` | `` (disabled), `suspend`, `delete` | Action to take on accounts that have been inactive for the configured number of days. |
+| `RCCONF_suspend_users_inactive_days` | integer | `180` | Days | Inactivity threshold (in days) that triggers the suspension/deletion action. |
+| `RCCONF_suspend_users_inactive_send_email` | boolean | `1` | `0`, `1` | Notify the user by email before their account is suspended or deleted. |
+
+### User Access Dashboard
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_user_access_dashboard_enable` | boolean | `1` | `0`, `1` | Enable the User Access Dashboard in the Control Center. |
+| `RCCONF_user_access_dashboard_custom_notification` | string | `` | HTML | Custom notification message displayed inside the User Access Dashboard. |
+
+### User Sponsor
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_user_sponsor_dashboard_enable` | boolean | `1` | `0`, `1` | Enable the User Sponsor feature, allowing designated users to approve (sponsor) other users. |
+| `RCCONF_user_sponsor_set_expiration_days` | integer | `365` | Days | Default account expiration (days from now) applied when a sponsor approves a user account. |
+
+### User Profile
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_my_profile_enable_edit` | boolean | `1` | `0`, `1` | Allow users to edit their first and last name on the My Profile page. |
+| `RCCONF_my_profile_enable_primary_email_edit` | boolean | `1` | `0`, `1` | Allow users to change their primary email address on the My Profile page. |
+
+### Messaging & Statistics
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_user_messaging_enabled` | boolean | `1` | `0`, `1` | Enable the REDCap Messenger (internal direct messaging between users). |
+| `RCCONF_user_messaging_prevent_admin_messaging` | boolean | `0` | `0`, `1` | Prevent administrators from sending messages via the REDCap Messenger. |
+
+---
+
+## Project Settings & Workflow
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_auto_prod_changes` | enum | `4` | `1` = never auto-approve; `2` = only if new fields added; `3` = no records or only new fields; `4` = no critical issues; `5` = no records or no critical issues | Auto-approve Draft Mode changes in production projects when certain conditions are met (from most strict to most lenient). |
+| `RCCONF_auto_prod_changes_check_identifiers` | boolean | `0` | `0`, `1` | Also check for identifier fields when auto-approving production Draft Mode changes. |
+| `RCCONF_enable_edit_prod_events` | boolean | `1` | `0`, `1` | Allow normal users to add or modify events/arms on the Define My Events page of longitudinal production projects. |
+| `RCCONF_enable_edit_prod_repeating_setup` | boolean | `1` | `0`, `1` | Allow normal users to edit repeating instrument/event configuration in production projects. |
+| `RCCONF_enable_edit_survey_response` | boolean | `1` | `0`, `1` | Allow users with appropriate rights to edit survey responses already submitted by respondents. |
+| `RCCONF_enable_projecttype_forms` | boolean | `1` | `0`, `1` | Enable the "Data Collection with Forms" project type. |
+| `RCCONF_enable_projecttype_singlesurvey` | boolean | `1` | `0`, `1` | Enable the "Survey" (single-survey) project type. |
+| `RCCONF_enable_projecttype_singlesurveyforms` | boolean | `1` | `0`, `1` | Enable the "Traditional Data Collection + Survey" project type. |
+| `RCCONF_survey_pid_create_project` | integer | `` | REDCap project ID | PID of the project serving as the "Request a New Project" survey. |
+| `RCCONF_survey_pid_move_to_prod_status` | integer | `` | REDCap project ID | PID of the project serving as the "Request to Move to Production" survey. |
+| `RCCONF_survey_pid_move_to_analysis_status` | integer | `` | REDCap project ID | PID of the project serving as the "Request to Move to Analysis" survey. |
+| `RCCONF_survey_pid_mark_completed` | integer | `` | REDCap project ID | PID of the project used for survey-based project completion marking. |
+| `RCCONF_project_contact_name` | string | `` | Free text | Default administrator contact name shown to users in projects. |
+| `RCCONF_project_contact_email` | email | `` | Email address | Default administrator contact email shown to users in projects. |
+| `RCCONF_identifier_keywords` | string | `name, street, address, ...` | Comma-separated keywords | Keywords used to flag potentially identifying fields in the de-identification/codebook module. |
+| `RCCONF_allow_auto_variable_naming` | enum | `2` | `0` = off, `1` = on (silent), `2` = prompt user | Whether REDCap auto-generates variable names from field labels in the Online Designer. |
+| `RCCONF_field_comment_log_enabled_default` | boolean | `1` | `0`, `1` | Enable the Field Comment Log by default for new projects. |
+
+---
+
+## File Storage
+
+### General File Upload Settings
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_edoc_field_option_enabled` | boolean | `1` | `0`, `1` | Enable the "File Upload" field type for use in data-collection forms and surveys. |
+| `RCCONF_edoc_upload_max` | integer | `` | MB; blank = PHP server default | Maximum file size (MB) for uploads in "File Upload" fields. |
+| `RCCONF_file_attachment_upload_max` | integer | `` | MB; blank = PHP server default | Maximum file size (MB) for file attachments in the rich text editor. |
+| `RCCONF_restricted_upload_file_types` | string | *(long list)* | Comma-separated extensions (without dot) | File extensions blocked from upload (e.g. `exe, bat, php`). Default list covers common dangerous types. |
+| `RCCONF_file_upload_versioning_enabled` | boolean | `1` | `0`, `1` | Enable file version history at the project level (project admins can toggle per-field). |
+| `RCCONF_file_upload_versioning_global_enabled` | boolean | `1` | `0`, `1` | Master switch for file version history. Must be enabled before individual projects can use it. |
+| `RCCONF_drw_upload_option_enabled` | boolean | `1` | `0`, `1` | Enable the "Draw / Signature" upload option in File Upload fields. |
+
+### File Repository
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_file_repository_enabled` | boolean | `1` | `0`, `1` | Enable the File Repository module in projects. |
+| `RCCONF_file_repository_upload_max` | integer | `` | MB; blank = PHP server default | Maximum file size (MB) for files uploaded to the File Repository. |
+| `RCCONF_file_repository_allow_public_link` | boolean | `1` | `0`, `1` | Allow File Repository files to be shared via public (unauthenticated) links. |
+| `RCCONF_file_repository_total_size` | integer | `` | MB; blank = no limit | Maximum total size (MB) of all files in a project's File Repository. |
+
+### Local Storage
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_edoc_storage_option` | enum | `0` | `0` = local filesystem, `1` = WebDAV, `2` = Amazon S3, `3` = Azure Blob Storage, `4` = Google Cloud Storage | Storage backend for all uploaded files in REDCap. |
+| `RCCONF_edoc_path` | path | `` | Server path | Custom directory for local file storage. Defaults to the `edocs` folder in the REDCap web root. Should be outside the web root for security. |
+
+### Amazon S3
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_amazon_s3_key` | secret | `` | AWS Access Key ID | AWS IAM access key ID for S3 storage. |
+| `RCCONF_amazon_s3_secret` | secret | `` | AWS Secret Access Key | AWS IAM secret access key for S3 storage. |
+| `RCCONF_amazon_s3_bucket` | string | `` | Bucket name | S3 bucket name where REDCap stores files. |
+| `RCCONF_amazon_s3_endpoint` | URL | `` | Full URL | S3 service endpoint (leave blank for AWS; set for S3-compatible providers). |
+| `RCCONF_amazon_s3_endpoint_url` | URL | `` | Full URL | Alternative endpoint URL for S3-compatible object storage. |
+
+### Azure Blob Storage
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_azure_app_name` | string | `` | Azure storage account name | Azure Blob Storage account name. |
+| `RCCONF_azure_app_secret` | secret | `` | Storage account key | Azure Blob Storage account key. |
+| `RCCONF_azure_container` | string | `` | Container name | Azure Blob Storage container where files are stored. |
+| `RCCONF_azure_quickstart` | boolean | `0` | `0`, `1` | Enable the Azure quickstart wizard in the Control Center. |
+
+### Google Cloud Storage
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_google_cloud_storage_api_bucket_name` | string | `` | Bucket name | Google Cloud Storage bucket for REDCap file storage. |
+| `RCCONF_google_cloud_storage_api_project_id` | string | `` | GCP project ID | Google Cloud Platform project ID. |
+| `RCCONF_google_cloud_storage_api_service_account` | JSON | `` | JSON service account key object | GCP service account credentials JSON string. |
+| `RCCONF_google_cloud_storage_api_use_project_subfolder` | boolean | `1` | `0`, `1` | Store files in a per-project subfolder within the GCS bucket. |
+| `RCCONF_google_cloud_storage_edocs_bucket` | string | `` | Bucket name | Separate GCS bucket for edoc files (if different from the main bucket). |
+| `RCCONF_google_cloud_storage_temp_bucket` | string | `` | Bucket name | GCS bucket for temporary files. |
+
+### File Upload Vault (WebDAV/SFTP)
+
+External filesystem vault for files uploaded via "File Upload" field types.
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_file_upload_vault_filesystem_type` | enum | `` | `webdav`, `sftp` | Protocol for the external file vault. |
+| `RCCONF_file_upload_vault_filesystem_host` | URL | `` | Full URL or hostname | Host address of the external file vault server. |
+| `RCCONF_file_upload_vault_filesystem_username` | string | `` | Username | Authentication username for the vault. |
+| `RCCONF_file_upload_vault_filesystem_password` | secret | `` | Password | Authentication password for the vault. |
+| `RCCONF_file_upload_vault_filesystem_path` | path | `` | Remote path | Base path on the remote server where files are stored. |
+| `RCCONF_file_upload_vault_filesystem_private_key_path` | path | `` | Server path | Path to the SSH private key file for SFTP key-based authentication. |
+| `RCCONF_file_upload_vault_filesystem_authtype` | enum | `AUTH_DIGEST` | `AUTH_DIGEST`, `AUTH_BASIC` | HTTP authentication type used for WebDAV connections. |
+| `RCCONF_file_upload_vault_filesystem_container` | string | `` | Container/bucket name | Container name for cloud-backed WebDAV. |
+
+### PDF eConsent Vault (WebDAV/SFTP)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_pdf_econsent_filesystem_type` | enum | `` | `webdav`, `sftp` | Protocol for the PDF eConsent external vault. |
+| `RCCONF_pdf_econsent_filesystem_host` | URL | `` | Full URL or hostname | Host address of the PDF eConsent vault. |
+| `RCCONF_pdf_econsent_filesystem_username` | string | `` | Username | Authentication username for the PDF eConsent vault. |
+| `RCCONF_pdf_econsent_filesystem_password` | secret | `` | Password | Authentication password for the PDF eConsent vault. |
+| `RCCONF_pdf_econsent_filesystem_path` | path | `` | Remote path | Base path for PDF eConsent files on the remote server. |
+| `RCCONF_pdf_econsent_filesystem_private_key_path` | path | `` | Server path | SSH private key path for SFTP access to the PDF eConsent vault. |
+| `RCCONF_pdf_econsent_filesystem_authtype` | enum | `AUTH_DIGEST` | `AUTH_DIGEST`, `AUTH_BASIC` | HTTP authentication type for WebDAV access. |
+| `RCCONF_pdf_econsent_filesystem_container` | string | `` | Container/bucket name | Container name for the PDF eConsent cloud vault. |
+
+### Record Locking PDF Vault (WebDAV/SFTP)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_record_locking_pdf_vault_filesystem_type` | enum | `` | `webdav`, `sftp` | Protocol for the record-locking PDF vault. |
+| `RCCONF_record_locking_pdf_vault_filesystem_host` | URL | `` | Full URL or hostname | Host address of the record-locking PDF vault. |
+| `RCCONF_record_locking_pdf_vault_filesystem_username` | string | `` | Username | Authentication username for the record-locking PDF vault. |
+| `RCCONF_record_locking_pdf_vault_filesystem_password` | secret | `` | Password | Authentication password for the record-locking PDF vault. |
+| `RCCONF_record_locking_pdf_vault_filesystem_path` | path | `` | Remote path | Base path for record-locking PDF files on the remote server. |
+| `RCCONF_record_locking_pdf_vault_filesystem_private_key_path` | path | `` | Server path | SSH private key path for SFTP access to the record-locking PDF vault. |
+| `RCCONF_record_locking_pdf_vault_filesystem_authtype` | enum | `AUTH_DIGEST` | `AUTH_DIGEST`, `AUTH_BASIC` | HTTP authentication type for WebDAV access. |
+| `RCCONF_record_locking_pdf_vault_filesystem_container` | string | `` | Container/bucket name | Container name for the record-locking PDF cloud vault. |
+
+---
+
+## PDF eConsent System
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_pdf_econsent_system_enabled` | boolean | `1` | `0`, `1` | Enable the PDF eConsent system globally. |
+| `RCCONF_pdf_econsent_system_ip` | boolean | `1` | `0`, `1` | Log the participant's IP address in the PDF eConsent record. |
+| `RCCONF_pdf_econsent_system_custom_text` | string | `` | HTML | Custom text added to PDF eConsent documents (e.g. institutional disclosure). |
+| `RCCONF_display_inline_pdf_in_pdf` | boolean | `1` | `0`, `1` | Render inline/embedded PDFs within eConsent PDF files. Requires ImageMagick (`convert`) on the server. |
+
+---
+
+## Modules & Features
+
+### REDCap API
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_api_enabled` | boolean | `1` | `0`, `1` | Enable the REDCap API globally, allowing programmatic data access by external applications. |
+| `RCCONF_api_token_request_type` | enum | `admin_approve` | `admin_approve`, `auto_approve` | Whether API token requests from users require administrator approval or are granted automatically. |
+
+### REDCap Mobile App & MyCap
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_mobile_app_enabled` | boolean | `1` | `0`, `1` | Enable the REDCap Mobile App for offline data collection. |
+| `RCCONF_mycap_enabled_global` | boolean | `1` | `0`, `1` | Enable MyCap (participant-facing mobile app) globally. |
+| `RCCONF_mycap_enable_type` | enum | `admin` | `admin`, `auto` | Who may enable MyCap per-project: `admin` = only admins; `auto` = any project manager. |
+
+### Surveys & Data Collection
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_enable_survey_text_to_speech` | boolean | `1` | `0`, `1` | Enable the text-to-speech accessibility service on surveys. |
+| `RCCONF_google_recaptcha_site_key` | string | `` | reCAPTCHA v2 site key | Google reCAPTCHA v2 site key; protects public surveys from bot submissions. |
+| `RCCONF_google_recaptcha_secret_key` | secret | `` | reCAPTCHA v2 secret key | Google reCAPTCHA v2 secret key. |
+
+### Data Visualization
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_enable_plotting` | enum | `2` | `0` = disabled, `2` = enabled | Enable graphical charts and statistical summaries in project data views. |
+| `RCCONF_enable_plotting_survey_results` | boolean | `1` | `0`, `1` | Allow survey respondents to view aggregate survey results (charts) after completing a survey. |
+
+### Rich Text Editor Features
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_rich_text_image_embed_enabled` | boolean | `1` | `0`, `1` | Allow images to be embedded directly in the rich text editor. |
+| `RCCONF_rich_text_attachment_embed_enabled` | boolean | `1` | `0`, `1` | Allow file attachments to be embedded in the rich text editor. |
+| `RCCONF_enable_field_attachment_video_url` | boolean | `1` | `0`, `1` | Allow YouTube/Vimeo video URLs to be embedded in Descriptive fields. |
+
+### External Modules
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_external_modules_allow_activation_user_request` | boolean | `1` | `0`, `1` | Show a "Request Activation" button in the External Module list, allowing users to request that a module be enabled for their project. |
+| `RCCONF_external_module_alt_paths` | path | `` | Pipe-separated paths (e.g. `/var/www/redcap/modules2/\|/opt/redcap_modules/`) | Additional directories where REDCap searches for External Modules. |
+| `RCCONF_external_modules_project_custom_text` | string | `` | HTML | Custom informational text shown on the project-level External Modules page. |
+| `RCCONF_external_modules_updates_available` | string | `` | Internal, auto-managed | Cached JSON list of available External Module updates. Updated automatically by cron. |
+| `RCCONF_external_modules_updates_available_last_check` | string | `` | MySQL timestamp, auto-managed | Timestamp of the last External Module update check. Updated automatically by cron. |
+
+### Randomization
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_randomization_global` | boolean | `1` | `0`, `1` | Enable the Randomization module globally. When disabled, it is completely hidden in all projects. |
+
+### REDCap Shared Library
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_shared_library_enabled` | boolean | `1` | `0`, `1` | Allow users to download instrument templates from the REDCap Shared Library. |
+
+### E-Signature
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_esignature_enabled_global` | boolean | `1` | `0`, `1` | Enable the e-signature feature globally. |
+
+### Field Bank
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_field_bank_enabled` | boolean | `1` | `0`, `1` | Enable the Field Bank, allowing users to browse and reuse fields from other projects they have access to. |
+
+### Calendar & Feed
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_calendar_feed_enabled_global` | boolean | `1` | `0`, `1` | Enable iCal calendar feed subscriptions for REDCap project calendars. |
+
+### Data Transfer Services (DTS)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_dts_enabled_global` | boolean | `0` | `0`, `1` | Enable the REDCap DTS module, which allows data to be pushed from external systems (e.g. EMR) into REDCap with an adjudication workflow. |
+
+### Send-It
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_sendit_enabled` | boolean | `1` | `0`, `1` | Enable the Send-It application for secure file sharing between users. |
+| `RCCONF_sendit_upload_max` | integer | `` | MB; blank = PHP server default | Maximum file size (MB) for Send-It uploads. |
+
+### Data Entry
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_data_entry_trigger_enabled` | boolean | `1` | `0`, `1` | Enable the Data Entry Trigger feature — REDCap sends an HTTP POST to a configured URL whenever a record is saved. |
+| `RCCONF_database_query_tool_enabled` | boolean | `0` | `0`, `1` | Enable the Database Query Tool in the Control Center, which runs arbitrary SQL queries. Use with caution. |
+| `RCCONF_display_project_xml_backup_option` | boolean | `1` | `0`, `1` | Show the "Project XML" backup/export option on the project setup page. |
+| `RCCONF_new_form_default_prod_user_access` | boolean | `1` | `0`, `1` | Automatically grant all users access to a newly added instrument in a production project. |
+
+### Ontology / BioPortal
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_enable_ontology_auto_suggest` | boolean | `1` | `0`, `1` | Enable ontology auto-suggest on form and survey fields using the BioPortal API. |
+| `RCCONF_bioportal_api_url` | URL | `https://data.bioontology.org/` | Full URL | BioPortal API endpoint. |
+| `RCCONF_bioportal_api_token` | secret | `` | BioPortal API token | API token for BioPortal (required for ontology auto-suggest). Register at bioportal.bioontology.org. |
+| `RCCONF_bioportal_ontology_list` | string | `` | Comma-separated ontology IDs | Restrict the ontology selector to only the listed ontologies (e.g. `SNOMEDCT,ICD10`). |
+| `RCCONF_bioportal_ontology_list_cache_time` | integer | `` | Hours | How long (hours) the ontology list from BioPortal is cached locally. |
+
+### PROMIS / CATs
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_promis_enabled` | boolean | `1` | `0`, `1` | Enable integration with PROMIS/CATs (computerized adaptive testing via the NIH Assessment Center API). |
+| `RCCONF_promis_api_base_url` | URL | `https://www.redcap-cats.org/promis_api/` | Full URL | Base URL for the PROMIS/CATs API. |
+| `RCCONF_promis_registration_id` | string | `` | Registration ID | Institution registration identifier for the PROMIS/Assessment Center. |
+| `RCCONF_promis_token` | secret | `` | API token | PROMIS/Assessment Center API token. |
+
+### MTB
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_mtb_enabled` | boolean | `0` | `0`, `1` | Enable the Multi-Language Management (MTB) module for multi-language survey/form support. |
+
+---
+
+## Twilio SMS/Voice
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_twilio_enabled_global` | boolean | `1` | `0`, `1` | Enable Twilio for SMS/voice survey invitations and alert notifications globally. |
+| `RCCONF_twilio_enabled_by_super_users_only` | enum | `0` | `0` = all projects, `1` = super-user projects only, `2` = super-user only + display restricted | Controls which projects may use Twilio. |
+| `RCCONF_twilio_display_info_project_setup` | boolean | `0` | `0`, `1` | Show Twilio setup instructions on the Project Setup page. Only effective when `twilio_enabled_by_super_users_only` is `1`. |
+
+---
+
+## Mosio SMS
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_mosio_enabled_global` | boolean | `1` | `0`, `1` | Enable Mosio for SMS survey delivery globally. |
+| `RCCONF_mosio_enabled_by_super_users_only` | enum | `0` | `0` = all projects, `1` = super-user only, `2` = super-user only + display restricted | Controls which projects may use Mosio. |
+| `RCCONF_mosio_display_info_project_setup` | boolean | `0` | `0`, `1` | Show Mosio setup information on the Project Setup page. Requires `mosio_enabled_by_super_users_only=1`. |
+
+---
+
+## FHIR / EHR Integration (DDP)
+
+### Connection Settings
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_fhir_ddp_enabled` | boolean | `0` | `0`, `1` | Enable the FHIR-based Dynamic Data Pull (DDP) module. |
+| `RCCONF_fhir_endpoint_base_url` | URL | `` | Full URL | Base URL of the FHIR R4 API endpoint. |
+| `RCCONF_fhir_endpoint_authorize_url` | URL | `` | Full URL | OAuth2 authorization endpoint for FHIR authentication. |
+| `RCCONF_fhir_endpoint_token_url` | URL | `` | Full URL | OAuth2 token exchange endpoint for FHIR authentication. |
+| `RCCONF_fhir_client_id` | string | `` | OAuth2 client ID | Client ID registered with the FHIR authorization server. |
+| `RCCONF_fhir_client_secret` | secret | `` | OAuth2 client secret | Client secret for the FHIR OAuth2 registration. |
+| `RCCONF_fhir_identity_provider` | string | `` | Identity provider name or URL | Name/URL of the FHIR identity provider. |
+| `RCCONF_fhir_ehr_mrn_identifier` | string | `` | FHIR identifier system URL | FHIR identifier system used for the patient MRN (e.g. `urn:oid:2.16.840.1.113883.4.1`). |
+| `RCCONF_fhir_standalone_authentication_flow` | enum | `standalone_launch` | `standalone_launch`, `ehr_launch` | SMART on FHIR launch context. `standalone_launch` = patient-facing; `ehr_launch` = provider-facing from EHR. |
+
+### Display & Access
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_fhir_source_system_custom_name` | string | `EHR` | Free text | Custom display name for the FHIR source system in the UI (e.g. `Epic`, `Cerner`). |
+| `RCCONF_fhir_custom_text` | string | `` | HTML | Custom text shown on the FHIR/DDP section of the Project Setup page. |
+| `RCCONF_fhir_display_info_project_setup` | boolean | `1` | `0`, `1` | Show FHIR integration setup information on the Project Setup page. |
+| `RCCONF_fhir_user_rights_super_users_only` | boolean | `1` | `0`, `1` | Restrict FHIR/DDP user-rights management to super users only. |
+| `RCCONF_fhir_url_user_access` | URL | `` | Full URL | URL where users can request access to the EHR/FHIR system. |
+| `RCCONF_fhir_include_email_address` | boolean | `0` | `0`, `1` | Include the user's email address in FHIR patient-matching requests. |
+
+### Data Fetch Behavior
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_fhir_data_fetch_interval` | integer | `24` | Hours | How often (hours) REDCap automatically polls the FHIR endpoint for updated patient data. |
+| `RCCONF_fhir_stop_fetch_inactivity_days` | integer | `7` | Days | Stop auto-fetching FHIR data for a project after this many days without any user activity. |
+| `RCCONF_fhir_convert_timestamp_from_gmt` | boolean | `0` | `0`, `1` | Convert timestamps returned by the FHIR endpoint from UTC/GMT to the server's local timezone. |
+| `RCCONF_fhir_data_mart_create_project` | boolean | `0` | `0`, `1` | Allow FHIR data to be automatically pulled into a "data mart" project. |
+| `RCCONF_fhir_cdp_allow_auto_adjudication` | boolean | `1` | `0`, `1` | Allow auto-adjudication of incoming FHIR data (bypasses the manual review step for new data). |
+
+### Custom Mapping & Auth
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_fhir_custom_mapping_file_id` | integer | `` | edoc file ID | ID of a custom FHIR-to-REDCap field mapping file stored in the database. |
+| `RCCONF_fhir_custom_auth_params` | string | `` | `key=value` pairs | Additional parameters appended to FHIR authorization requests. |
+
+### Break-the-Glass (Emergency Access)
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_fhir_break_the_glass_enabled` | boolean | `` | `0`, `1` | Enable the "Break the Glass" emergency access override for FHIR data retrieval. |
+| `RCCONF_fhir_break_the_glass_ehr_usertype` | string | `SystemLogin` | EHR user type value | EHR user type string that identifies a break-the-glass access attempt. |
+| `RCCONF_fhir_break_the_glass_token_usertype` | string | `EMP` | Token user type | User type identifier used when exchanging tokens for break-the-glass access. |
+| `RCCONF_fhir_break_the_glass_token_username` | string | `` | Username | Username for token-based break-the-glass authentication. |
+| `RCCONF_fhir_break_the_glass_token_password` | secret | `` | Password | Password for token-based break-the-glass authentication. |
+| `RCCONF_fhir_break_the_glass_username_token_base_url` | URL | `` | Full URL | Base URL for the token exchange endpoint in the break-the-glass flow. |
+| `RCCONF_fhir_break_the_glass_department_type` | string | `` | Department identifier | Department type used to identify authorized break-the-glass users. |
+| `RCCONF_fhir_break_the_glass_patient_type` | string | `` | Patient type identifier | Patient type used when filtering break-the-glass access. |
+
+---
+
+## Real-time Webservice (Legacy DDP)
+
+The older, non-FHIR Dynamic Data Pull integration. For new deployments, prefer the FHIR-based DDP above.
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_realtime_webservice_global_enabled` | boolean | `0` | `0`, `1` | Enable the legacy real-time webservice (DDP) globally. |
+| `RCCONF_realtime_webservice_url_metadata` | URL | `` | Full URL | Webservice endpoint for fetching field/metadata definitions. |
+| `RCCONF_realtime_webservice_url_data` | URL | `` | Full URL | Webservice endpoint for fetching patient data. |
+| `RCCONF_realtime_webservice_url_user_access` | URL | `` | Full URL | Webservice endpoint for checking user access to patient records. |
+| `RCCONF_realtime_webservice_data_fetch_interval` | integer | `24` | Hours | How often (hours) REDCap polls the webservice for new/updated data. |
+| `RCCONF_realtime_webservice_stop_fetch_inactivity_days` | integer | `7` | Days | Stop auto-fetching data for a project after this many days without user activity. |
+| `RCCONF_realtime_webservice_convert_timestamp_from_gmt` | boolean | `0` | `0`, `1` | Convert timestamps from the webservice from UTC/GMT to local time. |
+| `RCCONF_realtime_webservice_source_system_custom_name` | string | `` | Free text | Custom display name for the DDP source system shown in the UI. |
+| `RCCONF_realtime_webservice_custom_text` | string | `` | HTML | Custom information text shown on the project DDP setup section. |
+| `RCCONF_realtime_webservice_display_info_project_setup` | boolean | `1` | `0`, `1` | Show DDP setup information on the Project Setup page. |
+| `RCCONF_realtime_webservice_user_rights_super_users_only` | boolean | `1` | `0`, `1` | Restrict DDP user-rights management to super users only. |
+
+---
+
+## Publication Matching
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_pub_matching_enabled` | boolean | `0` | `0`, `1` | Enable the Publication Matching module, which helps match PubMed publications to REDCap projects. |
+| `RCCONF_pub_matching_institution` | string | `Vanderbilt\nMeharry` | Newline-separated institution names | Institution names used as search terms for PubMed publication matching. |
+| `RCCONF_pub_matching_emails` | boolean | `0` | `0`, `1` | Send email notifications to project owners about newly matched publications. |
+| `RCCONF_pub_matching_email_days` | integer | `7` | Days | How often (days) publication match notification emails are sent. |
+| `RCCONF_pub_matching_email_limit` | integer | `3` | Count | Maximum number of publication match emails sent per interval. |
+| `RCCONF_pub_matching_email_subject` | string | `` | Free text | Subject line for publication match notification emails. |
+| `RCCONF_pub_matching_email_text` | string | `` | HTML | Body text for publication match notification emails. |
+
+---
+
+## REDCap Updates & Versioning
+
+| Variable | Type | Default | Allowed Values / Notes | Purpose |
+|---|---|---|---|---|
+| `RCCONF_redcap_updates_user` | string | `` | REDCap Community username | Username used to check for REDCap software updates from the community portal. |
+| `RCCONF_redcap_updates_password` | secret | `` | Password | Password for the REDCap Community portal (used for update checks). |
+| `RCCONF_redcap_updates_password_encrypted` | boolean | `1` | `0`, `1` | Whether the stored `redcap_updates_password` is encrypted at rest. Managed automatically. |
+| `RCCONF_redcap_updates_available` | string | `` | Internal, auto-managed | Cached update availability data. Updated automatically by cron. |
+| `RCCONF_redcap_updates_available_last_check` | string | `` | MySQL timestamp, auto-managed | Timestamp of the last update availability check. Updated automatically by cron. |
+| `RCCONF_aws_quickstart` | boolean | `0` | `0`, `1` | Enable the AWS quickstart wizard in the Control Center (simplified AWS configuration). |

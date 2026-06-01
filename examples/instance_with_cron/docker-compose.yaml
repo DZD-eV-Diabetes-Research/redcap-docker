@@ -13,6 +13,7 @@ services:
       REDCAP_INSTALL_ENABLE: "true"
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop"
@@ -80,9 +81,17 @@ services:
       MSMTP_tls: "on"
       MSMTP_tls_starttls: "on"
       MSMTP_syslog: "on"
-      RCCONF_from_email: "redcap-system@wy-corp.earth"
     volumes:
       - ./data/redcap:/var/www/html
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
     depends_on:
       db:
         condition: service_healthy

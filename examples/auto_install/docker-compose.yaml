@@ -20,6 +20,7 @@ services:
       DB_SALT: changeme_use_a_long_random_hex_string_here
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Your Institution"
       RCCONF_homepage_contact: "REDCap Admin"

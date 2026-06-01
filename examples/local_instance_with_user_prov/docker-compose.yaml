@@ -13,12 +13,13 @@ services:
       REDCAP_INSTALL_ENABLE: "true"
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop"
-      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      RCCONF_homepage_contact_email: "k.bishop@wy-corp.earth"
       RCCONF_project_contact_name: "Colette Ferro"
-      RCCONF_project_contact_email: "c.ferro@wyyu.earth"
+      RCCONF_project_contact_email: "c.ferro@wy-corp.earth"
       # Use table-based (local) authentication so provisioned users can log in.
       RCCONF_auth_meth_global: "table"
 
@@ -35,7 +36,7 @@ services:
       USER_PROV_2: '{"username": "user2", "user_firstname": "Bob", "user_lastname": "Two", "user_email": "bob@example.com"}'
     volumes:
       # User list from a YAML file — see users.yaml for the full schema.
-      - ./users.yaml:/opt/redcap-docker/users
+      - ./users.yaml:/opt/redcap-docker/users/users.yaml
       - ./data/redcap:/var/www/html
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
     restart: "no"

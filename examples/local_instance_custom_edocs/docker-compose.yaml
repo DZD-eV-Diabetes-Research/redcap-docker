@@ -13,12 +13,13 @@ services:
       REDCAP_INSTALL_ENABLE: "true"
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop"
-      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      RCCONF_homepage_contact_email: "k.bishop@wy-corp.earth"
       RCCONF_project_contact_name: "Colette Ferro"
-      RCCONF_project_contact_email: "c.ferro@wyyu.earth"
+      RCCONF_project_contact_email: "c.ferro@wy-corp.earth"
 
       # --- User uploads outside the webroot ---
       # REDCap writes uploaded files to this path instead of /var/www/html/edocs.

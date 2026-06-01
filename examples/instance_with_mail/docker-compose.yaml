@@ -13,6 +13,7 @@ services:
       REDCAP_INSTALL_ENABLE: "true"
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Weyland-Yutani Corporation"
       RCCONF_homepage_contact: "Karl Bishop"

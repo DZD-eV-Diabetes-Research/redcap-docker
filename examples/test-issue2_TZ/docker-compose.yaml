@@ -13,11 +13,11 @@ services:
       # REDCAP_SUSPEND_SITE_ADMIN: true
       APPLY_RCCONF_VARIABLES: true
       RCCONF_institution: "Weyland-Yutani Corporation"
-      RCCONF_homepage_contact: "Karl Bishop "
-      RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
+      RCCONF_homepage_contact: "Karl Bishop"
+      RCCONF_homepage_contact_email: "k.bishop@wy-corp.earth"
       # Name of REDCap Administrator
       RCCONF_project_contact_name: Colette Ferro
-      RCCONF_project_contact_email: c.ferro@wyyu.earth
+      RCCONF_project_contact_email: c.ferro@wy-corp.earth
 
       TZ: America/Matamoros
 
@@ -56,14 +56,14 @@ services:
       MSMTP_tls: on
       MSMTP_tls_starttls: on
       MSMTP_syslog: on
-      RCCONF_from_email: redcap-system@wy-corp.earth
 
       TZ: America/Matamoros
 
-
     volumes:
       - ./data/redcap:/var/www/html
-      
+    depends_on:
+      db:
+        condition: service_healthy
     logging:
       options:
         max-size: "10m"

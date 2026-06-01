@@ -27,6 +27,7 @@ services:
       REDCAP_INTEGRITY_CHECK_ON_BOOT: "true"
 
       # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
       RCCONF_redcap_base_url: "https://redcap.example.com"
       RCCONF_institution: "Your Institution"
       RCCONF_homepage_contact: "REDCap Admin"

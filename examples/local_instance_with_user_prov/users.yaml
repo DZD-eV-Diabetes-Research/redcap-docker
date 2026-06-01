@@ -11,7 +11,7 @@ REDCapUserList:
 - username: s.gorman
   user_firstname: Scott
   user_lastname: Gorman
-  user_email: r.gorman@lv-426.exo
+  user_email: s.gorman@lv-426.exo
   password: pssst1234
   admin_rights: 1
   account_manager: 1

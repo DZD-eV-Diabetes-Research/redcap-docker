@@ -8,6 +8,11 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
 **Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
 **Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)
 
+
+> [!IMPORTANT]
+> If you find this tool useful and decide to test it, we would greatly appreciate your feedback. So far, we have only limited data on its usage in other environments. Feel free to leave your feedback in the [GitHub repository issues](
+https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)
+
 ---
 
 - [redcap-docker](#redcap-docker)
@@ -39,7 +44,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
 
 This is not an official REDCap project. We are an institutional partner of the REDCap Consortium, but beyond that we have no connection to REDCap - we are simple REDCap users.
 
-This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap, or a valid login to the REDCap community portal to download it automatically.
+This project does **not** distribute REDCap and never will. It is a wrapper to help deploy REDCap. You still need to provide your own licensed copy of REDCap, or a valid login to the REDCap community portal to download it.
 
 > [!CAUTION]
 > We are not responsible for any data loss or damage that may occur from the use of this container image. Use it at your own risk. **Make backups.**

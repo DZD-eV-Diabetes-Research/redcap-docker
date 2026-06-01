@@ -1,0 +1,85 @@
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_salt:
+    file: ./secrets/db_salt.txt
+  community_password:
+    file: ./secrets/community_password.txt
+
+services:
+  redcap:
+    image: dzdde/redcap-docker
+    environment:
+      # --- Database (credentials loaded from secret files, not env vars) ---
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_SALT_FILE: /run/secrets/db_salt
+
+      # --- Beta: Auto-install (portal password also from a secret) ---
+      REDCAP_VERSION: "14.9.5"
+      REDCAP_COMMUNITY_USER: your_community_username
+      REDCAP_COMMUNITY_PASSWORD_FILE: /run/secrets/community_password
+
+      # --- Beta: Abort startup if PHP files have been tampered with ---
+      # Requires community portal credentials (already set above).
+      REDCAP_INTEGRITY_CHECK_ON_BOOT: "true"
+
+      # --- REDCap application config ---
+      RCCONF_redcap_base_url: "https://redcap.example.com"
+      RCCONF_institution: "Your Institution"
+      RCCONF_homepage_contact: "REDCap Admin"
+      RCCONF_homepage_contact_email: "redcap@example.com"
+    secrets:
+      - db_password
+      - db_salt
+      - community_password
+    volumes:
+      - ./data/redcap:/var/www/html
+      - ./data/backups:/opt/redcap-docker/backups
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: mysql:lts
+    restart: unless-stopped
+    # MySQL password stays as an env var here — it never leaves the internal Docker network.
+    environment:
+      MYSQL_DATABASE: redcap
+      MYSQL_USER: redcap
+      MYSQL_PASSWORD: redcap123       # must match secrets/db_password.txt
+      MYSQL_ROOT_PASSWORD: redcaproot123
+    volumes:
+      - ./data/db:/var/lib/mysql
+    healthcheck:
+      test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE -e 'SHOW TABLES;'"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command:
+      - --max_allowed_packet=128M
+      - --bind-address=0.0.0.0
+      - --innodb_file_per_table=1
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

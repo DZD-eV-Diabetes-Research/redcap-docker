@@ -2,39 +2,41 @@ services:
   redcap:
     image: dzdde/redcap-docker
     environment:
-      DB_PORT: 3306
+      # --- Database ---
       DB_HOSTNAME: db
       DB_NAME: redcap
       DB_USERNAME: redcap
       DB_PASSWORD: redcap123
-      # Do not reuse this example DB_SALT
       DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
-      REDCAP_INSTALL_ENABLE: true
-      
-      APPLY_RCCONF_VARIABLES: true
+
+      # --- Installation ---
+      REDCAP_INSTALL_ENABLE: "true"
+
+      # --- REDCap application config ---
+      RCCONF_redcap_base_url: "http://localhost"
       RCCONF_institution: "Weyland-Yutani Corporation"
-      RCCONF_homepage_contact: "Karl Bishop "
+      RCCONF_homepage_contact: "Karl Bishop"
       RCCONF_homepage_contact_email: "k.bishop@wyyu.earth"
-      # Name of REDCap Administrator
-      RCCONF_project_contact_name: Colette Ferro
-      RCCONF_project_contact_email: c.ferro@wyyu.earth
-      # Set authentification to be table based.
-      RCCONF_auth_meth_global: table
-      # suspend public default user
-      REDCAP_SUSPEND_SITE_ADMIN: true
-      # enable user provisioning
-      ENABLE_USER_PROV: true
-      # rewrite users on every boot
-      USER_PROV_OVERWRITE_EXISTING: true
-      # two basic users via env vars.
-      USER_PROV_1: '{"username": "user1","user_firstname": "userone","user_lastname": "mcone","user_email": "one@test.com"}'
-      USER_PROV_2: '{"username": "user12","user_firstname": "usertwo","user_lastname": "mctwo","user_email": "two@test.com"}'
+      RCCONF_project_contact_name: "Colette Ferro"
+      RCCONF_project_contact_email: "c.ferro@wyyu.earth"
+      # Use table-based (local) authentication so provisioned users can log in.
+      RCCONF_auth_meth_global: "table"
+
+      # --- User provisioning ---
+      ENABLE_USER_PROV: "true"
+      # Overwrite existing users on every boot (useful for keeping users in sync).
+      USER_PROV_OVERWRITE_EXISTING: "true"
+      # Suspend the default site admin — provisioned users will be the only admins.
+      REDCAP_SUSPEND_SITE_ADMIN: "true"
+
+      # Two additional users defined inline as JSON.
+      # For larger user lists, use users.yaml (mounted below).
+      USER_PROV_1: '{"username": "user1", "user_firstname": "Alice", "user_lastname": "One", "user_email": "alice@example.com"}'
+      USER_PROV_2: '{"username": "user2", "user_firstname": "Bob", "user_lastname": "Two", "user_email": "bob@example.com"}'
     volumes:
-      # our user data via an yaml file
+      # User list from a YAML file — see users.yaml for the full schema.
       - ./users.yaml:/opt/redcap-docker/users
-      # Here you need to mount your copy of the redcap source/php script.
       - ./data/redcap:/var/www/html
-      # Here you can throw in some sql script that run once at boot. this can be handy for red updates
       - ./sql_scripts:/opt/redcap-docker/sql_scripts_run_once
     restart: "no"
     security_opt:
@@ -47,58 +49,36 @@ services:
       - SETUID
       - SETGID
       - NET_BIND_SERVICE
-    depends_on:
-          db:
-            condition: service_healthy
     ports:
       - "80:80"
-
+    depends_on:
+      db:
+        condition: service_healthy
     logging:
       options:
         max-size: "10m"
         max-file: "3"
+
   db:
     image: mysql:lts
     restart: "no"
-    cap_add:
-      - SYS_NICE # CAP_SYS_NICE
+    environment:
+      MYSQL_DATABASE: redcap
+      MYSQL_USER: redcap
+      MYSQL_PASSWORD: redcap123
+      MYSQL_ROOT_PASSWORD: redcaproot123
     volumes:
       - ./data/db:/var/lib/mysql
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=redcaproot123
-      - MYSQL_DATABASE=redcap
-      - MYSQL_USER=redcap
-      - MYSQL_PASSWORD=redcap123
-      - TZ=UTC
     healthcheck:
-            test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE --execute \"SHOW TABLES;\""
-            timeout: 3s
-            interval: 5s
-            retries: 4
+      test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE -e 'SHOW TABLES;'"
+      interval: 5s
+      timeout: 3s
+      retries: 5
     command:
-      # Per REDCap Recommendations
       - --max_allowed_packet=128M
-      # If you have a larger development database, you may want to increase this value:
-      # Default is 128MB (134217728) - I'm upping it to 512MB
-      - --innodb_buffer_pool_size=536870912
-      # 2x default
-      # sort_buffer_size=524288
-      - --sort_buffer_size=1024K
-      # Default
-      #read_rnd_buffer_size=262144
-      - --read_rnd_buffer_size=1024K
-      # By default we only accept connections from localhost but we want to allow connections from anywhere!
-      # bind-address=127.0.0.1
       - --bind-address=0.0.0.0
-      # MAKE SEPARATE FILES PER TABLE
       - --innodb_file_per_table=1
-      # Disabling symbolic-links is recommended to prevent assorted security risks
-      - --symbolic-links=0
-      # SLOW QUERY LOGGING
-      - --log_output=FILE
-      - --slow_query_log=0
-      - --slow_query_log_file=/var/log/mysql_slow.log
-      - --long_query_time=2.000
-      - --log-queries-not-using-indexes=0
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

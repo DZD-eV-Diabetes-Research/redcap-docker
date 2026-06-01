@@ -30,6 +30,7 @@ Yet another try to containerize [REDCap](https://www.project-redcap.org/) — bu
   - [Updates \& Upgrades](#updates--upgrades)
   - [Beta Channel](#beta-channel)
   - [Contributing \& Development](#contributing--development)
+  - [Example Setups](#example-setups)
   - [Roadmap](#roadmap)
 
 ---
@@ -355,6 +356,10 @@ See [DEV_README.md](DEV_README.md) for the project structure, where to add new f
 > **The integration tests download REDCap from the community portal.** You need to provide a Community portal login.Each full run downloads exactly 2 versions. Do not run the full suite repeatedly in a short period — automated downloads may conflict with the REDCap Consortium's usage policies. Run targeted tests during development and reserve full runs for pre-release verification.
 
 ---
+
+## Example Setups
+
+If you are more of a hands-on learner; Under [`examples/README.md`](examples/README.md) you can find examplary setups with some documentation.
 
 ## Roadmap
 

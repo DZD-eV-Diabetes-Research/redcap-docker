@@ -1,48 +1,42 @@
-# Simple docker compose example
+# Minimal setup: bring your own REDCap files
 
-> 🔋🛑 Batteries not included! Due to the way how REDCap is licensed, you still need to provide the REDCap source-code/php-scripts.  
-> See the `services`->`redcap`->`volumes` chapter in the `docker-compose-yaml` file.
+The simplest possible deployment. You supply the REDCap source files; the container handles database installation, configuration, and startup.
 
-This is the most basic docker compose to start a local instance of REDCap.
-This example should run as is (if you supply a copy of REDCap). 
+**What this example shows**
 
-## How to Start
+- Mounting your own REDCap files at `/var/www/html`
+- Database auto-install on first boot (`REDCAP_INSTALL_ENABLE`)
+- Setting `redcap_config` table values via `RCCONF_*` env vars
+- Recommended container security options (`cap_drop`, `no-new-privileges`)
 
-Create a local copy of the `docker-compose.yaml`-file in this directory or clone the repo with
+> If you'd rather have the container download REDCap for you, see [auto_install](../auto_install/).
+
+## Quick start
 
 ```bash
-git clone git@github.com:DZD-eV-Diabetes-Research/redcap-docker.git && \
-cd redcap-docker/examples/local_instance_basic`
+git clone https://github.com/DZD-eV-Diabetes-Research/redcap-docker.git
+cd redcap-docker/examples/local_instance_basic
 ```
 
-Deposit your copy of REDCap to `./data/redcap`. 
-The `./data/redcap` directory should contain the `index.php`,`database.php`,... files
+Place your REDCap source files inside `./data/redcap/` so that `index.php` lives at `./data/redcap/index.php`.
 
-Update to newest image:
-
-`docker compose pull`
-
-
-Start the container:
-
-`docker compose up -d`
-
-Wait for a healthy state:
-
-`docker compose ps` should mark both containers as (`healthy`)
-
-e.g.
 ```bash
-> docker compose ps
-NAME                        IMAGE                     COMMAND                  SERVICE       CREATED         STATUS                   PORTS
-dev_compose-db-1            mysql:lts                 "docker-entrypoint.s…"   db            8 minutes ago   Up 8 minutes (healthy)   0.0.0.0:3306->3306/tcp, :::3306->3306/tcp, 33060/tcp
-dev_compose-redcap-1        dev_compose-redcap        "docker-php-entrypoi…"   redcap        8 minutes ago   Up 8 minutes (healthy)   0.0.0.0:80->80/tcp, :::80->80/tcp
+docker compose pull
+docker compose up -d
+docker compose logs -f redcap   # watch startup progress
 ```
 
-Check for any error in the logs if status is `unhealthy`:
+Both containers should reach `(healthy)` status. Visit `http://localhost`.
 
-`docker compose logs`
+```bash
+docker compose ps
+# NAME                 STATUS
+# ...-redcap-1         Up (healthy)
+# ...-db-1             Up (healthy)
+```
 
-If everything is healthy you can visit:
+## Notes
 
-visit http://localhost to see the instance
+- `DB_SALT` must be a long, unique random hex string. Never reuse the example value in production.
+- Drop `NET_BIND_SERVICE` from `cap_add` if you map Apache to a non-privileged host port (e.g. `"8080:80"`).
+- Any `.sql` file placed in `./sql_scripts/` runs once on next boot, then never again. Handy for one-off migrations.

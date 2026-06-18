@@ -1,7 +1,11 @@
 <?php
 
-require_once __DIR__ . '/php_helpers/create_user.php';
 require_once __DIR__ . '/php_helpers/db.php';
+require_once __DIR__ . '/php_helpers/redcap_info.php';
+// NOTE: php_helpers/create_user.php is required lazily inside the
+// ENABLE_USER_PROV block below, because it resolves the installed REDCap
+// version directory at include time and therefore requires a fully installed
+// REDCap (the 'redcap_config'/'redcap_user_information' tables must exist).
 $ENABLE_USER_PROV = filter_var(getenv('ENABLE_USER_PROV'), FILTER_VALIDATE_BOOLEAN);
 
 
@@ -156,6 +160,13 @@ function run_user_provisioning()
 }
 printf("ENABLE_USER_PROV: $ENABLE_USER_PROV\n");
 if ($ENABLE_USER_PROV) {
+    // ## CHECK IF REDCAP IS INSTALLED
+    if (!redcap_is_installed()) {
+        printf("[USER PROVISIONING][WARNING]: Skipping user provisioning as REDCap does not seem to be installed (Missing 'redcap_config' table.)\n");
+        printf("[USER PROVISIONING][INFO]: You probably need to call the REDCap install page ('http(s)://<yourinstance>/install.php') first.\n");
+        exit(0);
+    }
+    require_once __DIR__ . '/php_helpers/create_user.php';
     printf("Start user provisining...\n");
     run_user_provisioning();
     printf("... user provisining done.\n");

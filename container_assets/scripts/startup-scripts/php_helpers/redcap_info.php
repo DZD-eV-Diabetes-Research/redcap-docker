@@ -53,9 +53,28 @@ function get_highest_redcap_version_no(?string $base_path = null)
 {
     return array_key_last(get_existent_redcap_version_dirs($base_path));
 }
+function redcap_is_installed(?mysqli $mysqli_con = null): bool
+{
+    // REDCap is considered installed once it has created its core config table.
+    $close_con = false;
+    if (is_null($mysqli_con)) {
+        $mysqli_con = get_db_con();
+        $close_con = true;
+    }
+    $result = $mysqli_con->query("SHOW TABLES LIKE 'redcap_config';");
+    $installed = $result && $result->num_rows > 0;
+    if ($close_con) {
+        $mysqli_con->close();
+    }
+    return $installed;
+}
 function get_installed_redcap_version_no()
 {
     $mysqli_con = get_db_con();
+    if (!redcap_is_installed($mysqli_con)) {
+        $mysqli_con->close();
+        return null;
+    }
     $version_query = "SELECT `value` from redcap_config WHERE field_name = 'redcap_version';";
     $result = $mysqli_con->query($version_query)->fetch_column();
     $mysqli_con->close();

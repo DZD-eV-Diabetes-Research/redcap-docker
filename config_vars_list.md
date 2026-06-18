@@ -97,10 +97,14 @@ See [README — Quick Start](README.md#quick-start) and [REDCAP_UPGRADE.md — M
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `REDCAP_VERSION` | `` | Desired REDCap version (e.g. `14.9.5`). When set, the container auto-installs on first boot and optionally auto-upgrades on subsequent boots. |
-| `REDCAP_AUTO_UPGRADE` | `false` | Set to `true` to allow the container to upgrade automatically when `REDCAP_VERSION` is bumped. Default is conservative — logs a warning but does not upgrade. |
+| `REDCAP_VERSION` | `` | Desired REDCap version. Either a pinned version (e.g. `14.9.5`) or one of the symbolic values `latest-lts` / `latest-std`, which resolve to the newest version on that branch from the community portal on every boot. When set, the container auto-installs on first boot and optionally auto-upgrades on subsequent boots. |
+| `REDCAP_AUTO_UPGRADE` | `false` | Set to `true` to allow the container to upgrade automatically when `REDCAP_VERSION` is bumped (or when a symbolic `latest-*` value resolves to a newer release). Default is conservative — logs a warning but does not upgrade. |
 | `REDCAP_COMMUNITY_USER` | `` | REDCap community portal username used for downloading REDCap. Also read by `redcap-upgrade` and `redcap-install`. |
 | `REDCAP_COMMUNITY_PASSWORD` | `` | REDCap community portal password. |
+
+> [!WARNING]
+> **`latest-lts` / `latest-std` + `REDCAP_AUTO_UPGRADE=true` is fully unattended and uncharted territory — not currently recommended.**
+> This combination resolves and applies the newest REDCap release (running its database migrations) on **every container reboot**, without any human review of an untested version. Both values must be set **deliberately and with intention**; neither is a default. For production, pin an explicit version and upgrade on a reviewed schedule instead. See [REDCAP_UPGRADE.md — Tracking the latest version](REDCAP_UPGRADE.md#tracking-the-latest-version-latest-lts--latest-std).
 
 
 # DEBUG

@@ -44,7 +44,10 @@ function get_existent_redcap_version_dirs(?string $base_path = null)
 }
 function get_highest_redcap_version_dir(?string $base_path = null)
 {
-    return end(get_existent_redcap_version_dirs($base_path));
+    // end() takes its argument by reference, so it needs a variable rather than
+    // a function return value (which otherwise emits an E_NOTICE in PHP 8).
+    $dirs = get_existent_redcap_version_dirs($base_path);
+    return end($dirs);
 }
 function get_highest_redcap_version_no(?string $base_path = null)
 {

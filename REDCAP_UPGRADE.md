@@ -5,6 +5,7 @@
   - [Environment Update](#environment-update)
   - [REDCap Application Update](#redcap-application-update)
     - [Method 1 — Automatic via REDCAP\_VERSION](#method-1--automatic-via-redcap_version)
+      - [Tracking the latest version (latest-lts / latest-std)](#tracking-the-latest-version-latest-lts--latest-std)
     - [Method 2 — Upgrader Script (redcap-upgrade)](#method-2--upgrader-script-redcap-upgrade)
       - [Interactive wizard](#interactive-wizard)
       - [Non-interactive (scripted) upgrade](#non-interactive-scripted-upgrade)
@@ -83,6 +84,42 @@ services:
 
 > [!NOTE]
 > When auto-upgrading, a pre-upgrade database backup is always created automatically. See [Backup and rollback](#backup-and-rollback).
+
+#### Tracking the latest version (`latest-lts` / `latest-std`)
+
+Instead of a pinned version number, `REDCAP_VERSION` accepts two symbolic values:
+
+| Value | Resolves to |
+|---|---|
+| `latest-lts` | Newest **LTS** (long-term support) release on the community portal |
+| `latest-std` | Newest **STD** (standard) release on the community portal |
+
+The value is resolved against the community portal **on every boot** (the version-listing endpoint is public — no credentials are needed to resolve, only to download). The resolved concrete version then flows through the exact same decision table as a pinned version:
+
+```yaml
+services:
+  redcap:
+    environment:
+      REDCAP_VERSION: "latest-lts"
+      REDCAP_AUTO_UPGRADE: "true"           # required for unattended upgrades
+      REDCAP_COMMUNITY_USER: your_username
+      REDCAP_COMMUNITY_PASSWORD: your_password
+```
+
+- `latest-lts` **alone** (no `REDCAP_AUTO_UPGRADE`) installs the newest LTS on first boot, and on later boots only **logs a warning** if a newer release exists — it does not upgrade.
+- `latest-lts` **+** `REDCAP_AUTO_UPGRADE=true` is fully automated: it resolves the newest release and upgrades on every reboot.
+
+> [!WARNING]
+> ## ⚠️ Uncharted waters — not currently recommended
+>
+> Combining a `latest-*` value with `REDCAP_AUTO_UPGRADE=true` means your instance will **download and apply the newest REDCap release — including its database schema migrations — automatically on every container reboot, with no human review of a version you have not tested.**
+>
+> This is powerful but risky:
+> - A reboot could pull a REDCap release that breaks your plugins, hooks, or workflows.
+> - Schema migrations run unattended; a failed migration mid-upgrade auto-rolls back, but recovery is still disruptive.
+> - Your deployment is no longer reproducible — two identical reboots on different days can land on different versions.
+>
+> **We do not recommend this combination at this time.** It exists for users who explicitly want hands-off, always-current instances and accept the risk. Both `REDCAP_VERSION=latest-*` and `REDCAP_AUTO_UPGRADE=true` must be set **deliberately** — neither is a default. For production, **pin an explicit version** (e.g. `REDCAP_VERSION: "16.0.34"`) and upgrade on a reviewed schedule. **Always keep verified backups.**
 
 ---
 
@@ -257,6 +294,8 @@ rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.
 
 ```
 --version <X.X.X>         Version to download from the community portal.
+                          Also accepts 'latest-lts' / 'latest-std' to resolve
+                          the newest version on that branch from the portal.
 --zip <path>              Use a local zip instead of downloading.
 --community-user          Community portal username (or REDCAP_COMMUNITY_USER env var).
 --community-password      Community portal password (or REDCAP_COMMUNITY_PASSWORD env var).

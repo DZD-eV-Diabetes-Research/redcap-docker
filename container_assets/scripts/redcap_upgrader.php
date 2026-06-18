@@ -29,6 +29,9 @@ Upgrade REDCap in-place inside the running container without a full restart.
 
 Source (one of the following is required in non-wizard mode):
   --version <X.X.X>         Target version to download from the community portal.
+                            Accepts the symbolic values 'latest-lts' or
+                            'latest-std' to resolve the newest version on that
+                            branch from the community portal.
   --zip <path>              Use a locally provided redcap_vX.X.X.zip instead of
                             downloading. Version is inferred from the filename
                             (override with --version if needed).
@@ -1085,6 +1088,28 @@ function main(array $argv): void
     if ($opts['rollback'] !== null) {
         run_rollback($opts['rollback'], $opts['dry-run']);
         exit(0);
+    }
+
+    // A local zip already pins the version, so a symbolic --version is
+    // meaningless (and would force an unnecessary, possibly offline-failing
+    // portal lookup). Drop it and let the version be inferred from the filename.
+    if ($opts['zip'] !== null && $opts['version'] !== null
+        && is_symbolic_redcap_version($opts['version'])) {
+        fwrite(STDERR, "Note: ignoring symbolic --version '{$opts['version']}' because --zip pins the version.\n");
+        $opts['version'] = null;
+    }
+
+    // ── Resolve symbolic --version (latest-lts / latest-std) to a concrete X.Y.Z
+    if ($opts['version'] !== null && is_symbolic_redcap_version($opts['version'])) {
+        echo "Resolving '{$opts['version']}' from the community portal...\n";
+        try {
+            $resolved = resolve_redcap_version($opts['version']);
+        } catch (Exception $e) {
+            fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
+            exit(1);
+        }
+        printf("Resolved '%s' to v%s.\n", $opts['version'], $resolved);
+        $opts['version'] = $resolved;
     }
 
     // ── Wizard mode: no version/zip specified and stdin is a terminal ─────────

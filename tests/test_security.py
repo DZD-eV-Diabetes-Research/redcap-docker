@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import re
+import time
 import uuid
 
 import pytest
@@ -25,6 +26,7 @@ from conftest import (
     DB_PASSWORD,
     REDCAP_COMMUNITY_PASSWORD,
     REDCAP_COMMUNITY_USER,
+    REDCAP_DOCKER_IMAGE,
     REDCAP_TEST_VERSION,
     RedcapStack,
 )
@@ -470,3 +472,92 @@ def test_docker_secret_missing_file_warns_but_continues(
         "Expected a WARNING in logs for a missing _FILE path."
         f"\nLogs:\n{logs}"
     )
+
+
+@pytest.mark.timeout(180)
+def test_docker_secret_loaded_in_cron_mode(docker_client) -> None:
+    """
+    Regression test: cron mode (CRON_MODE=true) must also load Docker Secrets.
+
+    The cron branch of container_start.sh does NOT source the startup-scripts/*.sh
+    glob, so 05_load_secrets.sh has to be sourced explicitly there — otherwise a
+    cron container configured only via DB_PASSWORD_FILE boots with an empty
+    DB_PASSWORD and the cron job (cron.php → database.php) cannot reach MySQL.
+
+    This needs neither a database nor REDCap source files: cron mode boots
+    crond regardless. We assert the secret was loaded AND that it made it into
+    the environment snapshot that is handed to busybox crond.
+    """
+    suffix = uuid.uuid4().hex[:8]
+    secret_value = f"cronsecret_{suffix}"
+    secret_vol_name = f"rctest_cronsecret_{suffix}"
+    secret_vol = docker_client.volumes.create(secret_vol_name)
+    container = None
+
+    try:
+        # Write the DB password into the volume using a transient Alpine container.
+        docker_client.containers.run(
+            "alpine",
+            command=["sh", "-c", f"printf '%s' '{secret_value}' > /secrets/db_password"],
+            volumes={secret_vol_name: {"bind": "/secrets", "mode": "rw"}},
+            remove=True,
+        )
+
+        container = docker_client.containers.run(
+            REDCAP_DOCKER_IMAGE,
+            name=f"rctest_cron_{suffix}",
+            environment={
+                "CRON_MODE": "true",
+                "CRON_INTERVAL": "*/5 * * * *",
+                "DB_HOSTNAME": "db",
+                "DB_NAME": "redcap",
+                "DB_USERNAME": "redcap",
+                "DB_PASSWORD": "",  # intentionally empty — must come from the file
+                "DB_PASSWORD_FILE": "/run/secrets/db_password",
+                "DB_SALT": "irrelevant_for_this_test",
+            },
+            volumes={secret_vol_name: {"bind": "/run/secrets", "mode": "ro"}},
+            detach=True,
+        )
+
+        # Wait for the secret-loader log line to appear.
+        deadline = time.monotonic() + 60
+        logs = ""
+        while time.monotonic() < deadline:
+            logs = container.logs().decode("utf-8", "replace")
+            if "Loaded DB_PASSWORD from /run/secrets/db_password" in logs:
+                break
+            time.sleep(2)
+
+        assert "Loaded DB_PASSWORD from /run/secrets/db_password" in logs, (
+            "Expected the secret loader to run in CRON_MODE and load DB_PASSWORD "
+            "from the mounted file.\nLogs:\n" + logs
+        )
+
+        # The crucial part: the loaded value must reach the environment snapshot
+        # that container_start.sh writes for busybox crond. Without the fix this
+        # file holds DB_PASSWORD="" because the secret was never loaded.
+        exit_code, out = container.exec_run(
+            ["grep", "DB_PASSWORD", "/etc/container-environment.sh"]
+        )
+        env_dump = out.decode("utf-8", "replace") if out else ""
+        assert exit_code == 0, (
+            "Expected DB_PASSWORD in the cron environment snapshot.\n"
+            f"grep exit {exit_code}\nFile contents:\n{env_dump}"
+        )
+        assert secret_value in env_dump, (
+            "The secret value must be present in the cron environment snapshot "
+            "handed to busybox crond.\n"
+            f"Snapshot DB_PASSWORD lines:\n{env_dump}"
+        )
+
+    finally:
+        if container is not None:
+            try:
+                container.remove(force=True)
+            except Exception:
+                pass
+        try:
+            secret_vol.remove(force=True)
+        except Exception:
+            pass

@@ -73,6 +73,66 @@ function fetch_available_versions_from_portal(string $current_version): ?array
     ];
 }
 
+// ── Symbolic version resolution ───────────────────────────────────────────────
+
+// User-facing symbolic version values mapped to their portal branch key.
+const REDCAP_SYMBOLIC_VERSIONS = [
+    'latest-lts' => 'lts',
+    'latest-std' => 'std',
+];
+
+/**
+ * True if $value is a symbolic version (e.g. "latest-lts") rather than a
+ * concrete X.Y.Z version number. Case-insensitive.
+ */
+function is_symbolic_redcap_version(string $value): bool
+{
+    return isset(REDCAP_SYMBOLIC_VERSIONS[strtolower(trim($value))]);
+}
+
+/**
+ * Resolve a symbolic version (latest-lts / latest-std) to the newest concrete
+ * X.Y.Z version available on that branch from the community portal.
+ *
+ * The portal endpoint only returns versions newer than the current_version it
+ * is given, so we query with a low baseline ("0.0.0") to get the full branch
+ * list regardless of what is installed.
+ *
+ * @throws RuntimeException if the value is not symbolic, the portal is
+ *                          unreachable, or the branch has no versions.
+ */
+function resolve_redcap_version(string $symbol): string
+{
+    $symbol = strtolower(trim($symbol));
+    if (!isset(REDCAP_SYMBOLIC_VERSIONS[$symbol])) {
+        throw new RuntimeException(
+            "Unknown symbolic REDCap version '$symbol'. Valid values: latest-lts, latest-std."
+        );
+    }
+    $branch = REDCAP_SYMBOLIC_VERSIONS[$symbol];
+
+    $portal = fetch_available_versions_from_portal('0.0.0');
+    if ($portal === null) {
+        throw new RuntimeException(
+            "Cannot resolve '$symbol': failed to fetch the version list from the "
+            . "community portal (network or parse error)."
+        );
+    }
+
+    $candidates = array_values(array_filter(
+        $portal['versions'],
+        static fn($e) => ($e['branch'] ?? null) === $branch
+    ));
+    if (empty($candidates)) {
+        throw new RuntimeException(
+            "Cannot resolve '$symbol': the community portal returned no '$branch' versions."
+        );
+    }
+
+    usort($candidates, static fn($a, $b) => version_compare($a['version'], $b['version']));
+    return end($candidates)['version'];
+}
+
 // ── Download ──────────────────────────────────────────────────────────────────
 
 /**

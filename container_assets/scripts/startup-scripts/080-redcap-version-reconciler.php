@@ -32,6 +32,24 @@ $auto_upgrade     = filter_var(getenv('REDCAP_AUTO_UPGRADE') ?: 'false', FILTER_
 $version_dirs = get_existent_redcap_version_dirs($doc_root);
 $installed    = !empty($version_dirs) ? array_key_last($version_dirs) : null;
 
+// ── Resolve symbolic versions (latest-lts / latest-std) to a concrete X.Y.Z ───
+if (is_symbolic_redcap_version($desired_version)) {
+    try {
+        $resolved = resolve_redcap_version($desired_version);
+        printf("[RECONCILER] REDCAP_VERSION=%s resolved to v%s\n", $desired_version, $resolved);
+        $desired_version = $resolved;
+    } catch (Exception $e) {
+        fwrite(STDERR, "[RECONCILER] ERROR: " . $e->getMessage() . "\n");
+        // A fresh install cannot continue without a concrete version, but an
+        // existing install can keep running on what it already has.
+        if ($installed !== null) {
+            fwrite(STDERR, "[RECONCILER] Keeping installed v$installed for this boot.\n");
+            exit(0);
+        }
+        exit(1);
+    }
+}
+
 printf("[RECONCILER] REDCAP_VERSION=%s  installed=%s\n",
     $desired_version,
     $installed ?? 'none'

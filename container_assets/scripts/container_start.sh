@@ -12,6 +12,11 @@ IFS=':' read -ra dirs <<< "$PHP_INI_SCAN_DIR"; for dir in "${dirs[@]}"; do [[ -d
 if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
     . /opt/redcap-docker/assets/scripts/get_php_ini_dirs.sh
     echo "Setup REDCap Cron Service..."
+    # Load Docker secrets (*_FILE) so the cron job inherits DB credentials etc.
+    # In web mode these are sourced via the startup-scripts/*.sh glob below; cron
+    # mode does not run that glob, so source the loader explicitly here — before
+    # the printenv snapshot that is handed to busybox crond.
+    . /opt/redcap-docker/assets/scripts/startup-scripts/05_load_secrets.sh
     #  Export the PHP env to be able to feed it to busybox
     ENV_EXPORT_FILE="/etc/container-environment.sh"
     printenv | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > $ENV_EXPORT_FILE

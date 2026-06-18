@@ -325,6 +325,7 @@ See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for complete documentation.
 | Method | When to use |
 |---|---|
 | Bump `REDCAP_VERSION` + `REDCAP_AUTO_UPGRADE=true` | Fully automated, GitOps-style |
+| `REDCAP_VERSION=latest-lts` / `latest-std` (+ `REDCAP_AUTO_UPGRADE=true`) | Always track the newest LTS/STD release. ⚠️ Unattended and **not recommended** — see warning below |
 | `docker compose exec redcap redcap-upgrade` | Manual in-container upgrade with interactive wizard |
 | `redcap-upgrade --version X.X.X` | Scripted non-interactive upgrade |
 | Mount SQL script to `/opt/redcap-docker/sql_scripts_run_once` | Manual fallback, no portal credentials needed |
@@ -336,6 +337,9 @@ docker compose exec -it redcap redcap-upgrade
 # Interactive install wizard (first boot, no REDCAP_VERSION set)
 docker compose exec -it redcap redcap-install
 ```
+
+> [!WARNING]
+> `REDCAP_VERSION` also accepts the symbolic values `latest-lts` / `latest-std`, resolved against the community portal on every boot. Combined with `REDCAP_AUTO_UPGRADE=true` this gives a fully unattended, always-current instance — but it applies untested releases and their schema migrations automatically on every reboot. **This is uncharted territory and not currently recommended.** Both flags must be set deliberately; for production, pin an explicit version. See [REDCAP_UPGRADE.md — Tracking the latest version](REDCAP_UPGRADE.md#tracking-the-latest-version-latest-lts--latest-std).
 
 ---
 

@@ -167,6 +167,15 @@ try {
     chown_path_recursive($target_dir, $uid, $gid);
 
     printf("[RECONCILER] REDCap v%s files installed to %s\n", $desired_version, $target_dir);
+
+    // The install zip ships REDCap's top-level bootstrap files (index.php,
+    // redcap_connect.php, api/, surveys/, cron.php, ...) alongside the versioned
+    // dir. A fresh webroot needs these or Apache serves 403/404 (no index.php).
+    // This is the fresh-install branch (no redcap_v* dirs existed), so the webroot
+    // is empty apart from the container-deployed database.php — deploy the rest.
+    $archive_root = dirname($extracted_dir);
+    deploy_redcap_root_files($archive_root, $doc_root, $uid, $gid);
+
     printf("[RECONCILER] Database setup will run in the next startup step.\n");
 
 } catch (Exception $e) {
@@ -180,6 +189,42 @@ exit(0);
 
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Deploy REDCap's top-level bootstrap files from the install archive's `redcap/`
+ * root into the webroot. The versioned redcap_v* dir is skipped (already copied
+ * separately) and database.php is skipped (the container manages its own).
+ */
+function deploy_redcap_root_files(string $archive_root, string $doc_root, int $uid, int $gid): void
+{
+    $handle = opendir($archive_root);
+    if ($handle === false) {
+        return;
+    }
+    while (($entry = readdir($handle)) !== false) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+        // Versioned application code is deployed by the caller.
+        if (strpos($entry, 'redcap_v') === 0) {
+            continue;
+        }
+        // Preserve the container-deployed database config.
+        if ($entry === 'database.php') {
+            continue;
+        }
+        $src = "$archive_root/$entry";
+        $dst = "$doc_root/$entry";
+        if (is_dir($src)) {
+            recursive_copy_dir($src, $dst);
+        } else {
+            copy($src, $dst);
+        }
+        chown_path_recursive($dst, $uid, $gid);
+        printf("[RECONCILER] Deployed webroot file: %s\n", $entry);
+    }
+    closedir($handle);
+}
 
 function recursive_copy_dir(string $src, string $dst): void
 {

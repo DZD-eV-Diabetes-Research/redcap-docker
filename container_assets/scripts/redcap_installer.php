@@ -397,6 +397,30 @@ function run_install(array $opts): void
         $gid = posix_getgrnam('www-data')['gid'] ?? 33;
         chown_www_data_recursive($target_dir, $uid, $gid);
 
+        // The install zip ships REDCap's top-level bootstrap files (index.php,
+        // redcap_connect.php, api/, surveys/, ...) alongside the versioned dir.
+        // The webroot needs these or Apache serves 403/404. Skip the versioned
+        // dir (already copied) and database.php (the container manages its own).
+        $archive_root = dirname($extracted_dir);
+        $handle = opendir($archive_root);
+        if ($handle !== false) {
+            while (($entry = readdir($handle)) !== false) {
+                if ($entry === '.' || $entry === '..') continue;
+                if (strpos($entry, 'redcap_v') === 0) continue;
+                if ($entry === 'database.php') continue;
+                $src = "$archive_root/$entry";
+                $dst = "$doc_root/$entry";
+                if (is_dir($src)) {
+                    recursive_copy_dir($src, $dst);
+                } else {
+                    copy($src, $dst);
+                }
+                chown_www_data_recursive($dst, $uid, $gid);
+                printf("  Deployed webroot file: %s\n", $entry);
+            }
+            closedir($handle);
+        }
+
         printf("Files installed.\n\n");
 
         // ── Database setup ────────────────────────────────────────────────────

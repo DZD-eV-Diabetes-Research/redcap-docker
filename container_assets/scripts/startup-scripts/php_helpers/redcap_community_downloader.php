@@ -141,6 +141,16 @@ function resolve_redcap_version(string $symbol): string
  * Mirrors REDCap's own Upgrade::performOneClickUpgrade() — credentials are sent
  * as POST fields to the same endpoint; no separate login/session step is needed.
  *
+ * We always request the *install* zip (install=1) rather than the upgrade zip.
+ * The two only differ by ~20 KB on a ~56 MB archive, but the upgrade zip contains
+ * only the versioned redcap_vX.Y.Z/ directory, whereas the install zip also ships
+ * REDCap's top-level bootstrap files (index.php, redcap_connect.php, api/,
+ * surveys/, ...). A fresh webroot needs those bootstrap files or Apache has no
+ * DirectoryIndex and serves 403/404. REDCap itself fetches the install zip the
+ * same way for fresh AWS Elastic Beanstalk deploys (Upgrade::performOneClickUpgrade,
+ * params['install']='1'). The upgrader ignores the extra files (it locates the
+ * versioned dir specifically), so one download path is safe everywhere.
+ *
  * On success returns the path to the downloaded zip file.
  * On failure throws RuntimeException (including community portal auth errors).
  */
@@ -207,6 +217,7 @@ function download_redcap_from_community(
             'username' => $community_user,
             'password' => $community_password,
             'version'  => $version,
+            'install'  => '1', // fetch the full install zip (see function doc)
         ]),
         CURLOPT_FILE             => $fp,
         CURLOPT_FOLLOWLOCATION   => true,

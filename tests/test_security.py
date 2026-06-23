@@ -561,3 +561,112 @@ def test_docker_secret_loaded_in_cron_mode(docker_client) -> None:
             secret_vol.remove(force=True)
         except Exception:
             pass
+
+
+# ── msmtp config file permissions ──────────────────────────────────────────────
+
+# The minimal Linux capability set documented in SECURITY.md for production
+# deployments. Note it intentionally does NOT include FOWNER: changing the mode
+# of a file root no longer owns requires FOWNER, and DAC_OVERRIDE does not cover
+# it. 60_generate_msmtp_config.sh must therefore set the mode while root still
+# owns the file (chmod before chown) so it works under exactly this set.
+_DOC_CAP_DROP = ["ALL"]
+_DOC_CAP_ADD = ["CHOWN", "DAC_OVERRIDE", "SETUID", "SETGID", "NET_BIND_SERVICE"]
+
+_MSMTP_ENV = {
+    "MSMTP_host": "smtp.example.com",
+    "MSMTP_port": "587",
+    "MSMTP_auth": "on",
+    "MSMTP_user": "redcap@example.com",
+    "MSMTP_password": "supersecret",  # makes the file security-sensitive
+    "MSMTP_tls": "on",
+    "MSMTP_tls_starttls": "on",
+}
+
+
+@pytest.mark.timeout(300)
+def test_msmtprc_secure_under_documented_capabilities(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """
+    Regression test for issue #7.
+
+    Under the minimal capability set documented in SECURITY.md (which omits
+    FOWNER), /etc/msmtprc must still end up owned by www-data with mode 0600.
+
+    Before the fix, 60_generate_msmtp_config.sh did `chown www-data` then
+    `chmod 600`. With FOWNER dropped, the chmod failed
+    ("chmod: ... Operation not permitted") and left the password-containing file
+    world-readable at 0644, so the mail process could not use it.
+    """
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(
+        vol, dump,
+        {**_BASE_ENV, **_MSMTP_ENV},
+        cap_drop=_DOC_CAP_DROP,
+        cap_add=_DOC_CAP_ADD,
+    )
+    logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    assert "Operation not permitted" not in logs, (
+        "A chmod/chown in the startup scripts failed under the documented "
+        "minimal capability set.\nLogs:\n" + logs
+    )
+
+    exit_code, out = redcap_stack.exec_run("stat -c '%U %G %a' /etc/msmtprc")
+    assert exit_code == 0, f"stat on /etc/msmtprc failed: {out}"
+    owner, group, mode = out.strip().split()
+
+    assert owner == "www-data", (
+        f"/etc/msmtprc must be owned by www-data so the mail process can read it "
+        f"(got {owner!r})"
+    )
+    assert group == "www-data", f"/etc/msmtprc group must be www-data, got {group!r}"
+    assert mode == "600", (
+        f"/etc/msmtprc must be mode 600 — it contains the SMTP password "
+        f"(got {mode!r}). 0644 would leave the password world-readable."
+    )
+
+
+@pytest.mark.timeout(300)
+def test_msmtprc_secure_after_in_place_restart(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """
+    Regression test for the container-restart case of issue #7.
+
+    On an in-place restart, /etc/msmtprc persists in the container's writable
+    layer owned by www-data from the previous boot. A plain '>' redirect keeps
+    that ownership, so chmod (without FOWNER) would fail again — unless the
+    script removes the file first and recreates it owned by root. This verifies
+    the file is still www-data:www-data 0600 after a restart.
+    """
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(
+        vol, dump,
+        {**_BASE_ENV, **_MSMTP_ENV},
+        cap_drop=_DOC_CAP_DROP,
+        cap_add=_DOC_CAP_ADD,
+    )
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    boot2 = redcap_stack.reboot_in_place(timeout=BOOT_TIMEOUT_FAST)
+    assert RedcapStack.BOOT_MARKER in boot2, (
+        "Container did not reach the boot marker after in-place restart.\n"
+        "Restart logs:\n" + boot2
+    )
+    assert "Operation not permitted" not in boot2, (
+        "A chmod/chown failed on restart under the documented capability set — "
+        "the pre-existing www-data-owned /etc/msmtprc was not reset to root.\n"
+        "Restart logs:\n" + boot2
+    )
+
+    exit_code, out = redcap_stack.exec_run("stat -c '%U %G %a' /etc/msmtprc")
+    assert exit_code == 0, f"stat on /etc/msmtprc failed: {out}"
+    owner, group, mode = out.strip().split()
+    assert (owner, group, mode) == ("www-data", "www-data", "600"), (
+        f"After in-place restart /etc/msmtprc must remain www-data:www-data 600, "
+        f"got {owner}:{group} {mode}"
+    )

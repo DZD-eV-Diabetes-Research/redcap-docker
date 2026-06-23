@@ -238,6 +238,8 @@ cap_add:
 
 Remove `NET_BIND_SERVICE` if you map Apache to a non-privileged host port (e.g. `"8080:80"`).
 
+The container's own startup scripts set the mode on files *before* handing them to `www-data`, so they work with this minimal set. If you add custom startup scripts that `chmod` a file *after* `chown`-ing it away from root, also add `FOWNER` — changing the mode of a file root no longer owns requires it (`DAC_OVERRIDE` does not cover this).
+
 ---
 
 ## TLS / HTTPS

@@ -32,15 +32,19 @@ else
     # REDCap requires write access to its temp/ directory.
     # Create it if absent (REDCap creates it lazily; we need it owned correctly from the start).
     mkdir -p "${APACHE_DOCUMENT_ROOT}/temp"
-    chown -R www-data:www-data "${APACHE_DOCUMENT_ROOT}/temp"
+    # chmod before chown so the mode change runs while root still owns the dir
+    # (avoids needing the FOWNER capability). See issue #7.
     chmod 750 "${APACHE_DOCUMENT_ROOT}/temp"
+    chown -R www-data:www-data "${APACHE_DOCUMENT_ROOT}/temp"
     echo "[PERMISSIONS] temp/ ${APACHE_DOCUMENT_ROOT}/temp is writable by www-data."
 
     # edocs directory (user uploads) must stay writable
     EDOCS_PATH="${RCCONF_edoc_path:-${APACHE_DOCUMENT_ROOT}/edocs}"
     if [[ -d "${EDOCS_PATH}" ]]; then
-        chown -R www-data:www-data "${EDOCS_PATH}"
+        # chmod before chown so the mode change runs while root still owns the dir
+        # (avoids needing the FOWNER capability). See issue #7.
         chmod 750 "${EDOCS_PATH}"
+        chown -R www-data:www-data "${EDOCS_PATH}"
         echo "[PERMISSIONS] edocs directory ${EDOCS_PATH} remains writable by www-data."
     fi
 

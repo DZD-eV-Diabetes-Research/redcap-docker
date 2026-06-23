@@ -41,6 +41,16 @@ done
 config_file_content="${config_file_content}account default : redcapmail\n"
 #$config_file_content=$(echo -e $config_file_content)
 
+# Remove any pre-existing file first so it is recreated owned by root. On a
+# container restart the file persists owned by www-data from the previous boot;
+# a plain '>' redirect would keep that ownership and the chmod below would then
+# need the FOWNER capability. Deleting + recreating guarantees root owns it.
+rm -f ${TARGET_FILE}
 echo -e "$config_file_content" >${TARGET_FILE}
-chown www-data:www-data ${TARGET_FILE}
+# Set the mode before changing ownership: while root still owns the freshly
+# created file, chmod needs no FOWNER capability. chown preserves the mode bits,
+# so the file ends up www-data:www-data 0600 even with a minimal capability set
+# (CHOWN without FOWNER). Doing it the other way round fails with EPERM on
+# containers that drop FOWNER. See https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues/7
 chmod 600 ${TARGET_FILE}
+chown www-data:www-data ${TARGET_FILE}

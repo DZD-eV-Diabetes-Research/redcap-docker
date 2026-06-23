@@ -66,10 +66,10 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 ## Features
 
-- 🧪 **[BETA](#beta-channel)**  **Auto-install/upgrade/update** Set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
-- 🧪 **[BETA](#beta-channel)** **Manual upgrade/update-wizard** (`redcap-upgrade`) Checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
-- 🧪 **[BETA](#beta-channel)** **Security-hardened by default** — read-only webroot, HTTP security headers, PHP hardening, Docker Secrets support. REDCap's browser-based Easy Upgrade is disabled by default (see [Security](#security)).
-- 🧪 **[BETA](#beta-channel)** **Automated testing** We run an automated testing rig, to validate security and functionality before every change and/or release (see [Testing](tests/README.md)).
+- **Auto-install/upgrade/update** Set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
+- **Manual upgrade/update-wizard** (`redcap-upgrade`) Checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
+- **Security-hardened by default** — read-only webroot, HTTP security headers, PHP hardening, Docker Secrets support. REDCap's browser-based Easy Upgrade is disabled by default (see [Security](#security)).
+- **Automated testing** We run an automated testing rig, to validate security and functionality before every change and/or release (see [Testing](tests/README.md)).
 - Database and application configuration entirely via environment variables
 - Automated DB schema installation . No need to manually run install SQL scripts
 - Simple mail setup via environment variables (`msmtprc`-based)

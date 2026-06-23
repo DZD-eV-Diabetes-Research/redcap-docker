@@ -213,12 +213,16 @@ class RedcapStack:
         db_dump: bytes,
         redcap_env: dict,
         extra_volumes: dict[str, str] | None = None,
+        cap_drop: list[str] | None = None,
+        cap_add: list[str] | None = None,
     ) -> "RedcapStack":
         """
         Fast path: clone REDCap files from src_rc_vol_name and restore DB from
         db_dump instead of downloading and installing from scratch.
         Saves ~4 minutes per test compared to start().
         extra_volumes maps Docker volume name → container mount path (read-only).
+        cap_drop/cap_add let a test pin the container's Linux capability set
+        (e.g. the minimal set documented in SECURITY.md).
         """
         rid = self.run_id
         self._start_mysql()
@@ -226,13 +230,18 @@ class RedcapStack:
         self._rc_vol = self.client.volumes.create(f"rctest_rc_{rid}")
         self._bak_vol = self.client.volumes.create(f"rctest_bak_{rid}")
         _clone_volume(self.client, src_rc_vol_name, self._rc_vol.name)
-        self._rc = self._create_redcap(redcap_env, extra_volumes=extra_volumes)
+        self._rc = self._create_redcap(
+            redcap_env, extra_volumes=extra_volumes,
+            cap_drop=cap_drop, cap_add=cap_add,
+        )
         return self
 
     def restart_redcap(
         self,
         redcap_env: dict,
         extra_volumes: dict[str, str] | None = None,
+        cap_drop: list[str] | None = None,
+        cap_add: list[str] | None = None,
     ) -> None:
         """Stop and remove the REDCap container; start a new one with different env."""
         if self._rc is not None:
@@ -244,12 +253,39 @@ class RedcapStack:
                 self._rc.remove(force=True)
             except Exception:
                 pass
-        self._rc = self._create_redcap(redcap_env, extra_volumes=extra_volumes)
+        self._rc = self._create_redcap(
+            redcap_env, extra_volumes=extra_volumes,
+            cap_drop=cap_drop, cap_add=cap_add,
+        )
+
+    def reboot_in_place(self, timeout: int | None = None) -> str:
+        """
+        Restart the *same* container (docker restart) so its writable layer —
+        and thus any files written to it on the previous boot, e.g. /etc/msmtprc —
+        survives. Re-runs the startup scripts and waits for a fresh boot marker.
+        Use this to exercise restart-only code paths; restart_redcap() recreates
+        the container with a clean layer instead.
+        """
+        assert self._rc is not None, "no REDCap container to reboot"
+        before = len(self.logs())
+        self._rc.restart(timeout=15)
+        deadline = time.monotonic() + (timeout or self.boot_timeout)
+        while time.monotonic() < deadline:
+            tail = self.logs()[before:]
+            if self.BOOT_MARKER in tail:
+                return tail
+            self._rc.reload()
+            if self._rc.status in ("exited", "dead"):
+                return tail
+            time.sleep(3)
+        return self.logs()[before:]
 
     def _create_redcap(
         self,
         extra_env: dict,
         extra_volumes: dict[str, str] | None = None,
+        cap_drop: list[str] | None = None,
+        cap_add: list[str] | None = None,
     ) -> docker.models.containers.Container:
         self._rc_seq += 1
         rid = self.run_id
@@ -275,6 +311,8 @@ class RedcapStack:
             network=self._network.name,
             environment=env,
             volumes=volumes,
+            cap_drop=cap_drop,
+            cap_add=cap_add,
             detach=True,
         )
 
@@ -289,11 +327,14 @@ class RedcapStack:
 
     def dump_db(self) -> bytes:
         """Run mysqldump inside the DB container and return raw SQL bytes."""
+        # Dump as root: mysqldump --single-transaction issues a FLUSH TABLES,
+        # which on MySQL 8.4 (the current mysql:lts) requires the RELOAD /
+        # FLUSH_TABLES privilege that the unprivileged DB_USER does not have.
         result = self._db.exec_run(
             [
                 "mysqldump",
-                f"-u{DB_USER}",
-                f"-p{DB_PASSWORD}",
+                "-uroot",
+                f"-p{DB_ROOT_PASSWORD}",
                 "--single-transaction",
                 DB_NAME,
             ],
@@ -306,11 +347,14 @@ class RedcapStack:
 
     def _restore_db(self, dump: bytes) -> None:
         """Pipe a SQL dump into MySQL via docker exec."""
+        # Restore as root: the root-made dump contains session-variable SET
+        # statements that require SESSION_VARIABLES_ADMIN on MySQL 8.4, which the
+        # unprivileged DB_USER lacks.
         proc = subprocess.run(
             [
                 "docker", "exec", "-i",
                 self._db.name,
-                "mysql", f"-u{DB_USER}", f"-p{DB_PASSWORD}", DB_NAME,
+                "mysql", "-uroot", f"-p{DB_ROOT_PASSWORD}", DB_NAME,
             ],
             input=dump,
             capture_output=True,

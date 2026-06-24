@@ -1,20 +1,31 @@
-# REDCap external module provisioning list.
+# REDCap external module provisioning list (real, working modules).
 # Mounted into the container at /opt/redcap-docker/modules/modules.yaml
 # Full schema + all sources: ../../MODULE_PROV.md
 REDCapModuleList:
-  # Download a specific release straight from GitHub and system-enable it.
+  # 1) Instance Table — pinned GitHub release.
+  #    https://github.com/lsgs/redcap-instance-table
   - source: github
-    repo: vanderbilt-redcap/redcap-banner
-    version: 1.2.0
+    repo: lsgs/redcap-instance-table
+    version: 1.13.4
+    prefix: instance_table
     enabled: true
 
-  # Download from the official REDCap central repository by numeric module id.
-  # (Find the id in the module's repo URL. Requires outbound internet.)
-  # - source: repo
-  #   module_id: 1234
-  #   enabled: true
+  # 2) Auto-Notify — pinned GitHub release.
+  #    https://github.com/IUREDCap/auto-notify-module
+  - source: github
+    repo: IUREDCap/auto-notify-module
+    version: 1.5.12
+    prefix: auto_notify_module
+    enabled: true
 
-  # Enable a module that you bind-mounted yourself into /modules.
+  # 3) Popup Alerts — from the official REDCap central repository, by numeric
+  #    module id (popup_alerts_v1.1.1). See "How to find a module's module_id"
+  #    in ../../MODULE_PROV.md. Requires outbound access to redcap.vumc.org.
+  - source: repo
+    module_id: 2919
+    enabled: true
+
+  # You can also enable a module you bind-mounted yourself into /modules.
   # Mount it so it lands at /var/www/html/modules/my_inhouse_module_v1.0.0
   # (REDCap requires the "_v<version>" directory naming).
   # - source: local

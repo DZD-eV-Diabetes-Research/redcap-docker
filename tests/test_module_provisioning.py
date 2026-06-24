@@ -188,3 +188,62 @@ def test_module_provisioning_install_only(
         f"Module '{MODULE_PREFIX}' should NOT be enabled under install-only policy.\n\n"
         f"Logs:\n{logs}"
     )
+
+
+@pytest.mark.timeout(360)
+def test_module_provisioning_version_update(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+    module_volume: str,
+) -> None:
+    """
+    A module already system-enabled at one version must be switched to a newer
+    version on the next boot when the pinned version changes. This exercises the
+    disable->enable update path (REDCap refuses to enable a second version of the
+    same namespace, so the old enabled version must be cleared first).
+
+    The module's version is determined by its directory name (<prefix>_v<ver>),
+    so we mount the same volume at a different "_v" path to simulate a new
+    release without needing a second set of files.
+    """
+    v_old, v_new = "1.0.0", "1.0.1"
+    mount_old = f"/var/www/html/modules/{MODULE_PREFIX}_v{v_old}"
+    mount_new = f"/var/www/html/modules/{MODULE_PREFIX}_v{v_new}"
+
+    vol, dump = installed_a_snapshot
+
+    # Boot 1: enable the old version.
+    redcap_stack.start_from_snapshot(
+        vol, dump,
+        {
+            "REDCAP_VERSION": REDCAP_TEST_VERSION,
+            "ENABLE_MODULE_PROV": "true",
+            "MODULE_PROV": json.dumps([
+                {"source": "local", "prefix": MODULE_PREFIX, "version": v_old, "enabled": True}
+            ]),
+            **_CREDENTIALS,
+        },
+        extra_volumes={module_volume: mount_old},
+    )
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+    assert redcap_stack.module_enabled_version(MODULE_PREFIX) == f"v{v_old}", (
+        "Pre-condition failed: module was not enabled at the old version."
+    )
+
+    # Boot 2: same DB, bump the pinned version (mount the files at the new path).
+    redcap_stack.restart_redcap(
+        {
+            "REDCAP_VERSION": REDCAP_TEST_VERSION,
+            "ENABLE_MODULE_PROV": "true",
+            "MODULE_PROV": json.dumps([
+                {"source": "local", "prefix": MODULE_PREFIX, "version": v_new, "enabled": True}
+            ]),
+            **_CREDENTIALS,
+        },
+        extra_volumes={module_volume: mount_new},
+    )
+    logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    assert redcap_stack.module_enabled_version(MODULE_PREFIX) == f"v{v_new}", (
+        f"Module was not updated to v{v_new}.\n\nLogs:\n{logs}"
+    )

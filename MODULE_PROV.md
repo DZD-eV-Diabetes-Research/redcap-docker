@@ -16,6 +16,7 @@
   - [Option 2 — Indexed environment variables](#option-2--indexed-environment-variables)
   - [Option 3 — YAML or JSON files](#option-3--yaml-or-json-files)
 - [How it works under the hood](#how-it-works-under-the-hood)
+- [Updating modules & `latest`](#updating-modules--latest)
 - [Security considerations](#security-considerations)
 - [Environment variable reference](#environment-variable-reference)
 
@@ -97,21 +98,22 @@ Downloads a release (or tag/branch) zip straight from a GitHub repository.
 | --- | --- | --- |
 | `source` | yes | `github` |
 | `repo` | yes | `owner/name` slug, e.g. `vanderbilt-redcap/redcap-banner` |
-| `version` | no | release tag (a leading `v` is optional). Omit to use the **latest** release. |
+| `version` | no | release tag (a leading `v` is optional). Set to `latest` or omit to always use the **latest** release (see [Updating modules & `latest`](#updating-modules--latest)). |
 | `prefix` | no | module directory prefix. Derived from the repo name when omitted. |
 | `github_token` | no | token for private repos / higher API rate limits |
 
 ```yaml
 source: github
 repo: vanderbilt-redcap/survey-ui-tweaks
-version: 1.4.2          # optional; omit for the latest release
+version: 1.4.2          # pin a release; use "latest" (or omit) to auto-update
 prefix: survey_ui_tweaks # optional; derived from repo name otherwise
 enabled: true
 ```
 
 > [!TIP]
-> Pin an explicit `version` for reproducible deployments. `latest` will change
-> over time and pulls in whatever the upstream maintainer last released.
+> Pin an explicit `version` for reproducible deployments. `latest` changes over
+> time and pulls in whatever the upstream maintainer last released — convenient,
+> but see the security note in [Updating modules & `latest`](#updating-modules--latest).
 
 ### `url` — an arbitrary zip
 
@@ -164,8 +166,9 @@ Mount the module so it lands at `<webroot>/modules/<prefix>_v<version>/`, e.g.
 
 Downloads a module published in the official REDCap repository, using REDCap's
 own downloader. Requires outbound internet access to the REDCap community
-servers. Modules are identified by their **numeric** module id (visible in the
-repo URL).
+servers (`https://redcap.vumc.org/consortium/modules/`). It does **not** require
+your community login — the download only sends your `institution` and server
+name. Modules are identified by their **numeric** module id.
 
 | field | required | description |
 | --- | --- | --- |
@@ -177,6 +180,38 @@ source: repo
 module_id: 1234
 enabled: true
 ```
+
+#### How to find a module's `module_id`
+
+The id is **not** shown in the repo's web page text — it lives in the
+"Download" button. Pick whichever method is convenient:
+
+**Option A — from a REDCap Control Center (browser)**
+
+1. Go to *Control Center → External Modules → "View modules available in the
+   REDCap Repo"*.
+2. Find your module, right-click its **Download** button → *Inspect*.
+3. The button's `onclick` reads `downloadModule('<module_id>', ...)` — the first
+   argument is the id.
+
+> Under this container's hardened webroot the Download button itself does not
+> work (that's the whole point of this feature), but the id is still readable in
+> the page markup.
+
+**Option B — from the consortium repo (no REDCap needed)**
+
+The public module list embeds the same `downloadModule('<id>', …)` calls. Grep
+for your module's directory name (e.g. `popup_alerts_v1.1.1`):
+
+```bash
+curl -s https://redcap.vumc.org/consortium/modules/index.php \
+  | grep -oE "downloadModule\('[0-9]+','[^']*','popup_alerts_v1\.1\.1'\)"
+# downloadModule('2919','Popup+Alerts+%28popup_alerts_v1.1.1%29','popup_alerts_v1.1.1')
+#                  ^^^^ module_id
+```
+
+The first number is the `module_id` (here `2919`). The third argument confirms
+the exact `<prefix>_v<version>` you will get.
 
 ## Common fields
 
@@ -291,6 +326,41 @@ volumes:
 Operations are idempotent: a module already present in `/modules` is left
 untouched, and a module already system-enabled at the requested version is not
 re-enabled.
+
+# Updating modules & `latest`
+
+Provisioning re-runs on **every container start**, so it doubles as an update
+mechanism:
+
+- **Pinned version (`version: 1.4.2`)** — bump the value and restart the
+  container. The new version is downloaded and the module is switched over to it.
+- **`version: latest` (or omitted)** — on every boot the newest release is
+  resolved and, if it is newer than what is enabled, downloaded and switched to
+  automatically. This is the "always keep it updated" mode.
+
+How a version switch works: when a module is already enabled at a different
+version, the container first clears the old enabled version (a database-only
+disable that preserves your system settings and project-level enablement), then
+enables the new one via REDCap's framework — so config-default settings and cron
+jobs are re-initialised for the new version. Project enablements and any
+settings you set previously are kept.
+
+Notes and limits:
+
+- Updates happen **at container start**, not while running. A running instance is
+  not auto-updated until it restarts.
+- `latest` is supported for **`github`** (newest GitHub release) and, by
+  omitting `version`, for **`local`** (highest `_v<version>` directory mounted).
+  It is **not** supported for `url` (an arbitrary zip has no version to resolve)
+  or `repo` (central-repo `module_id`s are version-specific — bump the id to
+  update).
+- Old version directories are left in `/modules` after an update (they are simply
+  ignored by REDCap once disabled); clean them up manually if disk usage matters.
+
+> [!CAUTION]
+> `latest` runs whatever the maintainer most recently released, **unreviewed**,
+> inside your webroot, and a release made between two restarts will be picked up
+> automatically. For production, pin explicit versions and update deliberately.
 
 # Security considerations
 

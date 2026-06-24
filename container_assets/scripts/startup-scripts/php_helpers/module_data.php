@@ -180,8 +180,15 @@ function module_spec_from_array(?array $data, string $ident): ?ModuleSpec
         } elseif ($key === 'module_id') {
             $spec->module_id = (int) $value;
         } elseif ($key === 'version') {
-            // Normalize a leading "v" so "v1.2.3" and "1.2.3" behave the same.
-            $spec->version = ltrim((string) $value, 'vV');
+            // A null/empty version means "resolve the newest version at boot".
+            // "latest" is an explicit, self-documenting synonym for that.
+            $v = trim((string) $value);
+            if ($v === '' || strcasecmp($v, 'latest') === 0) {
+                $spec->version = null;
+            } else {
+                // Normalize a leading "v" so "v1.2.3" and "1.2.3" behave the same.
+                $spec->version = ltrim($v, 'vV');
+            }
         } else {
             $spec->$key = $value;
         }

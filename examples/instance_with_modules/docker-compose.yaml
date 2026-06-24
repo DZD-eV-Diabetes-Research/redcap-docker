@@ -22,9 +22,10 @@ services:
       # an admin enables them). Set to "true" to auto system-enable instead.
       MODULE_PROV_DEFAULT_ENABLE: "false"
 
-      # One module defined inline as JSON (downloaded from GitHub and enabled).
-      # For larger lists, use modules.yaml (mounted below).
-      MODULE_PROV_1: '{"source":"github","repo":"vanderbilt-redcap/redcap-survey-ui-tweaks","version":"1.4.2","enabled":true}'
+      # This example defines its three real modules in modules.yaml (mounted
+      # below) — Instance Table, Auto-Notify (GitHub) and Popup Alerts (REDCap
+      # central repo). You can also define modules inline as JSON, e.g.:
+      #   MODULE_PROV_1: '{"source":"github","repo":"lsgs/redcap-instance-table","version":"1.13.4","prefix":"instance_table","enabled":true}'
     volumes:
       # Module list from a YAML file — see modules.yaml for the full schema.
       - ./modules.yaml:/opt/redcap-docker/modules/modules.yaml

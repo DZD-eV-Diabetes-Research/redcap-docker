@@ -110,6 +110,17 @@ function em_enable_module(string $prefix, string $version, bool $enable, array $
     if ($current === $version) {
         em_log('INFO', "Module '$prefix' already system-enabled at version '$version'. Skipping enable.");
     } else {
+        if ($current !== null) {
+            // The module is already enabled at a different version (e.g. a
+            // pinned version was bumped, or 'latest' resolved to a newer
+            // release). enableAndCatchExceptions() refuses to enable a second
+            // version of the same namespace, so first clear the old enabled
+            // version. disable(..., true) is DB-only: it removes the version
+            // setting and cron jobs but keeps system settings and project
+            // enablement, and fires no disable hook.
+            em_log('INFO', "Updating module '$prefix' from '$current' to '$version'...");
+            ExternalModules::disable($prefix, true);
+        }
         $err = ExternalModules::enableAndCatchExceptions($prefix, $version);
         if ($err !== null) {
             em_log('ERROR', "Failed to enable '{$prefix}_{$version}': " . $err->getMessage());

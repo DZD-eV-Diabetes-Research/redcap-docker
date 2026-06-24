@@ -439,6 +439,43 @@ class RedcapStack:
         cols = ["username", "user_firstname", "user_lastname", "user_email"]
         return dict(zip(cols, rows[0]))
 
+    def module_id(self, prefix: str) -> int | None:
+        """Return the external_module_id REDCap assigned to a module prefix, or None."""
+        rows = self.db_query(
+            "SELECT external_module_id FROM redcap_external_modules "
+            "WHERE directory_prefix = %s",
+            (prefix,),
+        )
+        return rows[0][0] if rows else None
+
+    def module_enabled_version(self, prefix: str) -> str | None:
+        """
+        Return the system-wide enabled version of a module, or None if it is not
+        system-enabled. A 'version' setting row with project_id IS NULL is
+        REDCap's canonical marker that a module is enabled system-wide.
+        """
+        rows = self.db_query(
+            "SELECT s.value FROM redcap_external_modules m "
+            "JOIN redcap_external_module_settings s "
+            "  ON m.external_module_id = s.external_module_id "
+            "WHERE m.directory_prefix = %s "
+            "  AND s.`key` = 'version' AND s.project_id IS NULL",
+            (prefix,),
+        )
+        return rows[0][0] if rows else None
+
+    def module_system_setting(self, prefix: str, key: str) -> str | None:
+        """Return a module's system-level setting value, or None if unset."""
+        rows = self.db_query(
+            "SELECT s.value FROM redcap_external_modules m "
+            "JOIN redcap_external_module_settings s "
+            "  ON m.external_module_id = s.external_module_id "
+            "WHERE m.directory_prefix = %s "
+            "  AND s.`key` = %s AND s.project_id IS NULL",
+            (prefix, key),
+        )
+        return rows[0][0] if rows else None
+
     # ── Container exec ────────────────────────────────────────────────────────
 
     def exec_run(self, cmd: str | list) -> tuple[int, str]:

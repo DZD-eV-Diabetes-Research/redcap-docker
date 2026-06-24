@@ -31,6 +31,7 @@ https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)
     - [Volumes \& Paths](#volumes--paths)
       - [REDCap file repository](#redcap-file-repository)
     - [User Provisioning](#user-provisioning)
+    - [Module Provisioning](#module-provisioning)
     - [File Ownership](#file-ownership)
   - [Updates \& Upgrades](#updates--upgrades)
   - [Beta Channel](#beta-channel)
@@ -66,10 +67,12 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 ## Features
 
+
 - **Auto-install/upgrade/update** Set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
 - **Manual upgrade/update-wizard** (`redcap-upgrade`) Checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
 - **Security-hardened by default** — read-only webroot, HTTP security headers, PHP hardening, Docker Secrets support. REDCap's browser-based Easy Upgrade is disabled by default (see [Security](#security)).
 - **Automated testing** We run an automated testing rig, to validate security and functionality before every change and/or release (see [Testing](tests/README.md)).
+- **External Module Provisioning** install/enable modules from GitHub, a zip URL, a mounted dir, or the REDCap central repo, all via environment variables and/or YAML files. see [Module Provisioning](#module-provisioning)
 - Database and application configuration entirely via environment variables
 - Automated DB schema installation . No need to manually run install SQL scripts
 - Simple mail setup via environment variables (`msmtprc`-based)
@@ -84,7 +87,7 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 The container ships with several hardening defaults:
 
-- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path.
+- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path. For the same reason, **REDCap's web UI external-module installer (Repo download / ZIP upload) does not work** under the hardened webroot — use [Module Provisioning](#module-provisioning) instead (or set `REDCAP_EASY_UPGRADE_ENABLE=true` to re-enable the web UI, not recommended for production).
 - **HTTP security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` — sent on every response.
 - **PHP hardening** — `expose_php = Off`, `display_errors = Off`.
 - **Docker Secrets support** — sensitive variables (`DB_PASSWORD`, `DB_SALT`, `REDCAP_COMMUNITY_PASSWORD`) can be loaded from files via `_FILE` variants to avoid plaintext env vars.
@@ -302,6 +305,25 @@ USER_PROV='[{"username":"admin","user_firstname":"Admin","user_lastname":"User",
 > ```env
 > RCCONF_auth_meth_global=table
 > ```
+
+---
+
+### Module Provisioning
+
+Install (and optionally enable + configure) REDCap external modules on container boot, via environment variables or YAML/JSON files. Sources: a GitHub release, an arbitrary zip URL, a pre-mounted directory, or the REDCap central repository.
+
+> [!NOTE]
+> Because of the read-only webroot hardening, REDCap's **web UI module installer (Repo download / ZIP upload) does not work** by default — this feature is the supported way to add modules. See [Security](#security).
+
+- Full documentation: [MODULE_PROV.md](MODULE_PROV.md)
+- Working example: [docker compose example](examples/instance_with_modules)
+
+```env
+ENABLE_MODULE_PROV=true
+# Default is install-only; set true to system-enable provisioned modules.
+MODULE_PROV_DEFAULT_ENABLE=false
+MODULE_PROV_1='{"source":"github","repo":"vanderbilt-redcap/redcap-banner","version":"1.2.0","enabled":true}'
+```
 
 ---
 

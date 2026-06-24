@@ -13,6 +13,7 @@ Each subdirectory is a self-contained `docker compose` setup. Copy the one close
 | [instance_with_mail](instance_with_mail/) | Email via MSMTP |
 | [instance_with_cron](instance_with_cron/) | Separate cron container for REDCap background jobs |
 | [local_instance_with_user_prov](local_instance_with_user_prov/) | Provision users from env vars and a YAML file |
+| [instance_with_modules](instance_with_modules/) | Install/enable external modules from env vars and a YAML file |
 | [local_instance_custom_edocs](local_instance_custom_edocs/) | Store user uploads outside the webroot |
 | [docker_secrets](docker_secrets/) | 🔒 Keep passwords out of env vars using Docker Secrets |
 

@@ -1,0 +1,75 @@
+services:
+  redcap:
+    image: dzdde/redcap-docker
+    environment:
+      # --- Database ---
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+
+      # --- Installation ---
+      REDCAP_INSTALL_ENABLE: "true"
+
+      # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
+      RCCONF_redcap_base_url: "http://localhost"
+
+      # --- External module provisioning ---
+      ENABLE_MODULE_PROV: "true"
+      # Global policy: install only (modules appear in the control center but
+      # an admin enables them). Set to "true" to auto system-enable instead.
+      MODULE_PROV_DEFAULT_ENABLE: "false"
+
+      # One module defined inline as JSON (downloaded from GitHub and enabled).
+      # For larger lists, use modules.yaml (mounted below).
+      MODULE_PROV_1: '{"source":"github","repo":"vanderbilt-redcap/redcap-survey-ui-tweaks","version":"1.4.2","enabled":true}'
+    volumes:
+      # Module list from a YAML file — see modules.yaml for the full schema.
+      - ./modules.yaml:/opt/redcap-docker/modules/modules.yaml
+      - ./data/redcap:/var/www/html
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: mysql:lts
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: redcap
+      MYSQL_USER: redcap
+      MYSQL_PASSWORD: redcap123
+      MYSQL_ROOT_PASSWORD: redcaproot123
+    volumes:
+      - ./data/db:/var/lib/mysql
+    healthcheck:
+      test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE -e 'SHOW TABLES;'"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command:
+      - --max_allowed_packet=128M
+      - --bind-address=0.0.0.0
+      - --innodb_file_per_table=1
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

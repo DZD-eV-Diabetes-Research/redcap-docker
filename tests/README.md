@@ -131,6 +131,7 @@ The session-scoped fixtures ensure each artifact is downloaded at most once per 
 | `test_reconciler.py` | 3 | Already at version, upgrade warning, auto-upgrade |
 | `test_upgrade.py` | 2 | `redcap-upgrade --dry-run`, non-interactive upgrade |
 | `test_config.py` | 2 | `RCCONF_*` vars applied, user provisioning |
+| `test_module_provisioning.py` | 2 | External module provisioning (`local` source): system-enable + system setting applied; install-only policy leaves the module disabled |
 | `test_security.py` | 11 | Webroot permissions (read-only default, Easy Upgrade mode, temp/ always writable), startup warnings (Easy Upgrade, plaintext password, http:// URL), PHP ini hardening (expose_php, display_errors), HTTP security headers (presence + values, Server header, X-Powered-By), Docker Secrets (`_FILE` loads from file, missing file warns and continues) |
 
 Tests that use the session snapshot (`start_from_snapshot`) clone a Docker volume and restore a DB dump — setup takes ~30 s instead of the ~5 min a full re-install would take.

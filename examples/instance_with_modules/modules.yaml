@@ -1,0 +1,26 @@
+# REDCap external module provisioning list.
+# Mounted into the container at /opt/redcap-docker/modules/modules.yaml
+# Full schema + all sources: ../../MODULE_PROV.md
+REDCapModuleList:
+  # Download a specific release straight from GitHub and system-enable it.
+  - source: github
+    repo: vanderbilt-redcap/redcap-banner
+    version: 1.2.0
+    enabled: true
+
+  # Download from the official REDCap central repository by numeric module id.
+  # (Find the id in the module's repo URL. Requires outbound internet.)
+  # - source: repo
+  #   module_id: 1234
+  #   enabled: true
+
+  # Enable a module that you bind-mounted yourself into /modules.
+  # Mount it so it lands at /var/www/html/modules/my_inhouse_module_v1.0.0
+  # (REDCap requires the "_v<version>" directory naming).
+  # - source: local
+  #   prefix: my_inhouse_module
+  #   version: 1.0.0
+  #   enabled: true
+  #   projects: [1]
+  #   settings:
+  #     some_setting: some_value

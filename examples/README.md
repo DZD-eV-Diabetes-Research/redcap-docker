@@ -34,6 +34,7 @@ data/
 Start any example with:
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch startup progress
 ```

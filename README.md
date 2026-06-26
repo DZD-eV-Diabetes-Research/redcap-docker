@@ -155,6 +155,7 @@ services:
 ```
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch the install progress
 ```

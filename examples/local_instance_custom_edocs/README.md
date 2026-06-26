@@ -21,6 +21,7 @@ cd redcap-docker/examples/local_instance_custom_edocs
 Place your REDCap source in `./data/redcap/`, then:
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap
 ```

@@ -39,6 +39,7 @@ cd redcap-docker/examples/instance_with_modules
 Place your REDCap source in `./data/redcap/`, then:
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap
 ```

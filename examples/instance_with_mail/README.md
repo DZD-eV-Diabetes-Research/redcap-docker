@@ -21,6 +21,7 @@ cd redcap-docker/examples/instance_with_mail
 Place your REDCap source in `./data/redcap/`, fill in the `MSMTP_*` values, then:
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap
 ```

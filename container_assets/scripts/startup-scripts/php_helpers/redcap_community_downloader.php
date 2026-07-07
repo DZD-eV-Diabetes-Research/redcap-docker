@@ -155,8 +155,8 @@ function resolve_redcap_version(string $symbol): string
  * On failure throws RuntimeException (including community portal auth errors).
  */
 function download_redcap_from_community(
-    string $community_user,
-    string $community_password,
+    #[\SensitiveParameter] string $community_user,
+    #[\SensitiveParameter] string $community_password,
     string $version,
     string $download_dir
 ): string {

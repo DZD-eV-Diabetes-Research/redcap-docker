@@ -718,6 +718,32 @@ function recursive_rmdir(string $dir): void
     rmdir($dir);
 }
 
+/**
+ * Walk $path (and its contents, if a directory) applying the given owner/group
+ * and separate directory/file modes. The upgrader runs as root, so root remains
+ * the owner throughout and no FOWNER capability is needed (cf. issue #7).
+ */
+function set_tree_perms(string $path, int $uid, int $gid, int $dir_mode, int $file_mode): void
+{
+    $apply = static function (string $p) use ($uid, $gid, $dir_mode, $file_mode): void {
+        chmod($p, is_dir($p) ? $dir_mode : $file_mode);
+        chown($p, $uid);
+        chgrp($p, $gid);
+    };
+
+    $apply($path);
+    if (!is_dir($path)) {
+        return;
+    }
+    $iter = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+    foreach ($iter as $item) {
+        $apply($item->getPathname());
+    }
+}
+
 function chown_www_data_recursive(string $path): void
 {
     $uid = posix_getpwnam('www-data')['uid'] ?? 33;
@@ -737,6 +763,43 @@ function chown_www_data_recursive(string $path): void
         chown($item->getPathname(), $uid);
         chgrp($item->getPathname(), $gid);
     }
+}
+
+/**
+ * Apply to a freshly installed version directory the same permission model the
+ * startup script (startup-scripts/90-fix_permissions.sh) enforces on the whole
+ * webroot at boot. Without this, an in-place upgrade leaves the new version dir
+ * owned by www-data with world-readable 755 directories — inconsistent with its
+ * siblings and defeating the read-only-webroot hardening until the next restart.
+ * See issue #10 and SECURITY.md.
+ *
+ * Honours the same environment variables as the startup script so the two paths
+ * cannot drift:
+ *   FIX_REDCAP_DIR_PERMISSIONS  master switch (default: true in the image)
+ *   REDCAP_EASY_UPGRADE_ENABLE  www-data owns the webroot when true
+ */
+function apply_version_dir_permissions(string $target_dir): void
+{
+    $truthy = static fn(?string $v): bool =>
+        $v !== null && preg_match('/^(1|y|yes|true)$/i', $v) === 1;
+
+    if (!$truthy(getenv('FIX_REDCAP_DIR_PERMISSIONS') ?: null)) {
+        printf("Permissions: FIX_REDCAP_DIR_PERMISSIONS is not true — leaving %s as installed.\n", $target_dir);
+        return;
+    }
+
+    if ($truthy(getenv('REDCAP_EASY_UPGRADE_ENABLE') ?: null)) {
+        // Easy Upgrade mode: www-data owns the webroot so REDCap's browser-based
+        // upgrader can write to it. Match that for the new version directory.
+        printf("Permissions: Easy Upgrade model (www-data:www-data) applied to %s.\n", $target_dir);
+        chown_www_data_recursive($target_dir);
+        return;
+    }
+
+    // Production-safe model (default): root owns the code, www-data may only read.
+    printf("Permissions: production-safe model (root:www-data, 750 dirs / 640 files) applied to %s.\n", $target_dir);
+    $gid = posix_getgrnam('www-data')['gid'] ?? 33;
+    set_tree_perms($target_dir, 0, $gid, 0750, 0640);
 }
 
 function set_redcap_offline(bool $offline, mysqli $db): void
@@ -997,7 +1060,7 @@ function run_upgrade(array $opts): void
         }
 
         recursive_copy_dir($version_dir_in_tmp, $target_dir);
-        chown_www_data_recursive($target_dir);
+        apply_version_dir_permissions($target_dir);
         printf("Files installed.\n\n");
 
         // ── Update version in database ────────────────────────────────────────

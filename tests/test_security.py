@@ -670,3 +670,153 @@ def test_msmtprc_secure_after_in_place_restart(
         f"After in-place restart /etc/msmtprc must remain www-data:www-data 600, "
         f"got {owner}:{group} {mode}"
     )
+
+
+# ── Webroot permission-fix efficiency (issue #11) ──────────────────────────────
+#
+# 90-fix_permissions.sh must not re-apply ownership/mode to files that are
+# already correct. Re-chmod/chown of the whole webroot on every boot is what
+# makes startup take minutes on installs with several REDCap versions.
+
+
+def _ctimes(stack: RedcapStack, paths: list[str]) -> dict[str, str]:
+    """
+    Return {path: ctime_epoch} for the given paths, read via a single stat call.
+    ctime (%Z) changes whenever a file's mode or ownership is touched — even when
+    the resulting bits are identical — so it is a precise probe for a redundant
+    chmod/chown.
+    """
+    exit_code, out = stack.exec_run("stat -c '%n %Z' " + " ".join(paths))
+    assert exit_code == 0, f"stat failed: {out}"
+    result: dict[str, str] = {}
+    for line in out.strip().splitlines():
+        name, _, ctime = line.rpartition(" ")
+        result[name] = ctime
+    return result
+
+
+@pytest.mark.timeout(300)
+def test_fix_permissions_is_idempotent_on_restart(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """
+    Regression test for issue #11.
+
+    After the first boot has normalised the webroot to root:www-data 640/750,
+    an in-place restart must NOT touch those files again — files already in the
+    target state should be skipped. We probe this via ctime: a redundant chmod or
+    chown bumps a file's ctime even though the resulting bits are unchanged.
+
+    Before the fix, 90-fix_permissions.sh ran an unconditional `chown -R` plus a
+    `find ... -exec chmod` over the entire webroot on every boot, so every file's
+    ctime advanced on each restart — the bottleneck that made startup take
+    minutes with several installed REDCap versions. This test fails against that
+    behaviour and passes once the passes are filtered to skip already-correct
+    files.
+
+    Scope note: temp/ and edocs/ are intentionally excluded — the script
+    legitimately (re)asserts their www-data ownership on every boot, so their
+    ctime is expected to move. The bulk of the webroot (the redcap_v* install
+    trees) is what must stay untouched.
+    """
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(vol, dump, _BASE_ENV)
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    # Sample files from the installed REDCap trees that are already in the
+    # canonical read-only state. Any of these being touched again on restart is a
+    # redundant permission operation.
+    exit_code, out = redcap_stack.exec_run(
+        "find /var/www/html/redcap_v* -type f -user root -group www-data "
+        "-perm 640 2>/dev/null | head -50"
+    )
+    assert exit_code == 0, f"find failed: {out}"
+    sample = [line for line in out.strip().splitlines() if line.strip()]
+    assert len(sample) >= 10, (
+        "Expected the installed REDCap tree to contain files already at "
+        f"root:www-data 640 after the first boot; found {len(sample)}.\n{out}"
+    )
+
+    before = _ctimes(redcap_stack, sample)
+
+    boot2 = redcap_stack.reboot_in_place(timeout=BOOT_TIMEOUT_FAST)
+    assert RedcapStack.BOOT_MARKER in boot2, (
+        "Container did not reach the boot marker after in-place restart.\n"
+        "Restart logs:\n" + boot2
+    )
+
+    after = _ctimes(redcap_stack, sample)
+
+    changed = [p for p in sample if before.get(p) != after.get(p)]
+    assert not changed, (
+        f"{len(changed)} of {len(sample)} already-correct webroot files were "
+        "re-chmod/chown'd on an unchanged restart — 90-fix_permissions.sh is not "
+        "skipping files that already match the target ownership/mode. This is the "
+        "startup bottleneck in issue #11.\nExamples: " + ", ".join(changed[:5])
+    )
+
+
+@pytest.mark.timeout(300)
+def test_fix_permissions_recovers_webroot_under_minimal_caps(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """
+    Regression guard tying issue #11 back to issue #7.
+
+    When a webroot is currently owned by www-data (e.g. after running in Easy
+    Upgrade mode) and the container is then restarted in production mode, the
+    permission fix must re-assert root:www-data 750/640 while running under the
+    documented minimal capability set — which omits FOWNER.
+
+    This pins the ordering constraint: ownership must be reset to root *before*
+    any chmod, because root cannot chmod a www-data-owned file without FOWNER
+    (DAC_OVERRIDE does not cover it). A fix that reorders to chmod-before-chown
+    would raise "Operation not permitted" here and leave the webroot writable.
+    """
+    vol, dump = installed_a_snapshot
+
+    # 1. Boot in Easy Upgrade mode so the whole webroot becomes www-data-owned.
+    redcap_stack.start_from_snapshot(
+        vol, dump,
+        {**_BASE_ENV, "REDCAP_EASY_UPGRADE_ENABLE": "true"},
+    )
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+    owner, _, _ = redcap_stack.stat_path("/var/www/html")
+    assert owner == "www-data", (
+        f"Setup precondition failed: Easy Upgrade mode should leave the webroot "
+        f"owned by www-data, got {owner!r}"
+    )
+
+    # 2. Restart in production mode under the minimal cap set (no FOWNER).
+    redcap_stack.restart_redcap(
+        {**_BASE_ENV, "REDCAP_EASY_UPGRADE_ENABLE": "false"},
+        cap_drop=_DOC_CAP_DROP,
+        cap_add=_DOC_CAP_ADD,
+    )
+    logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    assert "Operation not permitted" not in logs, (
+        "A chmod/chown in 90-fix_permissions.sh failed under the documented "
+        "minimal capability set — ownership must be reset to root before chmod "
+        "so no FOWNER is needed.\nLogs:\n" + logs
+    )
+
+    owner, group, mode = redcap_stack.stat_path("/var/www/html")
+    assert (owner, group, mode) == ("root", "www-data", "750"), (
+        f"After switching back to production mode the webroot must be "
+        f"root:www-data 750, got {owner}:{group} {mode}"
+    )
+
+    # A file deep in the install tree must also be reset to the read-only state.
+    exit_code, out = redcap_stack.exec_run(
+        "find /var/www/html/redcap_v* -type f 2>/dev/null | head -1"
+    )
+    assert exit_code == 0 and out.strip(), f"could not find a sample webroot file: {out}"
+    sample_file = out.strip().splitlines()[0]
+    owner, group, mode = redcap_stack.stat_path(sample_file)
+    assert (owner, group, mode) == ("root", "www-data", "640"), (
+        f"After switching back to production mode {sample_file} must be "
+        f"root:www-data 640, got {owner}:{group} {mode}"
+    )

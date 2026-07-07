@@ -490,6 +490,18 @@ class RedcapStack:
         _, out = self.exec_run("ls /opt/redcap-docker/backups/ 2>/dev/null || true")
         return [f for f in out.splitlines() if f.strip()]
 
+    def stat_path(self, path: str) -> tuple[str, str, str]:
+        """
+        Return (owner, group, octal_mode) of a path inside the container.
+        Raises if the path does not exist.
+        """
+        exit_code, out = self.exec_run(f"stat -c '%U %G %a' {path}")
+        out = out.strip()
+        if exit_code != 0:
+            raise RuntimeError(f"stat failed for {path!r}: {out}")
+        owner, group, mode = out.split()
+        return owner, group, mode
+
     # ── MySQL readiness ───────────────────────────────────────────────────────
 
     def _wait_for_mysql(self, timeout: int = 120) -> None:

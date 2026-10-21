@@ -8,7 +8,9 @@
 #   - Webroot permissions (read-only by default, writable with Easy Upgrade)
 #   - temp/ directory always writable by www-data
 #   - Startup security warnings (Easy Upgrade, plaintext password, http:// URL)
-#   - PHP ini hardening (expose_php=Off, display_errors=Off)
+#   - PHP ini hardening (expose_php=Off, display_errors=Off,
+#     session.upload_progress.enabled=Off)
+#   - PHP version contains the CERT-EU 2026-018 fixes (>= 8.4.27)
 #   - HTTP security response headers (X-Frame-Options, X-Content-Type-Options, …)
 #   - Server header does not reveal Apache version
 #   - Docker Secrets: DB_PASSWORD_FILE loads password from file
@@ -260,6 +262,47 @@ def test_php_display_errors_off(
     assert out.strip() == "OFF", (
         f"display_errors must be Off to prevent leaking error details, got {out.strip()!r}"
     )
+
+
+def _run_php_in_image(docker_client, code: str) -> tuple[int, str]:
+    """Run a php -r snippet in the bare image (no REDCap boot needed)."""
+    container = docker_client.containers.run(
+        REDCAP_DOCKER_IMAGE,
+        entrypoint=["php"],
+        command=["-r", code],
+        detach=True,
+    )
+    try:
+        result = container.wait()
+        logs = container.logs().decode("utf-8", "replace").strip()
+        return int(result.get("StatusCode", 1)), logs
+    finally:
+        container.remove(force=True)
+
+
+@pytest.mark.timeout(60)
+def test_php_version_has_security_fixes(docker_client) -> None:
+    """
+    PHP must be at least 8.4.27, which fixes the unauthenticated RCE bugs
+    CVE-2026-109618 and CVE-2026-109619 (CERT-EU advisory 2026-018).
+    """
+    exit_code, out = _run_php_in_image(
+        docker_client, "echo version_compare(PHP_VERSION, '8.4.27', '>=') ? 'OK' : PHP_VERSION;"
+    )
+    assert exit_code == 0, f"php -r failed: {out}"
+    assert out == "OK", f"PHP {out} is vulnerable to CVE-2026-109618/109619, need >= 8.4.27"
+
+
+@pytest.mark.timeout(60)
+def test_php_session_upload_progress_off(docker_client) -> None:
+    """
+    session.upload_progress.enabled must be Off (mitigation for CVE-2026-109619).
+    """
+    exit_code, out = _run_php_in_image(
+        docker_client, "echo ini_get('session.upload_progress.enabled') ? 'ON' : 'OFF';"
+    )
+    assert exit_code == 0, f"php -r failed: {out}"
+    assert out == "OFF", f"session.upload_progress.enabled must be Off, got {out!r}"
 
 
 # ── HTTP response header tests ─────────────────────────────────────────────────

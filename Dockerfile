@@ -1,6 +1,8 @@
-FROM php:8.4-apache-bookworm
+FROM php:8.4.27-apache-bookworm
 
 ## https://hub.docker.com/_/php/tags?page=1&name=apache
+## Pinned to a patch release so every build provably contains the PHP security fixes
+## (8.4.27: CVE-2026-109618, CVE-2026-109619). Bump deliberately.
 
 ARG DEBIAN_FRONTEND=noninteractive
 

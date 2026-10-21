@@ -7,6 +7,9 @@ on:
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
+    # "published" also fires for pre-releases; those are handled by the beta
+    # workflow and must not overwrite the "latest" tag.
+    if: ${{ !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo

@@ -332,6 +332,10 @@ If set to `true`, all supplied `RCCONF_*` environment variables are written to t
 
 Set to `false` after initial setup if you want the configuration to be applied only once.
 
+Each applied variable is listed in the container log. Values of fields whose name contains `secret` or ends in `password`, `token` or `key` (all fields of type `secret` below) are shown as `***`. If a variable cannot be written, the error is logged and the remaining variables are still applied.
+
+Example: enable the Database Query Tool in the Control Center with `RCCONF_database_query_tool_enabled=1` (see [Data Entry](#data-entry)).
+
 ## Type reference
 
 | Type | Meaning |

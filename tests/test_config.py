@@ -29,26 +29,40 @@ def test_rcconf_vars_applied(
     installed_a_snapshot: tuple[str, bytes],
 ) -> None:
     """
-    RCCONF_institution=TestOrg must be written to the redcap_config table
-    (field_name='institution') during the 110-set_redcap_config.php startup step.
+    RCCONF_* vars must be written to the redcap_config table during the
+    110-set_redcap_config.php startup step:
+    - values containing quotes or '%' are stored verbatim
+    - RCCONF_database_query_tool_enabled enables the Database Query Tool (#1)
+    - values of secret fields are stored but never printed to the container log
     """
+    secret = "SG.rcconf-test-secret-value"
     vol, dump = installed_a_snapshot
     redcap_stack.start_from_snapshot(
         vol, dump,
         {
             "REDCAP_VERSION": REDCAP_TEST_VERSION,
             "APPLY_RCCONF_VARIABLES": "true",
-            "RCCONF_institution": "TestOrg",
+            "RCCONF_institution": "Test's Org 100%",
+            "RCCONF_database_query_tool_enabled": "1",
+            "RCCONF_sendgrid_api_key": secret,
             **_CREDENTIALS,
         },
     )
 
-    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+    logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
 
     institution = redcap_stack.get_config("institution")
-    assert institution == "TestOrg", (
-        f"Expected institution='TestOrg' in redcap_config, got {institution!r}"
+    assert institution == "Test's Org 100%", (
+        f"Expected institution=\"Test's Org 100%\" in redcap_config, got {institution!r}"
     )
+    query_tool = redcap_stack.get_config("database_query_tool_enabled")
+    assert query_tool == "1", (
+        f"Expected database_query_tool_enabled='1' in redcap_config, got {query_tool!r}"
+    )
+    # REDCap encrypts sensitive settings in place on first load, so the stored
+    # value is either our plaintext or its ciphertext; just make sure it landed.
+    assert redcap_stack.get_config("sendgrid_api_key"), "sendgrid_api_key was not written"
+    assert secret not in logs, "RCCONF secret value leaked into the container log"
 
 
 @pytest.mark.timeout(300)

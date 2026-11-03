@@ -208,6 +208,7 @@ See [config_vars_list.md](config_vars_list.md) for the full variable reference.
 | **Email** | Prefix any msmtp config key with `MSMTP_` — e.g. `MSMTP_host=mail.example.com` |
 | **Cron** | `CRON_MODE`, `CRON_INTERVAL`, `CRON_RUN_JOB_ON_START` |
 | **User provisioning** | `USER_PROV`, `USER_PROV_FILE_DIR`, `USER_PROV_OVERWRITE_EXISTING` |
+| **Project provisioning** | `ENABLE_PROJECT_PROV`, `PROJECT_PROV`, `PROJECT_PROV_FILE_DIR`, see [PROJECT_PROV.md](PROJECT_PROV.md) |
 | **Data export** | `ENABLE_DATA_EXPORT`, `EXPORT_API_URL`, `EXPORT_JOBS`, `EXPORT_JOBS_FILE_DIR`, `EXPORT_DIR`, see [DATA_EXPORT.md](DATA_EXPORT.md) |
 | **Upgrades** | `REDCAP_UPGRADE_BACKUP_DIR`, `REDCAP_UPGRADE_BACKUP_DB_USER` |
 | **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
@@ -271,6 +272,7 @@ The cron container can also export project data on a schedule (records, saved re
 | `/config/apache/custom.virtualhost` | Custom Apache virtual-host directives | — |
 | `/config/redcap/install/install.sql` | Optional custom install SQL script | `REDCAP_INSTALL_SQL_SCRIPT_PATH` |
 | `/opt/redcap-docker/users` | User provisioning YAML/JSON files | `USER_PROV_FILE_DIR` |
+| `/opt/redcap-docker/projects` | Project provisioning YAML/JSON files and project XML files | `PROJECT_PROV_FILE_DIR` |
 | `/opt/redcap-docker/sql_scripts_run_once` | SQL scripts to run once at boot (e.g. manual upgrade scripts) | `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` |
 | `/opt/redcap-docker/backups` | Pre-upgrade database backups | `REDCAP_UPGRADE_BACKUP_DIR` |
 | `/opt/redcap-docker/export-jobs` | Data export job YAML/JSON files | `EXPORT_JOBS_FILE_DIR` |
@@ -330,6 +332,20 @@ ENABLE_MODULE_PROV=true
 # Default is install-only; set true to system-enable provisioned modules.
 MODULE_PROV_DEFAULT_ENABLE=false
 MODULE_PROV_1='{"source":"github","repo":"vanderbilt-redcap/redcap-banner","version":"1.2.0","enabled":true}'
+```
+
+---
+
+### Project Provisioning
+
+Create REDCap projects on container boot from REDCap project XML files, e.g. a template exported with *Download metadata only (XML)* on another instance, or a `project_xml` file of the [periodic data export](DATA_EXPORT.md). The XML comes from a mounted file or an `https://` URL. Each project is created once and never changed afterwards.
+
+- Full documentation: [PROJECT_PROV.md](PROJECT_PROV.md)
+- Working example: [docker compose example](examples/instance_with_project_prov)
+
+```env
+ENABLE_PROJECT_PROV=true
+PROJECT_PROV_1='{"key":"study-template","xml":"study-template.xml","owner":"admin"}'
 ```
 
 ---

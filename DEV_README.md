@@ -29,8 +29,8 @@ redcap-docker/
 │           ├── 100-run-install-script.php          # Runs the REDCap install SQL on first boot
 │           ├── 102-run-sql-scripts.php             # Runs one-off SQL scripts from the run-once dir
 │           ├── 110-set_redcap_config.php           # Writes RCCONF_* env vars → redcap_config table
-│           ├── 120-suspend_default-admin.php       # Optionally suspends the default admin
 │           ├── 130_user_provisioning.php           # Creates/updates users from USER_PROV / YAML files
+│           ├── 135-suspend_default-admin.php       # Optionally suspends the default admin and revokes its admin rights
 │           └── php_helpers/                        # Shared PHP libraries used by startup scripts
 │               ├── db.php
 │               ├── redcap_community_downloader.php  # Downloads from community portal

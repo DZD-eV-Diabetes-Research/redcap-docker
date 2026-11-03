@@ -62,19 +62,33 @@ class UserData
     public ?int $api_token_auto_request;
     public ?int $fhir_data_mart_create_project;
 
-    public function __set($name, $value)
+    // Not a __set() magic method: PHP never calls __set() for declared typed properties,
+    // so values assigned directly would skip the type checks and sanitization below.
+    public function set_value(string $name, $value): void
     {
-        $no_sanitization_props = array("pass");
-        if (property_exists($this, $name) and ($value != null)) {
-            $prop_info = new ReflectionProperty($this, $name);
-            // lets sanitate all strings (if its not blacklisted or anything other as a string)
-            if (in_array($name, $no_sanitization_props) or $prop_info->getType()->getName() != 'string') {
-                $this->$name = trim($value);
-            } else {
-                $this->$name = trim(strip_tags(label_decode($value)));
-            }
-        } elseif (!property_exists($this, $name)) {
+        // values that are stored as given (opaque secrets and serialized data)
+        $no_sanitization_props = array("password", "two_factor_auth_secret", "api_token", "ui_state");
+        if (!property_exists($this, $name)) {
             throw new InvalidArgumentException("Invalid property for User: $name");
+        }
+        // null means "not set", the column default applies. 0 and false are values (#20)
+        if ($value === null) {
+            return;
+        }
+        if (!is_scalar($value)) {
+            throw new InvalidArgumentException("Property '$name' expects a single value, got a " . gettype($value));
+        }
+        $prop_info = new ReflectionProperty($this, $name);
+        if ($prop_info->getType()->getName() == 'int') {
+            $int_value = is_bool($value) ? (int)$value : filter_var($value, FILTER_VALIDATE_INT);
+            if ($int_value === false) {
+                throw new InvalidArgumentException("Property '$name' expects an integer");
+            }
+            $this->$name = $int_value;
+        } elseif (in_array($name, $no_sanitization_props)) {
+            $this->$name = (string)$value;
+        } else {
+            $this->$name = trim(strip_tags(label_decode((string)$value)));
         }
     }
 
@@ -115,90 +129,97 @@ class UserCRUD
     {
         $this->db = $db;
     }
-    private function UserIdByName($username)
+    // All values go through prepared statements, user data can contain quotes (e.g. "O'Neill", #21)
+    private function execute(string $query, string $types, array $params): mysqli_stmt
     {
-        $query = "SELECT ui_id FROM `redcap_user_information` WHERE `username` = '$username'; ";
-        $res = $this->db->query($query);
-        $row = $res->fetch_column();
-        return $row;
-    }
-    private function UserExists($username)
-    {
-        $query = "SELECT 1 FROM `redcap_user_information` WHERE `username` = '$username'; ";
-        $res = $this->db->query($query);
-        $row = $res->fetch_assoc();
-        return (bool)$row;
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        return $stmt;
     }
 
-    private function generateInsertUserQuery(UserData $data)
+    private function UserIdByName(string $username): ?int
     {
-        $tableName = "redcap_user_information";
+        $stmt = $this->execute("SELECT ui_id FROM `redcap_user_information` WHERE `username` = ?;", "s", [$username]);
+        $ui_id = $stmt->get_result()->fetch_column();
+        $stmt->close();
+        return $ui_id === false ? null : (int)$ui_id;
+    }
+
+    // Column names are the declared UserData properties, only the values are user input
+    private function userColumns(UserData $data): array
+    {
+        $ignore_props = array("password", "ui_id");
         $columns = [];
-        $values = [];
-        $ignore_props = array("password", "ui_id");
-
         foreach ($data as $key => $value) {
             if ($value !== null and !in_array($key, $ignore_props)) {
-                $columns[] = $key;
-                $values[] = is_int($value) ? $value : "'$value'";
+                $columns[$key] = $value;
             }
         }
-
-        $columnStr = implode(", ", $columns);
-        $valueStr = implode(", ", $values);
-
-        $query = "INSERT INTO $tableName ($columnStr) VALUES ($valueStr);";
-
-        return $query;
+        return $columns;
     }
-    private function generateUpdateUserQuery(UserData $data)
+
+    private static function bindTypes(array $values): string
     {
-        $tableName = "redcap_user_information";
-        $setValues = [];
-        $ignore_props = array("password", "ui_id");
+        return implode("", array_map(fn($value) => is_int($value) ? "i" : "s", $values));
+    }
 
-        foreach ($data as $key => $value) {
-            if ($value !== null and !in_array($key, $ignore_props)) {
-                $setValues[] = "$key = " . (is_int($value) ? $value : "'$value'");
-            }
-        }
+    private function InsertUser(UserData $data): void
+    {
+        $columns = $this->userColumns($data);
+        $columnStr = implode(", ", array_map(fn($column) => "`$column`", array_keys($columns)));
+        $placeholderStr = implode(", ", array_fill(0, count($columns), "?"));
+        $query = "INSERT INTO `redcap_user_information` ($columnStr) VALUES ($placeholderStr);";
+        $this->execute($query, self::bindTypes($columns), array_values($columns))->close();
+    }
 
-        $setValueStr = implode(", ", $setValues);
-        $query = "UPDATE $tableName SET $setValueStr WHERE ui_id=$data->ui_id;";
-
-        return $query;
+    private function UpdateUser(UserData $data): void
+    {
+        $columns = $this->userColumns($data);
+        $setValueStr = implode(", ", array_map(fn($column) => "`$column` = ?", array_keys($columns)));
+        $query = "UPDATE `redcap_user_information` SET $setValueStr WHERE `ui_id` = ?;";
+        $params = array_values($columns);
+        $params[] = $data->ui_id;
+        $this->execute($query, self::bindTypes($params), $params)->close();
     }
 
     public function UpsertPassword(UserData $userdata)
     {
-        if ($userdata->password == null or $userdata->password == '') {
-            printf("Can not set password for user '$userdata->username'. Password is empty.\n");
+        if (!isset($userdata->password) or $userdata->password === '') {
+            printf("Can not set password for user '%s'. Password is empty.\n", $userdata->username);
             return;
         }
         $user_auth = new UserAuthData($userdata->password);
-        $query = "INSERT INTO `redcap_auth` (`username`,`password`, `password_salt`) VALUES('$userdata->username', '$user_auth->pw_hash','$user_auth->salt') ON DUPLICATE KEY UPDATE `password` ='$user_auth->pw_hash', `password_salt`='$user_auth->salt';";
-        $this->db->query($query);
+        $query = "INSERT INTO `redcap_auth` (`username`, `password`, `password_salt`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `password` = ?, `password_salt` = ?;";
+        $this->execute($query, "sssss", [$userdata->username, $user_auth->pw_hash, $user_auth->salt, $user_auth->pw_hash, $user_auth->salt])->close();
     }
 
     public function UpsertUser(UserData $userdata, bool $overwrite_existing = false)
     {
-
-        $user_exists = $this->UserExists($userdata->username);
-        $query = null;
-        if ($user_exists and !$overwrite_existing) {
+        $ui_id = $this->UserIdByName($userdata->username);
+        if ($ui_id !== null and !$overwrite_existing) {
             return;
-        } elseif ($user_exists) {
-            printf("[USER PROVISIONING]: Update user '$userdata->username'\n");
-            $userdata->ui_id = $this->UserIdByName($userdata->username);
-            $query = $this->generateUpdateUserQuery($userdata);
-        } else {
-            printf("[USER PROVISIONING]: Create user '$userdata->username'\n");
-            $query = $this->generateInsertUserQuery($userdata);
         }
-        $res = $this->db->query($query);
-        if ($overwrite_existing and (isset($userdata->password) and ($userdata->password != null or $userdata->password != ''))) {
-            printf("[USER PROVISIONING]: Update/Create password for user '$userdata->username'\n");
-            $this->UpsertPassword($userdata);
+        // user and password in one transaction, a user created without its password would never get it on later boots
+        $this->db->begin_transaction();
+        try {
+            if ($ui_id !== null) {
+                printf("[USER PROVISIONING]: Update user '%s'\n", $userdata->username);
+                $userdata->ui_id = $ui_id;
+                $this->UpdateUser($userdata);
+            } else {
+                printf("[USER PROVISIONING]: Create user '%s'\n", $userdata->username);
+                $this->InsertUser($userdata);
+            }
+            // new users always get their password, existing ones only when overwriting is enabled
+            if (isset($userdata->password) and $userdata->password !== '') {
+                printf("[USER PROVISIONING]: Update/Create password for user '%s'\n", $userdata->username);
+                $this->UpsertPassword($userdata);
+            }
+            $this->db->commit();
+        } catch (Throwable $e) {
+            $this->db->rollback();
+            throw $e;
         }
     }
 }

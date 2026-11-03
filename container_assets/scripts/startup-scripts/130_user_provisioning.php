@@ -12,15 +12,20 @@ $ENABLE_USER_PROV = filter_var(getenv('ENABLE_USER_PROV'), FILTER_VALIDATE_BOOLE
 function user_data_from_array(?array $user_data_array = null, string $ident = ""): ?UserData
 {
     if (is_null($user_data_array)) {
-        return [];
+        return null;
     }
     $user_data = new UserData();
     foreach ($user_data_array as $user_prop_name => $user_prop_val) {
         if (!property_exists(new UserData, $user_prop_name)) {
-            printf("[USER PROVISIONING][ERROR]: User data at $ident contains unexcpected property '$user_prop_name'. User will not be created. Data: $user_prop_name: '$user_prop_val'\n");
+            printf("[USER PROVISIONING][ERROR]: User data at %s contains unexcpected property '%s'. User will not be created.\n", $ident, $user_prop_name);
             return null;
         }
-        $user_data->$user_prop_name = $user_prop_val;
+        try {
+            $user_data->set_value($user_prop_name, $user_prop_val);
+        } catch (InvalidArgumentException $e) {
+            printf("[USER PROVISIONING][ERROR]: User data at %s has an invalid value: %s. User will not be created.\n", $ident, $e->getMessage());
+            return null;
+        }
     }
     if (!$user_data->required_fields_not_empty()) {
         printf("[USER PROVISIONING][ERROR]: User data from env var '$ident' is not complete. User will not be created. Missing fields: %s\n", implode(", ", $user_data->get_required_fields_that_are_empty()));
@@ -37,6 +42,10 @@ function users_data_from_list(?array $users_data_list = null, string $ident_base
     }
     $user_data_objs = [];
     foreach ($users_data_list as $user_data_index => $user_props) {
+        if (!is_array($user_props)) {
+            printf("[USER PROVISIONING][ERROR]: User data at %s '%s' is not an object. User will not be created.\n", $ident_base, $user_data_index);
+            continue;
+        }
         $user = user_data_from_array($user_props, "$ident_base '$user_data_index'");
         if ($user != null) {
             $user_data_objs[] = $user;
@@ -63,7 +72,8 @@ function collect_user_data_from_indexed_env_vars(string $env_var_prefix): array
         if (json_last_error() === JSON_ERROR_NONE) {
             $users_raw[$key] = $decoded_data;
         } else {
-            printf("[USER PROVISIONING][ERROR]: User data from env var '$key' does not contain valid JSON. User will not be created. Data:\n$value\n");
+            // no data in the log, it can contain a password
+            printf("[USER PROVISIONING][ERROR]: User data from env var '%s' does not contain valid JSON. User will not be created.\n", $key);
         }
     }
 
@@ -74,10 +84,13 @@ function collect_user_data_from_indexed_env_vars(string $env_var_prefix): array
 function collect_user_data_from_env_var(string $env_var_name): array
 {
     $raw_user_list_json = getenv($env_var_name);
+    if ($raw_user_list_json === false or trim($raw_user_list_json) === '') {
+        return array();
+    }
 
     $users_data_raw = json_decode($raw_user_list_json, true);
-    if (!json_last_error() === JSON_ERROR_NONE) {
-        printf("[USER PROVISIONING][ERROR]: User data list from env var '$env_var_name' does not contain valid JSON. Users will not be created. Data:\n$raw_user_list_json\n");
+    if (json_last_error() !== JSON_ERROR_NONE or !is_array($users_data_raw)) {
+        printf("[USER PROVISIONING][ERROR]: User data list from env var '%s' does not contain a valid JSON list. Users will not be created.\n", $env_var_name);
         return array();
     }
     $user_data_objs = users_data_from_list($users_data_raw, "env var '$env_var_name' at index ");
@@ -87,11 +100,13 @@ function collect_user_data_from_env_var(string $env_var_name): array
 function collect_user_data_from_yaml_file(string $yaml_file): array
 {
     $users_data_raw = yaml_parse_file($yaml_file);
-    if (!array_key_exists("REDCapUserList", $users_data_raw)) {
+    if (!is_array($users_data_raw) or !array_key_exists("REDCapUserList", $users_data_raw)) {
         printf("[USER PROVISIONING][ERROR]: Expected a root level key 'REDCapUserList' in yaml file $yaml_file. Can not parse user data file.\n");
+        return array();
     }
     if (!is_array($users_data_raw["REDCapUserList"])) {
         printf("[USER PROVISIONING][ERROR]: Expected a list of users in 'REDCapUserList' in file $yaml_file. Can not parse user data file.\n");
+        return array();
     }
     $user_data_objs = users_data_from_list($users_data_raw["REDCapUserList"], "file '$yaml_file' at pos ");
     return $user_data_objs;
@@ -101,26 +116,37 @@ function collect_user_data_from_json_file(string $json_file): array
 {
     $json_file_raw = file_get_contents($json_file);
     $users_data_raw = json_decode($json_file_raw, true);
-    if (!array_key_exists("REDCapUserList", $users_data_raw)) {
+    if (!is_array($users_data_raw) or !array_key_exists("REDCapUserList", $users_data_raw)) {
         printf("[USER PROVISIONING][ERROR]: Expected a root level key 'REDCapUserList' in json file $json_file. Can not parse user data file.\n");
+        return array();
     }
     if (!is_array($users_data_raw["REDCapUserList"])) {
         printf("[USER PROVISIONING][ERROR]: Expected a list of users in 'REDCapUserList' in file $json_file. Can not parse user data file.\n");
+        return array();
     }
     $user_data_objs = users_data_from_list($users_data_raw["REDCapUserList"], "file '$json_file' at pos ");
     return $user_data_objs;
 }
 
-function write_users_to_db(array $users, bool $overwrite_existing = false)
+function write_users_to_db(array $users, bool $overwrite_existing = false): array
 {
     $mysqli_con = get_db_con();
     $uc = new UserCRUD($mysqli_con);
+    $failed = array();
     foreach ($users as $user) {
-        $uc->UpsertUser($user, $overwrite_existing);
+        try {
+            $uc->UpsertUser($user, $overwrite_existing);
+        } catch (mysqli_sql_exception $e) {
+            // Do not print $e->getMessage(): MySQL quotes parts of the statement, which can contain user data.
+            printf("[USER PROVISIONING][ERROR]: Could not write user '%s' (MySQL error %d). Continuing with the remaining users.\n", $user->username, $e->getCode());
+            $failed[] = $user->username;
+        }
     }
+    $mysqli_con->close();
+    return $failed;
 }
 
-function run_user_provisioning()
+function run_user_provisioning(): array
 {
     $USER_PROV_ENV_VAR_BASE = "USER_PROV";
     $USER_PROV_FILE_DIR = getenv("USER_PROV_FILE_DIR");
@@ -152,11 +178,11 @@ function run_user_provisioning()
     $users_count = count($users);
     printf("[USER PROVISIONING][INFO]: Will write $users_count users into db ");
     if ($USER_PROV_OVERWRITE_EXISTING) {
-        printf("(if not allready existing).\n");
+        printf("(existing users will be overwritten).\n");
     } else {
-        printf(".\n");
+        printf("(if not allready existing).\n");
     }
-    write_users_to_db($users, $USER_PROV_OVERWRITE_EXISTING);
+    return write_users_to_db($users, $USER_PROV_OVERWRITE_EXISTING);
 }
 printf("ENABLE_USER_PROV: $ENABLE_USER_PROV\n");
 if ($ENABLE_USER_PROV) {
@@ -168,6 +194,10 @@ if ($ENABLE_USER_PROV) {
     }
     require_once __DIR__ . '/php_helpers/create_user.php';
     printf("Start user provisining...\n");
-    run_user_provisioning();
+    $failed = run_user_provisioning();
+    if (count($failed) > 0) {
+        printf("... user provisining done, but %d user(s) could not be written: %s\n", count($failed), implode(', ', $failed));
+        exit(1);
+    }
     printf("... user provisining done.\n");
 }

@@ -303,8 +303,10 @@ See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for full documentation.
 ## suspend site_admin
 
 ```env
-REDCAP_SUSPEND_SITE_ADMIN # Default: True
+REDCAP_SUSPEND_SITE_ADMIN # Default: false
 ```
+
+If set to true, REDCaps default user `site_admin` is suspended on every boot and loses all admin rights (`super_user`, `account_manager`, `access_system_config`, `access_system_upgrade`, `access_external_module_install`, `admin_rights`, `access_admin_dashboards`). Make sure another admin exists, e.g. via [User provisioning](USER_PROV.md). The container log prints a warning if no other active admin is found.
 
 
 # MSMTP

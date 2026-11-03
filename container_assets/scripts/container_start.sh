@@ -26,6 +26,9 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
     chown www-data:www-data $ENV_EXPORT_FILE
     # config msmtp
     /opt/redcap-docker/assets/scripts/startup-scripts/60_generate_msmtp_config.sh
+    # Apply TZ to PHP's date.timezone like in web mode, otherwise cron.php computes
+    # alerts and survey invitations in UTC while the web UI uses TZ (#18)
+    . /opt/redcap-docker/assets/scripts/startup-scripts/70-update_php_timezone.sh
     # config cronjob
     echo "Define Cronjob"
     /opt/redcap-docker/assets/scripts/startup-scripts/50_define-cronjob.sh

@@ -17,16 +17,10 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
     # mode does not run that glob, so source the loader explicitly here — before
     # the printenv snapshot that is handed to busybox crond.
     . /opt/redcap-docker/assets/scripts/startup-scripts/05_load_secrets.sh
-    #  Export the PHP env to be able to feed it to busybox
+    #  Export the PHP env to be able to feed it to busybox, with the current php ini files added.
+    #  `export -p` quotes the values, so JSON (e.g. EXPORT_JOBS) and passwords with quotes or '$' survive
     ENV_EXPORT_FILE="/etc/container-environment.sh"
-    printenv | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > $ENV_EXPORT_FILE
-    # Add the current php ini files to the env
-    current_ini_env=$(get_php_ini_dirs)
-    if grep -q "^export PHP_INI_SCAN_DIR=" "$ENV_EXPORT_FILE"; then
-       sed -i.bak "s|^export PHP_INI_SCAN_DIR=.*|export PHP_INI_SCAN_DIR=\"$current_ini_env\"|" "$ENV_EXPORT_FILE"
-    else
-        echo "export PHP_INI_SCAN_DIR=\"$current_ini_env\"" >> "$ENV_EXPORT_FILE"
-    fi
+    (export PHP_INI_SCAN_DIR="$(get_php_ini_dirs)"; export -p) > $ENV_EXPORT_FILE
     # make the file accesable
     chmod +x $ENV_EXPORT_FILE
     chown www-data:www-data $ENV_EXPORT_FILE

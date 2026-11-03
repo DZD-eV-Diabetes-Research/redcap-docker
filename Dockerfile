@@ -141,6 +141,18 @@ ENV CRON_MODE=false
 ENV CRON_INTERVAL="*/5 * * * *"
 ENV CRON_RUN_JOB_ON_START=false
 ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
+# periodic data export via the REDCap API, runs in the cron container (see DATA_EXPORT.md)
+ENV ENABLE_DATA_EXPORT=false
+ENV EXPORT_API_URL=
+ENV EXPORT_API_TIMEOUT=3600
+ENV EXPORT_API_VERIFY_TLS=true
+ENV EXPORT_DIR=/opt/redcap-docker/exports
+ENV EXPORT_JOBS_FILE_DIR=/opt/redcap-docker/export-jobs
+ENV EXPORT_DEFAULT_KEEP=0
+ENV EXPORT_SERVICE_USERNAME=redcap_docker_export
+ENV EXPORT_STATE_DIR=/tmp/redcap-export-state
+RUN mkdir -p $EXPORT_DIR $EXPORT_JOBS_FILE_DIR
+RUN ln -s /opt/redcap-docker/assets/scripts/redcap_export.sh /usr/bin/redcap-export
 # register cron command
 RUN ln -s /opt/redcap-docker/assets/scripts/cron-job.sh /usr/bin/redcap-cron
 # register in-place upgrade and install commands

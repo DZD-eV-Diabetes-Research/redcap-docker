@@ -79,6 +79,7 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 - Automated routine tasks such as deactivating the default admin (optional)
 - "Cron mode": run the same image as the REDCap cron job manager
 - User provisioning via environment variables and/or YAML files
+- Periodic data exports (records, reports, project XML) via the REDCap API, with retention, run by the cron container. See [DATA_EXPORT.md](DATA_EXPORT.md)
 
 
 ---
@@ -207,6 +208,7 @@ See [config_vars_list.md](config_vars_list.md) for the full variable reference.
 | **Email** | Prefix any msmtp config key with `MSMTP_` — e.g. `MSMTP_host=mail.example.com` |
 | **Cron** | `CRON_MODE`, `CRON_INTERVAL`, `CRON_RUN_JOB_ON_START` |
 | **User provisioning** | `USER_PROV`, `USER_PROV_FILE_DIR`, `USER_PROV_OVERWRITE_EXISTING` |
+| **Data export** | `ENABLE_DATA_EXPORT`, `EXPORT_API_URL`, `EXPORT_JOBS`, `EXPORT_JOBS_FILE_DIR`, `EXPORT_DIR`, see [DATA_EXPORT.md](DATA_EXPORT.md) |
 | **Upgrades** | `REDCAP_UPGRADE_BACKUP_DIR`, `REDCAP_UPGRADE_BACKUP_DB_USER` |
 | **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
 | **Server** | `SERVER_NAME`, `APACHE_DOCUMENT_ROOT`, `WWW_DATA_UID`, `WWW_DATA_GID` |
@@ -256,6 +258,8 @@ services:
 
 See the [cron example](examples/instance_with_cron) for a full setup.
 
+The cron container can also export project data on a schedule (records, saved reports or the full project XML) to a mounted directory. See [DATA_EXPORT.md](DATA_EXPORT.md).
+
 ---
 
 ### Volumes & Paths
@@ -269,6 +273,8 @@ See the [cron example](examples/instance_with_cron) for a full setup.
 | `/opt/redcap-docker/users` | User provisioning YAML/JSON files | `USER_PROV_FILE_DIR` |
 | `/opt/redcap-docker/sql_scripts_run_once` | SQL scripts to run once at boot (e.g. manual upgrade scripts) | `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` |
 | `/opt/redcap-docker/backups` | Pre-upgrade database backups | `REDCAP_UPGRADE_BACKUP_DIR` |
+| `/opt/redcap-docker/export-jobs` | Data export job YAML/JSON files | `EXPORT_JOBS_FILE_DIR` |
+| `/opt/redcap-docker/exports` | Data export output, one directory per job | `EXPORT_DIR` |
 
 > [!TIP]
 > Mount `/opt/redcap-docker/backups` to the host so backups survive container restarts:

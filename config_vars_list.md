@@ -9,6 +9,7 @@
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)
 - [User provisioning](#user-provisioning)
+- [Data export](#data-export)
 - [REDCap installation](#redcap-installation)
   - [Option 1 - automated installation](#option-1---automated-installation)
   - [Option 2 - Installation with bring-your-own SQL install Script](#option-2---installation-with-bring-your-own-sql-install-script)
@@ -231,6 +232,24 @@ Defaults to `true`
 
 This container image can prefill the database with table users. for more details have a look at [User provisioning](USER_PROV.md)
 
+# Data export
+
+Periodic exports via the REDCap API, run by the cron container (`CRON_MODE=true`). Full documentation, job format and examples: [DATA_EXPORT.md](DATA_EXPORT.md)
+
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `ENABLE_DATA_EXPORT` | `false` | Switch the data export on |
+| `EXPORT_API_URL` | `` | Required. REDCap API URL as reachable from the cron container, e.g. `http://redcap/api/` |
+| `EXPORT_DIR` | `/opt/redcap-docker/exports` | Output directory, one subdirectory per job |
+| `EXPORT_JOBS_FILE_DIR` | `/opt/redcap-docker/export-jobs` | Scanned for yaml/json files with export jobs |
+| `EXPORT_JOBS` | `` | Export jobs as a json list |
+| `EXPORT_JOBS_*` | `` | Single export job as indexed json, e.g. `EXPORT_JOBS_1={"name": "nightly", ...` |
+| `EXPORT_DEFAULT_KEEP` | `0` | Exports kept per job if the job sets no `keep`. `0` keeps all |
+| `EXPORT_SERVICE_USERNAME` | `redcap_docker_export` | REDCap user the container creates and uses for the exports |
+| `EXPORT_API_TIMEOUT` | `3600` | Maximum seconds for one API export |
+| `EXPORT_API_VERIFY_TLS` | `true` | Verify the TLS certificate of an `https://` `EXPORT_API_URL` |
+| `EXPORT_STATE_DIR` | `/tmp/redcap-export-state` | Last result and lock file per job, read by the healthcheck |
+
 
 # REDCap installation
 
@@ -314,6 +333,8 @@ If you want to run the job as soon the container starts you set this to true. On
 
 
 see the [cron example](examples/instance_with_cron) for a docker compose exmaple.
+
+The cron container can also run periodic data exports, see [Data export](#data-export).
 
 # REDCap Application Config vars
 

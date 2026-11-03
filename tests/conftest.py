@@ -416,6 +416,17 @@ class RedcapStack:
         finally:
             conn.close()
 
+    def db_execute(self, sql: str, args: tuple = ()) -> int:
+        """Run a writing statement and commit it. Returns the affected row count."""
+        conn = self._db_conn()
+        try:
+            with conn.cursor() as cur:
+                affected = cur.execute(sql, args)
+            conn.commit()
+            return affected
+        finally:
+            conn.close()
+
     def get_config(self, field: str) -> str | None:
         rows = self.db_query(
             "SELECT value FROM redcap_config WHERE field_name = %s", (field,)
@@ -478,11 +489,15 @@ class RedcapStack:
 
     # ── Container exec ────────────────────────────────────────────────────────
 
-    def exec_run(self, cmd: str | list) -> tuple[int, str]:
+    def exec_run(
+        self, cmd: str | list, user: str = "", environment: dict | None = None
+    ) -> tuple[int, str]:
         result = self._rc.exec_run(
             ["sh", "-c", cmd] if isinstance(cmd, str) else cmd,
             stdout=True,
             stderr=True,
+            user=user,
+            environment=environment,
         )
         return result.exit_code, result.output.decode("utf-8", errors="replace")
 

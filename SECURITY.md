@@ -282,6 +282,17 @@ See the [custom edocs example](examples/local_instance_custom_edocs).
 
 ---
 
+## Data export
+
+The optional periodic data export ([DATA_EXPORT.md](DATA_EXPORT.md)) writes full copies of project data to disk and manages a REDCap service user with export rights:
+
+- Export files are written with mode `640` (directories `750`), owned by `www-data`. Restrict access to the mounted export directory on the host and set `keep` so exports do not pile up.
+- The service user (`EXPORT_SERVICE_USERNAME`) gets API export and full data set export rights on every instrument of the exported projects, and no other rights. It has no password. With LDAP, Shibboleth or OpenID Connect, pick a username that can not exist in your directory.
+- Suspending the service user in the Control Center stops all exports.
+- Point `EXPORT_API_URL` to the internal address of the web container, or use `https://` with `EXPORT_API_VERIFY_TLS=true`.
+
+---
+
 ## Startup security warnings
 
 The container prints advisory messages at startup for common misconfigurations:

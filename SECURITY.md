@@ -293,6 +293,16 @@ The optional periodic data export ([DATA_EXPORT.md](DATA_EXPORT.md)) writes full
 
 ---
 
+## Project provisioning
+
+The optional project provisioning ([PROJECT_PROV.md](PROJECT_PROV.md)) imports REDCap project XML files on boot:
+
+- A project XML can contain alerts and automated survey invitations that send emails, and records with research data. Only provision XML from trusted sources.
+- Only `https://` URLs are downloaded. Pin them with `sha256` so a replaced file is not imported.
+- The import runs as `www-data`, so files from the XML end up owned by the web server user like regular uploads. Provisioned projects get no API token.
+
+---
+
 ## Startup security warnings
 
 The container prints advisory messages at startup for common misconfigurations:

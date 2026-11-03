@@ -1,0 +1,76 @@
+services:
+  redcap:
+    image: dzdde/redcap-docker
+    environment:
+      # --- Database ---
+      DB_HOSTNAME: db
+      DB_NAME: redcap
+      DB_USERNAME: redcap
+      DB_PASSWORD: redcap123
+      DB_SALT: d369a86842347f7e3e40a3ec64b9f9d950bdfde05beba3a61da69bb1fb28dcea9152fbf723889181a9bd9a97f34b90faf17a
+
+      # --- Installation ---
+      REDCAP_INSTALL_ENABLE: "true"
+
+      # --- REDCap application config ---
+      APPLY_RCCONF_VARIABLES: "true"
+      RCCONF_redcap_base_url: "http://localhost"
+      # Table-based login, so the provisioned project owner can log in
+      RCCONF_auth_meth_global: "table"
+
+      # --- User provisioning (the project owner) ---
+      ENABLE_USER_PROV: "true"
+      USER_PROV_1: '{"username": "study.lead", "user_firstname": "Study", "user_lastname": "Lead", "user_email": "study.lead@example.org", "password": "change-me-123"}'
+
+      # --- Project provisioning ---
+      ENABLE_PROJECT_PROV: "true"
+      # The specs are in projects/projects.yaml (mounted below). Inline JSON works too, e.g.:
+      #   PROJECT_PROV_1: '{"key": "study-template", "xml": "study-template.xml"}'
+    volumes:
+      # Project specs (projects.yaml) and the project XML files they point to.
+      - ./projects:/opt/redcap-docker/projects:ro
+      - ./data/redcap:/var/www/html
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: mysql:lts
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: redcap
+      MYSQL_USER: redcap
+      MYSQL_PASSWORD: redcap123
+      MYSQL_ROOT_PASSWORD: redcaproot123
+    volumes:
+      - ./data/db:/var/lib/mysql
+    healthcheck:
+      test: "/usr/bin/mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE -e 'SHOW TABLES;'"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command:
+      - --max_allowed_packet=128M
+      - --bind-address=0.0.0.0
+      - --innodb_file_per_table=1
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

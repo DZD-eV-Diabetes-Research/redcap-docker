@@ -95,7 +95,7 @@ Unknown properties, unknown options and invalid values are logged as errors and 
 | --- | --- | --- |
 | `record` | All (or the selected) records | `csv`, `json`, `xml`, `odm` |
 | `report` | The rows and columns of a saved report. The project team controls fields and filters in the REDCap UI. | `csv`, `json`, `xml` |
-| `project_xml` | CDISC ODM XML with the full project definition and, unless `returnMetadataOnly` is set, all data. Can be used to recreate the project on another instance. | `xml` |
+| `project_xml` | CDISC ODM XML with the full project definition and, unless `returnMetadataOnly` is set, all data. Can be used to recreate the project on another instance, e.g. with [project provisioning](PROJECT_PROV.md). | `xml` |
 
 ## Options
 

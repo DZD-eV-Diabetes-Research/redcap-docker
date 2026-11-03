@@ -132,6 +132,11 @@ ENV ENABLE_MODULE_PROV=false
 ENV MODULE_PROV_DEFAULT_ENABLE=false
 ENV MODULE_PROV_FILE_DIR=/opt/redcap-docker/modules
 RUN mkdir -p $MODULE_PROV_FILE_DIR
+# Project provisioning from REDCap project XML files (see PROJECT_PROV.md)
+ENV ENABLE_PROJECT_PROV=false
+ENV PROJECT_PROV_FILE_DIR=/opt/redcap-docker/projects
+ENV PROJECT_PROV_DOWNLOAD_TIMEOUT=600
+RUN mkdir -p $PROJECT_PROV_FILE_DIR
 # Application default config
 ENV RCCONF_redcap_base_url=http://localhost
 ENV RCCONF_password_algo=sha512

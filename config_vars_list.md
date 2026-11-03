@@ -232,6 +232,18 @@ Defaults to `true`
 
 This container image can prefill the database with table users. for more details have a look at [User provisioning](USER_PROV.md)
 
+# Project provisioning
+
+Create projects on boot from REDCap project XML files. Full documentation and spec format: [PROJECT_PROV.md](PROJECT_PROV.md)
+
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `ENABLE_PROJECT_PROV` | `false` | Switch project provisioning on |
+| `PROJECT_PROV` | `` | Project specs as a json list |
+| `PROJECT_PROV_*` | `` | Single project spec as indexed json, e.g. `PROJECT_PROV_1={"key": "study-template", "xml": "study-template.xml"}` |
+| `PROJECT_PROV_FILE_DIR` | `/opt/redcap-docker/projects` | Scanned for yaml/json files with project specs, base directory for relative `xml` paths |
+| `PROJECT_PROV_DOWNLOAD_TIMEOUT` | `600` | Maximum seconds for downloading one project XML from a `url` |
+
 # Data export
 
 Periodic exports via the REDCap API, run by the cron container (`CRON_MODE=true`). Full documentation, job format and examples: [DATA_EXPORT.md](DATA_EXPORT.md)

@@ -512,7 +512,9 @@ function backup_database(
         escapeshellarg($backup_file)
     );
 
-    exec($cmd . ' 2>&1', $output, $exit_code);
+    // pipefail: without it the exit code is gzip's, and a failed mysqldump would
+    // leave an empty "backup" behind while the upgrade carries on.
+    exec('bash -o pipefail -c ' . escapeshellarg($cmd) . ' 2>&1', $output, $exit_code);
     @unlink($opts_file);
 
     if ($exit_code !== 0) {
@@ -551,7 +553,8 @@ function restore_database_backup(string $backup_file): void
         escapeshellarg($dbname)
     );
 
-    exec($cmd . ' 2>&1', $output, $exit_code);
+    // pipefail: also fail when gzip cannot read the backup, not only when mysql fails
+    exec('bash -o pipefail -c ' . escapeshellarg($cmd) . ' 2>&1', $output, $exit_code);
     @unlink($opts_file);
 
     if ($exit_code !== 0) {

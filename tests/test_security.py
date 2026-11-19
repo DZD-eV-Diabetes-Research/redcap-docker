@@ -305,6 +305,52 @@ def test_php_session_upload_progress_off(docker_client) -> None:
     assert out == "OFF", f"session.upload_progress.enabled must be Off, got {out!r}"
 
 
+# ── Image contents: ImageMagick policy, removed tools ──────────────────────────
+
+
+def _run_in_image(docker_client, cmd: list[str]) -> tuple[int, str]:
+    """Run a command in the bare image (no REDCap boot needed)."""
+    container = docker_client.containers.run(
+        REDCAP_DOCKER_IMAGE,
+        entrypoint=[],
+        command=cmd,
+        detach=True,
+    )
+    try:
+        result = container.wait()
+        logs = container.logs().decode("utf-8", "replace").strip()
+        return int(result.get("StatusCode", 1)), logs
+    finally:
+        container.remove(force=True)
+
+
+@pytest.mark.timeout(60)
+def test_imagemagick_policy(docker_client) -> None:
+    """
+    Imagick must render a PDF to PNG (what REDCap's inline-PDF feature and its
+    Configuration Check do), while the ImageMagick policy denies writing PDF and
+    reading/writing the PostScript family (which goes straight to Ghostscript).
+    """
+    exit_code, out = _run_in_image(
+        docker_client,
+        ["php", "/opt/redcap-docker/assets/scripts/imagemagick_policy_check.php"],
+    )
+    assert exit_code == 0, f"ImageMagick policy check failed:\n{out}"
+
+
+@pytest.mark.timeout(60)
+def test_unused_tools_not_installed(docker_client) -> None:
+    """ssh (client and server), vim, wget and git must not be in the image."""
+    exit_code, out = _run_in_image(
+        docker_client,
+        ["sh", "-c", "dpkg-query -W -f '${Package} ${Status}\\n' | grep ' installed$' | cut -d' ' -f1"],
+    )
+    assert exit_code == 0, f"dpkg-query failed: {out}"
+    installed = set(out.split())
+    unwanted = {"openssh-client", "openssh-server", "ssh", "vim", "vim-tiny", "wget", "git"}
+    assert not installed & unwanted, f"Unused tools found in the image: {sorted(installed & unwanted)}"
+
+
 # ── HTTP response header tests ─────────────────────────────────────────────────
 
 

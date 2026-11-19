@@ -394,6 +394,52 @@ function run_wizard(array $opts): void
 // ── Database backup / restore ─────────────────────────────────────────────────
 
 /**
+ * TLS settings for the mysql / mysqldump CLI, matching how REDCap itself connects
+ * (database.php + REDCap's db_connect): TLS only when DB_SSL_CA_FILE_PATH is set, and the
+ * server certificate is checked only when DB_SSL_VERIFY_SERVER is true.
+ *
+ * The client in the image is MariaDB 11.8, which defaults to TLS *with* certificate
+ * verification. Without these settings it fails against a server with a self-signed
+ * certificate (e.g. MySQL's auto-generated one) or without TLS.
+ */
+function mysql_client_ssl_options(): string
+{
+    $ca = getenv('DB_SSL_CA_FILE_PATH') ?: '';
+    if ($ca === '') {
+        return "skip-ssl\n";
+    }
+    $lines = ['ssl', "ssl-ca=$ca"];
+    $optional = [
+        'DB_SSL_CA_DIR_PATH' => 'ssl-capath',
+        'DB_SSL_CERT_PATH'   => 'ssl-cert',
+        'DB_SSL_KEY_PATH'    => 'ssl-key',
+        'DB_SSL_ALGOS'       => 'ssl-cipher',
+    ];
+    foreach ($optional as $env => $option) {
+        $value = getenv($env) ?: '';
+        if ($value !== '') {
+            $lines[] = "$option=$value";
+        }
+    }
+    $verify = filter_var(getenv('DB_SSL_VERIFY_SERVER'), FILTER_VALIDATE_BOOLEAN);
+    $lines[] = 'ssl-verify-server-cert=' . ($verify ? '1' : '0');
+    return implode("\n", $lines) . "\n";
+}
+
+/**
+ * Write a temporary MySQL options file (password + TLS settings) for the given
+ * option group, so the password never appears in the process list or shell history.
+ * The caller deletes the file.
+ */
+function write_mysql_options_file(string $group, string $pass): string
+{
+    $opts_file = tempnam(sys_get_temp_dir(), 'redcap_mysql_opts_');
+    chmod($opts_file, 0600);
+    file_put_contents($opts_file, "[$group]\npassword=$pass\n" . mysql_client_ssl_options());
+    return $opts_file;
+}
+
+/**
  * Run a quick no-data test dump to verify the given credentials have
  * sufficient privileges for a full mysqldump.
  *
@@ -406,9 +452,7 @@ function test_backup_prerequisites(
     string $port,
     string $dbname
 ): ?string {
-    $opts_file = tempnam(sys_get_temp_dir(), 'redcap_mysql_opts_');
-    file_put_contents($opts_file, "[mysqldump]\npassword=$pass\n");
-    chmod($opts_file, 0600);
+    $opts_file = write_mysql_options_file('mysqldump', $pass);
 
     $cmd = sprintf(
         'mysqldump --defaults-file=%s -h %s -P %s -u %s --no-tablespaces --no-data %s 2>&1 > /dev/null',
@@ -454,11 +498,7 @@ function backup_database(
     $user   = $override_user  ?? (getenv('DB_USERNAME') ?: '');
     $pass   = $override_pass  ?? (getenv('DB_PASSWORD') ?: '');
 
-    // Write a temporary MySQL options file so the password never appears
-    // in the process list or shell history.
-    $opts_file = tempnam(sys_get_temp_dir(), 'redcap_mysql_opts_');
-    file_put_contents($opts_file, "[mysqldump]\npassword=$pass\n");
-    chmod($opts_file, 0600);
+    $opts_file = write_mysql_options_file('mysqldump', $pass);
 
     // --no-tablespaces avoids requiring the PROCESS privilege that MySQL 8+
     // demands for tablespace metadata — unnecessary for an application backup.
@@ -499,9 +539,7 @@ function restore_database_backup(string $backup_file): void
     $user   = getenv('DB_USERNAME') ?: '';
     $pass   = getenv('DB_PASSWORD') ?: '';
 
-    $opts_file = tempnam(sys_get_temp_dir(), 'redcap_mysql_opts_');
-    file_put_contents($opts_file, "[client]\npassword=$pass\n");
-    chmod($opts_file, 0600);
+    $opts_file = write_mysql_options_file('client', $pass);
 
     $cmd = sprintf(
         'gzip -dc %s | mysql --defaults-file=%s -h %s -P %s -u %s %s',

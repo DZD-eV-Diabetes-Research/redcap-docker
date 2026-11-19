@@ -274,6 +274,8 @@ The upgrader creates a compressed database dump **before every upgrade** in `/op
 >   - ./backups:/opt/redcap-docker/backups
 > ```
 
+The dump and the restore use the `mysqldump` / `mysql` client in the image (MariaDB client) with the same TLS settings REDCap uses: TLS only when `DB_SSL_CA_FILE_PATH` is set (plus `DB_SSL_CERT_PATH`, `DB_SSL_KEY_PATH`, `DB_SSL_CA_DIR_PATH`, `DB_SSL_ALGOS`), and the server certificate is verified only when `DB_SSL_VERIFY_SERVER=true`.
+
 If the SQL step fails mid-upgrade the database is **automatically restored** from the backup. The old version PHP directory is always kept so a rollback restores both layers cleanly.
 
 To manually roll back after a completed upgrade:

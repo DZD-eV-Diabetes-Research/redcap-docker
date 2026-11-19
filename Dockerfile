@@ -1,4 +1,4 @@
-FROM php:8.4.27-apache-bookworm
+FROM php:8.4.27-apache-trixie
 
 ## https://hub.docker.com/_/php/tags?page=1&name=apache
 ## Pinned to a patch release so every build provably contains the PHP security fixes
@@ -84,13 +84,25 @@ RUN set -eux; \
     php -d extension=yaml.so --ri yaml | grep -q "Module Version => ${PECL_YAML_VERSION}\$"
 
 
-# Update ImageMagick policy
-RUN sed -i 's/policy\ domain=\"coder\" rights=\"none\" pattern=\"PDF\"/policy domain=\"coder\" rights=\"read\" pattern=\"PDF\"/g' /etc/ImageMagick-6/policy.xml
+# ImageMagick policy. REDCap only reads PDFs (rendered to PNG through Ghostscript). Debian's IM7
+# policy.xml has no PDF or PostScript rule at all, so allow PDF read-only and deny the PostScript
+# family, which ImageMagick would hand straight to Ghostscript. The last matching rule wins, so
+# the rules go at the end. Fails loudly if the file moved; scripts/imagemagick_policy_check.php
+# (run below) tests the effect.
+RUN set -eux; \
+    POLICY=/etc/ImageMagick-7/policy.xml; \
+    test -f "$POLICY"; \
+    grep -q '^</policymap>$' "$POLICY"; \
+    sed -i 's#^</policymap>$#  <!-- redcap-docker: PDF read-only, no PostScript -->\n  <policy domain="coder" rights="read" pattern="PDF" />\n  <policy domain="coder" rights="none" pattern="{PS,PS2,PS3,EPS,EPI,EPSI,EPSF,EPT,EPT2,EPT3,XPS}" />\n</policymap>#' "$POLICY"; \
+    grep -q 'rights="read" pattern="PDF"' "$POLICY"
 
 # REDCap Container configs,templates and scripts
 COPY container_assets /opt/redcap-docker/assets
 
 RUN chmod -R +x /opt/redcap-docker/assets/scripts/
+
+# Fail the build unless Imagick renders PDFs and the policy above blocks PostScript
+RUN php /opt/redcap-docker/assets/scripts/imagemagick_policy_check.php
 
 # Deploy php.ini
 RUN mv /opt/redcap-docker/assets/config/php/php.ini /usr/local/etc/php/php.ini && \

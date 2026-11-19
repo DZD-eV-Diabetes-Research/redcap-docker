@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  security-events: write # upload the Trivy SARIF to code scanning
+
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -11,6 +15,11 @@ jobs:
     # workflow and must not overwrite the "latest" tag.
     if: ${{ !github.event.release.prerelease }}
     runs-on: ubuntu-latest
+    # Shared with rebuild-weekly.yaml so a release and the weekly rebuild never
+    # push "latest" at the same time.
+    concurrency:
+      group: docker-push-stable
+      cancel-in-progress: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -34,6 +43,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v4
         with:
@@ -43,3 +53,23 @@ jobs:
           short-description: "A container image to host a REDCap instance with a focus in automated deployments."
           enable-url-completion: true
           #readme-filepath: "MedLog/backend/README.md"
+
+      # Report only for now (exit-code 0): findings show up under
+      # Security > Code scanning (filed under the release tag). Runs last, so
+      # a scan problem can't keep the Docker Hub description from updating.
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: dzdde/${{ github.event.repository.name }}:${{ steps.meta.outputs.version }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
+          exit-code: "0"
+
+      - name: Upload Trivy results to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-image

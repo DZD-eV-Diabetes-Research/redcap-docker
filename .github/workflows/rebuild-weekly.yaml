@@ -1,0 +1,140 @@
+name: Weekly rebuild of the latest release
+
+# Apache, ghostscript, ImageMagick, OpenSSL etc. come from Debian packages. The
+# image is otherwise only built when a release is published, so "latest" would
+# go stale between releases. This rebuilds the newest stable release every week
+# from scratch, so Debian security fixes reach the published image.
+#
+# GitHub disables scheduled workflows after 60 days without activity in the
+# repository. If that happens, re-enable it in the Actions tab; it can always be
+# run by hand via "Run workflow" (workflow_dispatch).
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write # upload the Trivy SARIF to code scanning
+
+jobs:
+  rebuild_latest_release:
+    name: Rebuild and push the latest release
+    runs-on: ubuntu-latest
+    # Shared with the release workflow so a release and a rebuild never push
+    # "latest" at the same time (the one that runs second resolves the tag again).
+    concurrency:
+      group: docker-push-stable
+      cancel-in-progress: false
+    steps:
+      - name: Resolve the latest stable release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # /releases/latest is the release marked "Latest" on GitHub: the newest
+          # published release that is neither a draft nor a pre-release (unless
+          # one was marked "Latest" by hand). It answers 404 if there is none.
+          if ! release_json="$(gh api "repos/${REPO}/releases/latest")"; then
+            echo "::error::Could not get the latest stable release of ${REPO} (none published?); nothing to rebuild."
+            exit 1
+          fi
+          tag="$(jq -r '.tag_name // empty' <<<"$release_json")"
+          prerelease="$(jq -r '.prerelease' <<<"$release_json")"
+          if [ -z "$tag" ]; then
+            echo "::error::No published release found in ${REPO}; nothing to rebuild."
+            exit 1
+          fi
+          if [ "$prerelease" != "false" ]; then
+            echo "::error::Latest release ${tag} is a pre-release; refusing to push it as latest."
+            exit 1
+          fi
+          # The release workflow tags the image with the git tag name as is
+          # (metadata-action type=ref,event=tag), so "1.2.3" stays "1.2.3" and
+          # "v1.2.3" stays "v1.2.3". Use the same name here so the rebuild
+          # replaces exactly the image tag the release pushed.
+          if ! [[ "$tag" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,118}$ ]]; then
+            echo "::error::Release tag '${tag}' is not a valid Docker image tag."
+            exit 1
+          fi
+          date="$(date -u +%Y%m%d)"
+          echo "Rebuilding release ${tag} (build date ${date})"
+          {
+            echo "tag=${tag}"
+            echo "dated_tag=${tag}-${date}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Build the released source, never main: main may hold unreleased changes.
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+
+      - name: Get the commit of the release tag
+        id: git
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_DZD_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_DZD_PASSWORD }}
+
+      # The event is "schedule"/"workflow_dispatch", so metadata-action's
+      # release tags don't apply: set the tags explicitly. The version and
+      # revision labels would otherwise describe main, not the release tag.
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: dzdde/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=latest
+            # overwrite the release tag, like the official Docker images do
+            type=raw,value=${{ steps.release.outputs.tag }}
+            # and a dated tag, so an exact rebuild can be pinned
+            type=raw,value=${{ steps.release.outputs.dated_tag }}
+          labels: |
+            org.opencontainers.image.version=${{ steps.release.outputs.tag }}
+            org.opencontainers.image.revision=${{ steps.git.outputs.sha }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          # always pull the base image and rebuild every layer, so the apt
+          # layers really pick up new Debian packages
+          pull: true
+          no-cache: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Report only for now (exit-code 0): findings show up under
+      # Security > Code scanning, the build does not fail on them.
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: dzdde/${{ github.event.repository.name }}:${{ steps.release.outputs.dated_tag }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
+          exit-code: "0"
+
+      - name: Upload Trivy results to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-image
+          # File the results under the branch the workflow runs on (main for
+          # the schedule), not under the checked-out release commit, so they
+          # show up in the default Security > Code scanning view.
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}

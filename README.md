@@ -33,6 +33,7 @@ https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)
     - [User Provisioning](#user-provisioning)
     - [File Ownership](#file-ownership)
   - [Updates \& Upgrades](#updates--upgrades)
+  - [Image Tags](#image-tags)
   - [Beta Channel](#beta-channel)
   - [Contributing \& Development](#contributing--development)
   - [Example Setups](#example-setups)
@@ -340,6 +341,22 @@ docker compose exec -it redcap redcap-install
 
 > [!WARNING]
 > `REDCAP_VERSION` also accepts the symbolic values `latest-lts` / `latest-std`, resolved against the community portal on every boot. Combined with `REDCAP_AUTO_UPGRADE=true` this gives a fully unattended, always-current instance — but it applies untested releases and their schema migrations automatically on every reboot. **This is uncharted territory and not currently recommended.** Both flags must be set deliberately; for production, pin an explicit version. See [REDCAP_UPGRADE.md — Tracking the latest version](REDCAP_UPGRADE.md#tracking-the-latest-version-latest-lts--latest-std).
+
+---
+
+## Image Tags
+
+| Tag | What it is |
+|---|---|
+| `latest` | The newest stable release |
+| `1.2.3` | Release `1.2.3` (always its most recent build) |
+| `1.2.3-YYYYMMDD` | Release `1.2.3` as rebuilt on that date (UTC) |
+| `beta`, `1.3.0-beta.1` | Pre-releases, see [Beta Channel](#beta-channel) |
+
+The newest stable release is rebuilt from scratch every Monday, so security fixes from the Debian base
+image (Apache, OpenSSL, ImageMagick, Ghostscript, …) reach `latest` and that release's `1.2.3` tag without
+waiting for a new release. Each rebuild is also pushed with a dated tag, so you can pin a specific build (or pin the
+image digest). Pull `latest` or `1.2.3` regularly to get the fixes.
 
 ---
 

@@ -14,34 +14,36 @@ ARG PECL_IMAGICK_SHA256=3a3587c0a524c17d0dad9673a160b90cd776e836838474e173b549ed
 ARG PECL_YAML_VERSION=2.3.0
 ARG PECL_YAML_SHA256=bc8404807a3a4dc896b310af21a7f8063aa238424ff77f27eb6ffa88b5874b8a
 
-# Install Webserver dep
-RUN apt-get update -qq && \
-    apt-get -yq --no-install-recommends install \
-    msmtp-mta \
-    ca-certificates \
-    libpng-dev \
-    libzip-dev \
-    zip \
-    ghostscript \
-    libmagickwand-dev \
-    libyaml-dev \
-    # cron req
-    busybox-static \
-    # mysql client for upgrade backup/restore (mysqldump + mysql)
-    default-mysql-client \
-    # INSTALL MYSQLI AND OTHER DOCKER FUN
-    && docker-php-ext-install gd zip mysqli \
-    ### cleanup
-    && rm -r /var/lib/apt/lists/*
-
-# Build the pinned PECL extensions from verified tarballs:
-# imagick (REDCap PDF/image handling) and yaml (user provisioning).
-# Built with phpize instead of `pecl install`: pecl unpacks the files in an order that makes the
-# *.stub.php look newer than the shipped *_arginfo.h, and make then regenerates them with a
-# PHP-Parser downloaded unverified from GitHub. Unpacking with tar keeps the shipped mtimes, and
-# PHP= / PHP_EXECUTABLE= switch the regeneration off.
+# Install runtime packages, build the PHP extensions, then purge the build-only -dev packages
+# again in the same layer, keeping just the shared libraries the extensions link against.
+#
+# The PECL extensions imagick (REDCap PDF/image handling) and yaml (user provisioning) are built
+# from the pinned, sha256-checked tarballs with phpize instead of `pecl install`: pecl unpacks the
+# files in an order that makes the *.stub.php look newer than the shipped *_arginfo.h, and make then
+# regenerates them with a PHP-Parser downloaded unverified from GitHub. Unpacking with tar keeps the
+# shipped mtimes, and PHP= / PHP_EXECUTABLE= switch the regeneration off.
 # yaml is enabled by `extension=yaml.so` in our php.ini, imagick via docker-php-ext-enable.
 RUN set -eux; \
+    apt-get update -qq; \
+    apt-get -yq --no-install-recommends install \
+        msmtp-mta \
+        ca-certificates \
+        zip \
+        ghostscript \
+        # cron req
+        busybox-static \
+        # mysql client for upgrade backup/restore (mysqldump + mysql)
+        default-mysql-client \
+    ; \
+    savedAptMark="$(apt-mark showmanual)"; \
+    # build-only packages, purged again below
+    apt-get -yq --no-install-recommends install \
+        libpng-dev \
+        libzip-dev \
+        libmagickwand-dev \
+        libyaml-dev \
+    ; \
+    docker-php-ext-install gd zip mysqli; \
     build_pecl_ext() { \
         curl -fsSL -o "/tmp/$1.tgz" "https://pecl.php.net/get/$1-$2.tgz"; \
         echo "$3  /tmp/$1.tgz" | sha256sum -c -; \
@@ -58,8 +60,25 @@ RUN set -eux; \
     build_pecl_ext imagick "${PECL_IMAGICK_VERSION}" "${PECL_IMAGICK_SHA256}"; \
     build_pecl_ext yaml "${PECL_YAML_VERSION}" "${PECL_YAML_SHA256}"; \
     docker-php-ext-enable imagick; \
-    # fail the build if the extensions are missing or not the pinned release
+    # purge the -dev packages; keep (apt-mark manual) every package that ships a library
+    # one of the built extensions links against
+    apt-mark auto '.*' > /dev/null; \
+    apt-mark manual $savedAptMark > /dev/null; \
+    find /usr/local/lib/php/extensions -type f -name '*.so' -exec ldd '{}' ';' \
+        | awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
+        | sort -u \
+        | xargs -r dpkg-query --search \
+        | cut -d: -f1 \
+        | sort -u \
+        | xargs -r apt-mark manual; \
+    apt-get -yq purge --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    rm -rf /var/lib/apt/lists/*; \
+    # fail the build if a -dev package survived, or an extension is missing / not the pinned release
+    ! dpkg -l | grep -E '^ii +(libpng|libzip|libmagickwand|libmagickcore|libyaml)[^ ]*-dev'; \
     php -m | grep -qx imagick; \
+    php -m | grep -qx gd; \
+    php -m | grep -qx zip; \
+    php -m | grep -qx mysqli; \
     php -d extension=yaml.so -m | grep -qx yaml; \
     php --ri imagick | grep -q "module version => ${PECL_IMAGICK_VERSION}\$"; \
     php -d extension=yaml.so --ri yaml | grep -q "Module Version => ${PECL_YAML_VERSION}\$"

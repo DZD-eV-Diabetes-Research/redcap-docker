@@ -6,9 +6,13 @@ FROM php:8.4.27-apache-bookworm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-
-
-
+# PECL extensions, pinned to a release. `pecl install` verifies no signature, so the tarballs
+# are downloaded from pecl.php.net and checked against these sha256 sums first.
+# Bumping a version needs the matching sum: sha256sum of https://pecl.php.net/get/<name>-<version>.tgz
+ARG PECL_IMAGICK_VERSION=3.8.1
+ARG PECL_IMAGICK_SHA256=3a3587c0a524c17d0dad9673a160b90cd776e836838474e173b549ed864352ee
+ARG PECL_YAML_VERSION=2.3.0
+ARG PECL_YAML_SHA256=bc8404807a3a4dc896b310af21a7f8063aa238424ff77f27eb6ffa88b5874b8a
 
 # Install Webserver dep
 RUN apt-get update -qq && \
@@ -29,32 +33,40 @@ RUN apt-get update -qq && \
     busybox-static \
     # mysql client for upgrade backup/restore (mysqldump + mysql)
     default-mysql-client \
-    # yaml support for user prov
-    && pecl install yaml \
-    # INSTALL IMAGICK
-    #&& pecl install imagick \
-    #&& docker-php-ext-enable imagick \
     # INSTALL MYSQLI AND OTHER DOCKER FUN
     && docker-php-ext-install gd zip mysqli \
     ### cleanup
     && rm -r /var/lib/apt/lists/*
 
-#  Install imagick from source as there is no PECL version
-RUN apt-get update -qq && \
-    apt-get -yq --no-install-recommends install git && \
-    git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
-    cd /tmp/imagick && \
-    git fetch origin master && \
-    git switch master && \
-    cd /tmp/imagick && \
-    phpize && \
-    ./configure && \
-    make && \
-    make install && \
-    docker-php-ext-enable imagick && \
-    # cleanup
-    apt-get -yq purge git && \
-    rm -r /tmp/imagick
+# Build the pinned PECL extensions from verified tarballs:
+# imagick (REDCap PDF/image handling) and yaml (user provisioning).
+# Built with phpize instead of `pecl install`: pecl unpacks the files in an order that makes the
+# *.stub.php look newer than the shipped *_arginfo.h, and make then regenerates them with a
+# PHP-Parser downloaded unverified from GitHub. Unpacking with tar keeps the shipped mtimes, and
+# PHP= / PHP_EXECUTABLE= switch the regeneration off.
+# yaml is enabled by `extension=yaml.so` in our php.ini, imagick via docker-php-ext-enable.
+RUN set -eux; \
+    build_pecl_ext() { \
+        curl -fsSL -o "/tmp/$1.tgz" "https://pecl.php.net/get/$1-$2.tgz"; \
+        echo "$3  /tmp/$1.tgz" | sha256sum -c -; \
+        mkdir "/tmp/$1"; \
+        tar -xzf "/tmp/$1.tgz" -C "/tmp/$1" --strip-components=1 "$1-$2"; \
+        cd "/tmp/$1"; \
+        phpize; \
+        ./configure; \
+        make -j"$(nproc)" PHP= PHP_EXECUTABLE=; \
+        make install PHP= PHP_EXECUTABLE=; \
+        cd /; \
+        rm -rf "/tmp/$1" "/tmp/$1.tgz"; \
+    }; \
+    build_pecl_ext imagick "${PECL_IMAGICK_VERSION}" "${PECL_IMAGICK_SHA256}"; \
+    build_pecl_ext yaml "${PECL_YAML_VERSION}" "${PECL_YAML_SHA256}"; \
+    docker-php-ext-enable imagick; \
+    # fail the build if the extensions are missing or not the pinned release
+    php -m | grep -qx imagick; \
+    php -d extension=yaml.so -m | grep -qx yaml; \
+    php --ri imagick | grep -q "module version => ${PECL_IMAGICK_VERSION}\$"; \
+    php -d extension=yaml.so --ri yaml | grep -q "Module Version => ${PECL_YAML_VERSION}\$"
 
 
 # Update ImageMagick policy

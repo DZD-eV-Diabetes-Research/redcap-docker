@@ -713,3 +713,111 @@ def test_msmtprc_secure_after_in_place_restart(
         f"After in-place restart /etc/msmtprc must remain www-data:www-data 600, "
         f"got {owner}:{group} {mode}"
     )
+
+
+# ── CVE-2026-90817 request guard ───────────────────────────────────────────────
+#
+# The guard (container_assets/php/request_guard.php, auto_prepend_file) runs
+# before REDCap, so it answers 403 even for an invalid survey hash. That lets
+# these tests run without creating a project/survey. The positive exploit check
+# against a real public survey was done by hand (see SECURITY.md).
+
+_FAKE_SURVEY = "/surveys/?s=XXXXXXXXXX"
+
+# (description, query appended to _FAKE_SURVEY)
+_CVE_2026_90817_ATTACKS = [
+    ("template exploit, double-encoded index.php", "&__passthru=%2569ndex.php&route=ParcelController%3Ashow"),
+    ("triple-encoded index.php", "&__passthru=%252569ndex.php&route=ParcelController%3Ashow"),
+    ("array __passthru", "&__passthru[]=index.php&route=ParcelController%3Ashow"),
+    ("index.php passthru with non-allow-listed route", "&__passthru=index.php&route=DataImportController%3Aindex"),
+    ("double-encoded route", "&__passthru=index.php&route=PdfController%253Aindex"),
+    ("PHP stream wrapper in survey param", "&x=php%3A%2F%2Ffilter%2Fresource%3D%2Fetc%2Fpasswd"),
+]
+_CVE_2026_90817_LEGIT = [
+    ("survey page", ""),
+    ("image_view passthru", "&__passthru=DataEntry%2Fimage_view.php&id=1&doc_id_hash=x"),
+    ("PDF passthru with allowed route", "&__passthru=index.php&route=PdfController:index"),
+]
+
+
+def _http_status(redcap_stack: RedcapStack, path_and_query: str) -> str:
+    exit_code, out = redcap_stack.exec_run(
+        ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", f"http://localhost{path_and_query}"]
+    )
+    assert exit_code == 0, f"curl failed for {path_and_query}: {out}"
+    return out.strip()
+
+
+def _cve_2026_90817_affected(v: str) -> bool:
+    """Python mirror of is_affected_by_cve_2026_90817() in 140-security-advisories.php."""
+    t = tuple(int(x) for x in v.split("."))
+    if t < (13, 3, 0):
+        return False
+    if (16, 0, 49) <= t < (16, 1, 0) or (17, 3, 10) <= t < (17, 4, 0) or t >= (17, 4, 4):
+        return False
+    return True
+
+
+@pytest.mark.timeout(60)
+def test_request_guard_is_prepended(docker_client) -> None:
+    """The request guard must be wired in via auto_prepend_file."""
+    exit_code, out = _run_php_in_image(docker_client, "echo ini_get('auto_prepend_file');")
+    assert exit_code == 0, f"php -r failed: {out}"
+    assert out == "/opt/redcap-docker/assets/php/request_guard.php", (
+        f"auto_prepend_file must point at the request guard, got {out!r}"
+    )
+
+
+@pytest.mark.timeout(300)
+def test_request_guard_blocks_cve_2026_90817(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """Known exploit variants get 403; legitimate survey passthrough URLs do not."""
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(vol, dump, _BASE_ENV)
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    for desc, query in _CVE_2026_90817_ATTACKS:
+        status = _http_status(redcap_stack, _FAKE_SURVEY + query)
+        assert status == "403", f"Attack not blocked ({desc}): HTTP {status} for {query}"
+
+    for desc, query in _CVE_2026_90817_LEGIT:
+        status = _http_status(redcap_stack, _FAKE_SURVEY + query)
+        assert status != "403", f"Legitimate request blocked ({desc}): HTTP {status} for {query}"
+
+    assert "[redcap-docker request-guard] BLOCKED" in redcap_stack.logs(), (
+        "Blocked requests must be logged so operators can spot exploitation attempts."
+    )
+
+
+@pytest.mark.timeout(300)
+def test_request_guard_can_be_disabled(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """REDCAP_REQUEST_GUARD=false turns the guard off (escape hatch for false positives)."""
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(vol, dump, {**_BASE_ENV, "REDCAP_REQUEST_GUARD": "false"})
+    redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    status = _http_status(redcap_stack, _FAKE_SURVEY + _CVE_2026_90817_ATTACKS[0][1])
+    assert status != "403", f"Guard still active with REDCAP_REQUEST_GUARD=false (HTTP {status})"
+
+
+@pytest.mark.timeout(300)
+def test_cve_2026_90817_boot_warning(
+    redcap_stack: RedcapStack,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """Boot logs warn about CVE-2026-90817 if, and only if, the installed version is affected."""
+    vol, dump = installed_a_snapshot
+    redcap_stack.start_from_snapshot(vol, dump, _BASE_ENV)
+    logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
+
+    version = redcap_stack.get_redcap_version()
+    assert version, "Could not read redcap_version from the DB"
+    warned = "is affected by CVE-2026-90817" in logs
+    assert warned == _cve_2026_90817_affected(version), (
+        f"REDCap v{version}: expected warning={_cve_2026_90817_affected(version)}, got {warned}"
+    )

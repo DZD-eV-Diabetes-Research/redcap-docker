@@ -7,6 +7,7 @@ This document describes the security measures built into the redcap-docker conta
 
 - [Security](#security)
   - [Built-in hardening (defaults)](#built-in-hardening-defaults)
+  - [Request guard / CVE-2026-90817](#request-guard--cve-2026-90817)
   - [Read-only webroot and Easy Upgrade](#read-only-webroot-and-easy-upgrade)
   - [File integrity verification](#file-integrity-verification)
   - [HTTP security headers](#http-security-headers)
@@ -33,6 +34,47 @@ The following security controls are active **by default** without any configurat
 | PHP version hiding | **on** | `expose_php = Off` |
 | PHP error display | **off** | `display_errors = Off` — errors go to logs, not to the browser |
 | Easy Upgrade | **disabled** | `REDCAP_EASY_UPGRADE_ENABLE=false` |
+| Request guard (CVE-2026-90817 virtual patch) | **on** | `REDCAP_REQUEST_GUARD=true` — see [below](#request-guard--cve-2026-90817) |
+
+---
+
+## Request guard / CVE-2026-90817
+
+> [!CAUTION]
+> **CVE-2026-90817** is an unauthenticated remote code execution in REDCap itself (CVSS 9.8, actively
+> exploited, CISA KEV since 2026-11-18). Anyone with a **public survey link** can run code on the server.
+> Affected: REDCap **13.3.0 and later**. Fixed in **16.0.49** (LTS), **17.3.10** (LTS) and **17.4.4** (Standard).
+> Other versions in that range have no published fix, so treat them as affected.
+>
+> **Upgrade REDCap.** The guard below only buys time:
+> ```bash
+> docker compose exec redcap redcap-upgrade --version 16.0.49   # or 17.3.10 / 17.4.4
+> ```
+
+The image ships a small PHP request guard (`/opt/redcap-docker/assets/php/request_guard.php`, loaded via
+`auto_prepend_file`) that runs before REDCap on every web request and blocks the known exploit path:
+
+| Rule | Blocks |
+|---|---|
+| `__passthru` / `route` must be plain strings with no `%` after PHP's own URL decoding | The double-encoded `%2569ndex.php` trick that skips REDCap's route allow-list |
+| A passthrough to `index.php` is only allowed with `PdfController:index` or `SendItController:download` | Reaching any other controller (e.g. Data Import) from a survey link |
+| Survey requests may not contain PHP stream wrappers (`php://`, `phar://`, `data://`, …) in GET/POST/cookie values | The file-path/stream half of the exploit chain |
+
+Blocked requests get **HTTP 403** and a log line in the container output:
+
+```
+[redcap-docker request-guard] BLOCKED (CVE-2026-90817: encoded __passthru/route) GET /surveys/?s=...&__passthru=%2569ndex.php&route=... from 203.0.113.7
+```
+
+Search your logs for that string. It shows exploitation attempts. On older logs (before this image),
+look for `__passthru=%25` or `__passthru=` together with `route=` other than `PdfController:index` /
+`SendItController:download` in access logs.
+
+The container also prints a `[SECURITY]` warning at boot when the installed REDCap version is affected.
+
+Disable the guard only to rule it out when debugging a false positive: `REDCAP_REQUEST_GUARD=false`.
+If you set your own `auto_prepend_file` in a custom PHP ini, it replaces the guard. `require` the guard
+from your own prepend file to keep it.
 
 ---
 
@@ -292,6 +334,7 @@ The container prints advisory messages at startup for common misconfigurations:
 | `REDCAP_COMMUNITY_PASSWORD` set as env var | Suggests using `_FILE` variant instead |
 | `SERVER_NAME=localhost` | TLS not configured |
 | `RCCONF_redcap_base_url` uses `http://` (non-localhost) | Unencrypted transport |
+| Installed REDCap version affected by CVE-2026-90817 | Upgrade target versions + whether the request guard is on |
 
 ---
 

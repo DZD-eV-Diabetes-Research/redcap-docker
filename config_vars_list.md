@@ -101,6 +101,7 @@ See [README — Quick Start](README.md#quick-start) and [REDCAP_UPGRADE.md — M
 | `REDCAP_AUTO_UPGRADE` | `false` | Set to `true` to allow the container to upgrade automatically when `REDCAP_VERSION` is bumped (or when a symbolic `latest-*` value resolves to a newer release). Default is conservative — logs a warning but does not upgrade. |
 | `REDCAP_COMMUNITY_USER` | `` | REDCap community portal username used for downloading REDCap. Also read by `redcap-upgrade` and `redcap-install`. |
 | `REDCAP_COMMUNITY_PASSWORD` | `` | REDCap community portal password. |
+| `REDCAP_REQUEST_GUARD` | `true` | PHP request guard that runs before REDCap and blocks the CVE-2026-90817 survey passthrough exploit. Keep it on; set `false` only to debug a false positive. See [SECURITY.md](SECURITY.md#request-guard--cve-2026-90817). |
 
 > [!WARNING]
 > **`latest-lts` / `latest-std` + `REDCAP_AUTO_UPGRADE=true` is fully unattended and uncharted territory — not currently recommended.**

@@ -113,7 +113,7 @@ services:
     image: dzdde/redcap-docker
     environment:
       # --- REDCap source ---
-      REDCAP_VERSION: "14.9.5"
+      REDCAP_VERSION: "16.0.49"
       REDCAP_COMMUNITY_USER: your_community_username
       REDCAP_COMMUNITY_PASSWORD: your_community_password
 

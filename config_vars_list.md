@@ -787,7 +787,7 @@ External filesystem vault for files uploaded via "File Upload" field types.
 | `RCCONF_pdf_econsent_system_enabled` | boolean | `1` | `0`, `1` | Enable the PDF eConsent system globally. |
 | `RCCONF_pdf_econsent_system_ip` | boolean | `1` | `0`, `1` | Log the participant's IP address in the PDF eConsent record. |
 | `RCCONF_pdf_econsent_system_custom_text` | string | `` | HTML | Custom text added to PDF eConsent documents (e.g. institutional disclosure). |
-| `RCCONF_display_inline_pdf_in_pdf` | boolean | `1` | `0`, `1` | Render inline/embedded PDFs within eConsent PDF files. Needs the Imagick PHP extension and Ghostscript, both in the image. |
+| `RCCONF_display_inline_pdf_in_pdf` | boolean | `1` | `0`, `1` | Render inline/embedded PDFs within eConsent PDF files. Needs the Imagick PHP extension and Ghostscript, both in the image (see [SECURITY.md](SECURITY.md#ghostscript-and-imagemagick) for how they are restricted). |
 
 ---
 

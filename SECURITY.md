@@ -12,6 +12,7 @@ This document describes the security measures built into the redcap-docker conta
   - [File integrity verification](#file-integrity-verification)
   - [HTTP security headers](#http-security-headers)
   - [PHP hardening](#php-hardening)
+  - [Ghostscript and ImageMagick](#ghostscript-and-imagemagick)
   - [Docker Secrets — avoiding plaintext passwords](#docker-secrets--avoiding-plaintext-passwords)
   - [Container capabilities](#container-capabilities)
   - [TLS / HTTPS](#tls--https)
@@ -35,6 +36,7 @@ The following security controls are active **by default** without any configurat
 | PHP error display | **off** | `display_errors = Off` — errors go to logs, not to the browser |
 | Easy Upgrade | **disabled** | `REDCAP_EASY_UPGRADE_ENABLE=false` |
 | Request guard (CVE-2026-90817 virtual patch) | **on** | `REDCAP_REQUEST_GUARD=true` — see [below](#request-guard--cve-2026-90817) |
+| ImageMagick policy | **on** | PDF read-only, PostScript family denied — see [below](#ghostscript-and-imagemagick) |
 
 ---
 
@@ -222,7 +224,23 @@ volumes:
 ```
 
 > [!CAUTION]
-> REDCap uses `exec()` internally (e.g. for PDF generation via Ghostscript). Disabling it will break PDF exports. Test thoroughly before adding function restrictions.
+> REDCap calls `exec()` / `shell_exec()` in a few places (e.g. the Control Center cron page looks up the PHP binary). Ghostscript is not one of them: ImageMagick starts it from inside the Imagick extension. Test thoroughly before adding function restrictions.
+
+---
+
+## Ghostscript and ImageMagick
+
+Ghostscript has a long history of remote code execution bugs, mostly triggered by crafted PostScript. It is in the image because REDCap needs it for one feature: rendering uploaded PDFs as images inside the PDFs REDCap generates (inline PDF attachments in PDF exports, `RCCONF_display_inline_pdf_in_pdf`, and the consent form PDF in eConsent; checked under Control Center > Configuration Check). REDCap does this through the Imagick PHP extension, and ImageMagick hands the PDF to Ghostscript.
+
+How it is contained:
+
+- **ImageMagick policy** (`/etc/ImageMagick-7/policy.xml`): `PDF` is read-only, and the PostScript family (`PS`, `PS2`, `PS3`, `EPS`, `EPI`, `EPSI`, `EPSF`, `EPT*`) plus `XPS` is denied for reading and writing. ImageMagick checks the detected format, so PostScript renamed to `.pdf` is refused too. Debian's default ImageMagick 7 policy has none of these rules.
+- **Build-time check**: `scripts/imagemagick_policy_check.php` renders a PDF to PNG and makes sure PDF writing and every PostScript format are refused by the policy. The image build fails otherwise; the test suite runs the same check.
+- **Patches**: Ghostscript and ImageMagick come from Debian packages. The newest release image is rebuilt weekly, so Debian security fixes reach `latest` without waiting for a new release. Pull regularly.
+
+What stays open: PDFs are still parsed by Ghostscript, so a crafted PDF uploaded to a field that is rendered inline remains the attack path. Keeping the image current is what covers it.
+
+`RCCONF_display_inline_pdf_in_pdf=0` switches off the inline rendering of PDF attachments. REDCap 17.4 still renders eConsent consent form PDFs through Imagick with that setting off.
 
 ---
 

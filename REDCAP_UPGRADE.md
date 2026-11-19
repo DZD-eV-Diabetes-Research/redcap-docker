@@ -63,7 +63,7 @@ The fully automated path. Declare the desired version in your compose file and t
 services:
   redcap:
     environment:
-      REDCAP_VERSION: "14.9.5"
+      REDCAP_VERSION: "16.0.49"
       REDCAP_AUTO_UPGRADE: "true"           # required to enable auto-upgrade
       REDCAP_COMMUNITY_USER: your_username
       REDCAP_COMMUNITY_PASSWORD: your_password
@@ -119,7 +119,7 @@ services:
 > - Schema migrations run unattended; a failed migration mid-upgrade auto-rolls back, but recovery is still disruptive.
 > - Your deployment is no longer reproducible — two identical reboots on different days can land on different versions.
 >
-> **We do not recommend this combination at this time.** It exists for users who explicitly want hands-off, always-current instances and accept the risk. Both `REDCAP_VERSION=latest-*` and `REDCAP_AUTO_UPGRADE=true` must be set **deliberately** — neither is a default. For production, **pin an explicit version** (e.g. `REDCAP_VERSION: "16.0.34"`) and upgrade on a reviewed schedule. **Always keep verified backups.**
+> **We do not recommend this combination at this time.** It exists for users who explicitly want hands-off, always-current instances and accept the risk. Both `REDCAP_VERSION=latest-*` and `REDCAP_AUTO_UPGRADE=true` must be set **deliberately** — neither is a default. For production, **pin an explicit version** (e.g. `REDCAP_VERSION: "16.0.49"`) and upgrade on a reviewed schedule. **Always keep verified backups.**
 
 ---
 

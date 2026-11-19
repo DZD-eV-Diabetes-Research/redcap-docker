@@ -19,10 +19,6 @@ RUN apt-get update -qq && \
     apt-get -yq --no-install-recommends install \
     msmtp-mta \
     ca-certificates \
-    git \
-    vim \
-    ssh \
-    wget \
     libpng-dev \
     libzip-dev \
     zip \

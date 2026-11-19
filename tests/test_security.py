@@ -310,12 +310,13 @@ def test_php_session_upload_progress_off(docker_client) -> None:
 
 def _fetch_response_headers(redcap_stack: RedcapStack) -> str:
     """
-    Make a HEAD request to http://localhost/ from inside the container and
-    return the raw response header text.  Uses wget (always available in the
-    image) with --server-response; stderr is merged so exec_run captures it.
+    Make a GET request to http://localhost/ from inside the container and
+    return the raw response header text.  Uses curl (shipped with the php base
+    image, also used by the healthcheck); -D - prints the headers of every
+    response, -L follows redirects like wget did, the body is discarded.
     """
     exit_code, out = redcap_stack.exec_run(
-        "wget -q --server-response -O /dev/null http://localhost/ 2>&1 || true"
+        "curl -sL -D - -o /dev/null http://localhost/ 2>&1 || true"
     )
     return out
 

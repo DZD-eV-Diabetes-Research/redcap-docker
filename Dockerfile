@@ -95,6 +95,10 @@ ENV REDCAP_EASY_UPGRADE_ENABLE=false
 # Disabled by default because it requires a download and slows startup.
 # Aborts boot if tampering is detected.
 ENV REDCAP_INTEGRITY_CHECK_ON_BOOT=false
+# Request guard (PHP auto_prepend_file) that runs before REDCap on every web request.
+# Virtual patch for CVE-2026-90817 (survey passthrough RCE) — see SECURITY.md.
+# Keep it on; upgrading REDCap is still the real fix.
+ENV REDCAP_REQUEST_GUARD=true
 
 ENV REDCAP_DOCKER_SCRIPTS_DEBUG=false
 ENV WWW_DATA_UID=33

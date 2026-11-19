@@ -4,7 +4,7 @@ services:
     environment:
       # --- Beta: Auto-install/upgrade ---
       # The container downloads this version on first boot if files are not yet present.
-      REDCAP_VERSION: "14.9.5"
+      REDCAP_VERSION: "16.0.49"
       REDCAP_COMMUNITY_USER: your_community_username       # community.projectredcap.org
       REDCAP_COMMUNITY_PASSWORD: your_community_password  # community.projectredcap.org
       # Set to "true" to also auto-upgrade when REDCAP_VERSION is bumped.

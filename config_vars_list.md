@@ -6,6 +6,7 @@
 - [www-data user and group ID](#www-data-user-and-group-id)
 - [Run custom or upgrade SQL Scripts at boot](#run-custom-or-upgrade-sql-scripts-at-boot)
 - [Fix REDCap source files/directory permissions](#fix-redcap-source-filesdirectory-permissions)
+- [Webroot write access](#webroot-write-access)
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)
 - [User provisioning](#user-provisioning)
@@ -187,6 +188,20 @@ Defaults to `true`
 
 > [!TIP]
 > If you are not happy with the UID/GID of the user www-data have a look at [`WWW_DATA_UID`/`WWW_DATA_GID`](#www-data-user-and-group-id).
+
+
+
+# Webroot write access
+
+By default the webroot is read-only for the web server user `www-data` (see [SECURITY.md](SECURITY.md)). These options open it up again, fully or in part. `REDCAP_MODULES_WEB_INSTALL_ENABLE` has no effect while `FIX_REDCAP_DIR_PERMISSIONS` is `false`.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `REDCAP_EASY_UPGRADE_ENABLE` | `false` | Make the whole webroot writable for `www-data`, as REDCap's browser-based "Easy Upgrade" needs it. Not recommended for production. |
+| `REDCAP_MODULES_WEB_INSTALL_ENABLE` | `false` | Make only `<webroot>/modules` writable for `www-data`, so admins can install and delete external modules in the Control Center. `www-data` can then write PHP that Apache executes. See [MODULE_PROV.md](MODULE_PROV.md#installing-modules-in-the-web-ui). |
+
+> [!TIP]
+> With `REDCAP_MODULES_WEB_INSTALL_ENABLE=false`, downloading a module in the Control Center fails with the misleading message *"A duplicate request was detected"*. See [MODULE_PROV.md](MODULE_PROV.md#troubleshooting).
 
 
 

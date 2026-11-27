@@ -12,7 +12,9 @@
  * IMPORTANT: this runs during container startup as root, *after*
  * 90-fix_permissions.sh has already locked the webroot read-only for www-data.
  * We therefore re-apply the same ownership/permissions on every file we add so
- * Apache (www-data) can read the freshly placed module.
+ * Apache (www-data) can read the freshly placed module. With
+ * REDCAP_MODULES_WEB_INSTALL_ENABLE=true (or Easy Upgrade) modules/ belongs to
+ * www-data instead, and so do the files placed here.
  */
 
 require_once __DIR__ . '/redcap_info.php';
@@ -53,35 +55,66 @@ function module_provisioning_ensure_modules_dir(): string
             throw new RuntimeException("Failed to create modules directory: $dir");
         }
     }
-    module_apply_webroot_perms($dir);
+    // Only the directory itself: the modules in it are handled when placed,
+    // and 90-fix_permissions.sh keeps the rest in shape on every boot. A
+    // recursive walk here would re-touch every module on every boot (#11) and,
+    // in web install mode, run as root over a tree www-data can write to.
+    module_apply_webroot_perms($dir, false);
     return $dir;
 }
 
 /**
  * Re-apply webroot ownership/permissions to a path we just wrote, mirroring
  * 90-fix_permissions.sh so the running web process can read the module.
+ * Symlinks are skipped, never followed: chown()/chmod() on a link would change
+ * its target, which can be any file in the container.
  */
-function module_apply_webroot_perms(string $path): void
+function module_apply_webroot_perms(string $path, bool $recursive = true): void
 {
-    $easy_upgrade = filter_var(getenv('REDCAP_EASY_UPGRADE_ENABLE'), FILTER_VALIDATE_BOOLEAN);
+    // Exactly the truthy set of 90-fix_permissions.sh, so both agree on the mode.
+    $truthy = static fn($v): bool =>
+        is_string($v) && preg_match('/^(1|[yY]|[yY]es|[tT]rue)$/', $v) === 1;
+    // Like 90-fix_permissions.sh, the web install mode only applies while the
+    // container manages webroot permissions at all.
+    $web_install = $truthy(getenv('REDCAP_MODULES_WEB_INSTALL_ENABLE'))
+        && $truthy(getenv('FIX_REDCAP_DIR_PERMISSIONS'));
+    $web_ui_manages_modules = $truthy(getenv('REDCAP_EASY_UPGRADE_ENABLE')) || $web_install;
 
-    // www-data must always be able to read; in easy-upgrade mode it also owns
-    // the tree so its UI can manage modules.
-    $owner = $easy_upgrade ? 'www-data' : 'root';
-    @chown($path, $owner);
-    @chgrp($path, 'www-data');
-    @chmod($path, is_dir($path) ? 0750 : 0640);
+    // www-data must always be able to read. In Easy Upgrade mode and in module
+    // web install mode it also owns the tree, so provisioned modules can be
+    // updated or deleted from the Control Center like downloaded ones.
+    $owner = $web_ui_manages_modules ? 'www-data' : 'root';
 
-    if (is_dir($path)) {
+    // Without the FOWNER capability (dropped in the documented minimal cap
+    // set) root can only chmod files it owns. So change the mode while the
+    // file is root-owned: before handing it to www-data, after taking it back.
+    $apply = static function (string $p) use ($owner): void {
+        if (is_link($p)) {
+            return;
+        }
+        $mode = is_dir($p) ? 0750 : 0640;
+        if ($owner === 'www-data') {
+            @chmod($p, $mode);
+            @chgrp($p, 'www-data');
+            @chown($p, $owner);
+        } else {
+            @chown($p, $owner);
+            @chgrp($p, 'www-data');
+            @chmod($p, $mode);
+        }
+    };
+
+    $apply($path);
+
+    if ($recursive && is_dir($path) && !is_link($path)) {
+        // RecursiveDirectoryIterator does not descend into symlinked dirs by
+        // default; $apply skips the links themselves.
         $items = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
             RecursiveIteratorIterator::SELF_FIRST
         );
         foreach ($items as $item) {
-            $p = $item->getPathname();
-            @chown($p, $owner);
-            @chgrp($p, 'www-data');
-            @chmod($p, $item->isDir() ? 0750 : 0640);
+            $apply($item->getPathname());
         }
     }
 }

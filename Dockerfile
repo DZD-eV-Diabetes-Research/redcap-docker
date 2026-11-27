@@ -91,6 +91,11 @@ ENV REDCAP_AUTO_UPGRADE=false
 # risk on production servers. Set to true only if you specifically need the in-browser upgrade
 # tool — the container's own redcap-upgrade command does NOT require this to be enabled.
 ENV REDCAP_EASY_UPGRADE_ENABLE=false
+# Let admins install external modules in REDCap's Control Center (Repo download, module delete).
+# Makes only <webroot>/modules writable for www-data; the rest of the webroot stays read-only.
+# www-data can then write PHP that Apache executes, so enable it only where admins need it.
+# Module provisioning (MODULE_PROV.md) works without it.
+ENV REDCAP_MODULES_WEB_INSTALL_ENABLE=false
 # Run a file-integrity check against a canonical REDCap download on every boot.
 # Disabled by default because it requires a download and slows startup.
 # Aborts boot if tampering is detected.

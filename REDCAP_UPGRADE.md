@@ -334,7 +334,7 @@ rm /opt/redcap-docker/backups/redcap_backup_20260518_143022_from_14.8.0_to_14.9.
 
 #### Instances upgraded with an older image
 
-Images up to and including `1.0.2` and `1.1.0-beta.6` installed the new files during `redcap-upgrade` and `REDCAP_AUTO_UPGRADE` but did not run REDCap's upgrade SQL. The Control Center of such an instance shows "YOUR REDCAP DATABASE STRUCTURE IS INCORRECT", and "Date of last REDCap upgrade" still shows an older upgrade.
+Images up to and including `1.0.2` and `1.1.0-beta.7` installed the new files during `redcap-upgrade` and `REDCAP_AUTO_UPGRADE` but did not run REDCap's upgrade SQL. The Control Center of such an instance shows "YOUR REDCAP DATABASE STRUCTURE IS INCORRECT", and "Date of last REDCap upgrade" still shows an older upgrade.
 
 To repair it, generate the missing SQL with REDCap's own code and run it. Take a database dump first. `<from>` is the version before the upgrade (see the upgrader's log or the backup file name `..._from_<from>_to_<to>.sql.gz`), `<to>` the version now installed.
 

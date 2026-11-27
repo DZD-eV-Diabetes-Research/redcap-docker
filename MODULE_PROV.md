@@ -18,6 +18,8 @@
 - [How it works under the hood](#how-it-works-under-the-hood)
 - [Updating modules & `latest`](#updating-modules--latest)
 - [Security considerations](#security-considerations)
+- [Installing modules in the web UI](#installing-modules-in-the-web-ui)
+- [Troubleshooting](#troubleshooting)
 - [Environment variable reference](#environment-variable-reference)
 
 # What this does
@@ -34,15 +36,18 @@ container takes care of the rest on startup.
 > [!IMPORTANT]
 > **With the default security hardening, REDCap's built-in web UI module
 > installer does not work.** The read-only webroot prevents the `www-data` web
-> process from writing into `/modules`, so the Control Center actions
-> *"View modules available in the REDCap Repo" → Download* and
-> *"Upload a module ZIP"* will fail. This is by design — the same hardening that
-> disables REDCap's browser-based "Easy Upgrade" (see [SECURITY.md](SECURITY.md)).
+> process from writing into `/modules`, so the Control Center action
+> *"View modules available in the REDCap Repo" → Download* fails with the
+> misleading message *"A duplicate request was detected"*, and deleting a module
+> fails too. This is by design, the same hardening that disables REDCap's
+> browser-based "Easy Upgrade" (see [SECURITY.md](SECURITY.md)).
 >
 > This module provisioning feature is the supported replacement: it places module
 > files during container startup while it still runs as `root`, then re-applies
-> the read-only webroot permissions. If you specifically want the web UI installer
-> back, set `REDCAP_EASY_UPGRADE_ENABLE=true` (not recommended for production).
+> the read-only webroot permissions. If admins on an instance need the web UI
+> installer, set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true`: only `/modules` becomes
+> writable, the rest of the webroot stays read-only. See
+> [Installing modules in the web UI](#installing-modules-in-the-web-ui).
 
 # Enable or disable module provisioning
 
@@ -374,9 +379,57 @@ Notes and limits:
   through Docker Secrets rather than plaintext env vars where possible.
 - Provisioning honours the hardened webroot: after placing files the container
   restores the read-only permissions, so the running web process still cannot
-  write PHP into the webroot.
+  write PHP into the webroot (unless you enable
+  [the web UI installer](#installing-modules-in-the-web-ui)).
 
 See [SECURITY.md](SECURITY.md) for the container's overall hardening model.
+
+# Installing modules in the web UI
+
+To let admins install modules in the Control Center (*View modules available in
+the REDCap Repo → Download*) and delete them there, set:
+
+```env
+REDCAP_MODULES_WEB_INSTALL_ENABLE=true
+```
+
+On startup the container then makes `<webroot>/modules` owned and writable by
+`www-data`. The rest of the webroot stays `root:www-data` read-only. Modules
+placed by provisioning are also owned by `www-data` in this mode, so admins can
+update or delete them in the web UI.
+
+Both ways can be combined: provision the modules every instance needs, and let
+admins try further modules in the web UI.
+
+> [!CAUTION]
+> With this option `www-data` can write PHP into `/modules`, and Apache executes
+> it. That is a narrower risk than Easy Upgrade (whole webroot writable), but a
+> real one. Enable it only on instances where admins need it. Details in
+> [SECURITY.md](SECURITY.md#installing-external-modules-in-the-web-ui).
+
+Setting the option back to `false` and restarting returns `/modules` and every
+module in it to read-only. Modules installed in the web UI stay installed and
+enabled. `REDCAP_EASY_UPGRADE_ENABLE=true` already includes this option.
+
+# Troubleshooting
+
+**"A duplicate request was detected. Please wait a minute, then refresh the page
+to see if this module has been downloaded."** when downloading a module in the
+Control Center
+
+REDCap shows this message whenever it cannot create its temporary lock
+directory in `/modules`. In this container that almost always means the web UI
+module installer is disabled (the default) and `/modules` is read-only for the
+web server. Waiting or retrying does not help. The container log says so at
+startup:
+
+```
+[PERMISSIONS] Web UI module installer is disabled: modules/ is read-only for www-data.
+```
+
+Either provision the module (see [`repo`](#repo--the-redcap-central-repository)
+for modules from the REDCap Repo), or set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true`
+and restart the container.
 
 # Environment variable reference
 
@@ -388,6 +441,7 @@ See [SECURITY.md](SECURITY.md) for the container's overall hardening model.
 | `MODULE_PROV_1` … `MODULE_PROV_N` | _unset_ | Indexed single-object module specs |
 | `MODULE_PROV_FILE_DIR` | `/opt/redcap-docker/modules` | Directory scanned for `.yaml`/`.yml`/`.json` module files |
 | `MODULE_PROV_GITHUB_TOKEN` | _unset_ | Default GitHub token for `github`/`url` downloads |
+| `REDCAP_MODULES_WEB_INSTALL_ENABLE` | `false` | Make `/modules` writable for `www-data` so admins can install and delete modules in the Control Center. See [Installing modules in the web UI](#installing-modules-in-the-web-ui) |
 
 See [examples/instance_with_modules](examples/instance_with_modules) for a
 working `docker compose` setup.

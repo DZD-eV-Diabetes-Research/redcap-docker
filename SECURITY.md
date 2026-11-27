@@ -35,6 +35,7 @@ The following security controls are active **by default** without any configurat
 | PHP error display | **off** | `display_errors = Off` — errors go to logs, not to the browser |
 | Easy Upgrade | **disabled** | `REDCAP_EASY_UPGRADE_ENABLE=false` |
 | Request guard (CVE-2026-90817 virtual patch) | **on** | `REDCAP_REQUEST_GUARD=true` — see [below](#request-guard--cve-2026-90817) |
+| Web UI module installer | **disabled** | `REDCAP_MODULES_WEB_INSTALL_ENABLE=false` |
 
 ---
 
@@ -117,6 +118,30 @@ environment:
 ```
 
 The container will print a warning at startup and grant `www-data` write access to the entire webroot. After the upgrade completes, set this back to `false` and restart.
+
+### Installing external modules in the web UI
+
+With the read-only webroot, REDCap's Control Center cannot install external modules: *View modules available in the REDCap Repo → Download* fails with the misleading message *"A duplicate request was detected"*, and deleting a module fails as well. The supported way to add modules is [module provisioning](MODULE_PROV.md), which places the files at startup.
+
+If admins on an instance need to install modules in the web UI, enable it without opening the whole webroot:
+
+```yaml
+environment:
+  REDCAP_MODULES_WEB_INSTALL_ENABLE: "true"
+```
+
+The container then makes only `modules/` writable:
+
+```
+/var/www/html/           → root:www-data  750 dirs / 640 files
+/var/www/html/modules/   → www-data:www-data  (module installer writes here)
+/var/www/html/temp/      → www-data:www-data  750
+/var/www/html/edocs/     → www-data:www-data  750
+```
+
+This is a narrower risk than Easy Upgrade, but a real one: `www-data` can write PHP into `modules/`, and Apache executes it. A file-write vulnerability in REDCap or in a module can then plant code there. Every module an admin installs also runs with full access to REDCap and its data, so the same trust rules as for provisioned modules apply. Enable it only on instances where admins need it, and prefer module provisioning with pinned versions for production.
+
+Modules provisioned at startup are also owned by `www-data` in this mode, so admins can update or delete them in the Control Center. When you set the option back to `false`, the next start returns `modules/` and all modules in it to `root:www-data` read-only. `REDCAP_EASY_UPGRADE_ENABLE=true` already includes this option.
 
 ---
 
@@ -352,6 +377,7 @@ The container prints advisory messages at startup for common misconfigurations:
 | Condition | Warning |
 |---|---|
 | `REDCAP_EASY_UPGRADE_ENABLE=true` | Webroot is writable — not recommended for production |
+| `REDCAP_MODULES_WEB_INSTALL_ENABLE=true` | `modules/` is writable, so `www-data` can write PHP that Apache executes |
 | `REDCAP_COMMUNITY_PASSWORD` set as env var | Suggests using `_FILE` variant instead |
 | `SERVER_NAME=localhost` | TLS not configured |
 | `RCCONF_redcap_base_url` uses `http://` (non-localhost) | Unencrypted transport |

@@ -25,6 +25,7 @@
 
 require_once __DIR__ . '/redcap_info.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/module_fetcher.php';
 
 function em_log(string $level, string $msg): void
 {
@@ -174,6 +175,15 @@ foreach ($tasks as $task) {
         }
         [$prefix, $version] = $resolved;
         em_log('INFO', "Central repo module #$module_id resolved to '{$prefix}_{$version}'.");
+        // REDCap extracted the module as root (root:root, world-readable). Give
+        // it the same ownership as modules placed from github/url sources, so it
+        // matches the webroot mode right away and not only after the next boot.
+        // Group www-data means it was already handled; skip to keep restarts cheap.
+        $module_dir = module_provisioning_modules_dir() . "/{$prefix}_{$version}";
+        $www_gid = posix_getgrnam('www-data')['gid'] ?? 33;
+        if (is_dir($module_dir) && !is_link($module_dir) && @filegroup($module_dir) !== $www_gid) {
+            module_apply_webroot_perms($module_dir);
+        }
         em_enable_module($prefix, $version, $enable, $projects, $settings);
         continue;
     }

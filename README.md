@@ -88,7 +88,7 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 The container ships with several hardening defaults:
 
-- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path. For the same reason, **REDCap's web UI external-module installer (Repo download / ZIP upload) does not work** under the hardened webroot — use [Module Provisioning](#module-provisioning) instead (or set `REDCAP_EASY_UPGRADE_ENABLE=true` to re-enable the web UI, not recommended for production).
+- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path. For the same reason, **REDCap's web UI external-module installer (Repo download) does not work** by default; the Control Center then reports a misleading *"A duplicate request was detected"*. Use [Module Provisioning](#module-provisioning) instead, or set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true` to make only `modules/` writable so admins can install modules in the web UI (see [SECURITY.md](SECURITY.md#installing-external-modules-in-the-web-ui) for the risk).
 - **HTTP security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` — sent on every response.
 - **PHP hardening** — `expose_php = Off`, `display_errors = Off`.
 - **Docker Secrets support** — sensitive variables (`DB_PASSWORD`, `DB_SALT`, `REDCAP_COMMUNITY_PASSWORD`) can be loaded from files via `_FILE` variants to avoid plaintext env vars.
@@ -211,7 +211,7 @@ See [config_vars_list.md](config_vars_list.md) for the full variable reference.
 | **Project provisioning** | `ENABLE_PROJECT_PROV`, `PROJECT_PROV`, `PROJECT_PROV_FILE_DIR`, see [PROJECT_PROV.md](PROJECT_PROV.md) |
 | **Data export** | `ENABLE_DATA_EXPORT`, `EXPORT_API_URL`, `EXPORT_JOBS`, `EXPORT_JOBS_FILE_DIR`, `EXPORT_DIR`, see [DATA_EXPORT.md](DATA_EXPORT.md) |
 | **Upgrades** | `REDCAP_UPGRADE_BACKUP_DIR`, `REDCAP_UPGRADE_BACKUP_DB_USER` |
-| **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
+| **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_MODULES_WEB_INSTALL_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
 | **Server** | `SERVER_NAME`, `APACHE_DOCUMENT_ROOT`, `WWW_DATA_UID`, `WWW_DATA_GID` |
 
 #### REDCap application settings
@@ -322,7 +322,7 @@ USER_PROV='[{"username":"admin","user_firstname":"Admin","user_lastname":"User",
 Install (and optionally enable + configure) REDCap external modules on container boot, via environment variables or YAML/JSON files. Sources: a GitHub release, an arbitrary zip URL, a pre-mounted directory, or the REDCap central repository.
 
 > [!NOTE]
-> Because of the read-only webroot hardening, REDCap's **web UI module installer (Repo download / ZIP upload) does not work** by default — this feature is the supported way to add modules. See [Security](#security).
+> Because of the read-only webroot hardening, REDCap's **web UI module installer (Repo download) does not work** by default, and this feature is the supported way to add modules. To let admins install modules in the web UI on an instance, set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true`. See [Security](#security).
 
 - Full documentation: [MODULE_PROV.md](MODULE_PROV.md)
 - Working example: [docker compose example](examples/instance_with_modules)

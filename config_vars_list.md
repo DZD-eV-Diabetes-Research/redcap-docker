@@ -6,9 +6,11 @@
 - [www-data user and group ID](#www-data-user-and-group-id)
 - [Run custom or upgrade SQL Scripts at boot](#run-custom-or-upgrade-sql-scripts-at-boot)
 - [Fix REDCap source files/directory permissions](#fix-redcap-source-filesdirectory-permissions)
+- [Webroot write access](#webroot-write-access)
 - [REDCap database connection environment variable](#redcap-database-connection-environment-variable)
   - [REDCap Data Transfer Services](#redcap-data-transfer-services)
 - [User provisioning](#user-provisioning)
+- [Data export](#data-export)
 - [REDCap installation](#redcap-installation)
   - [Option 1 - automated installation](#option-1---automated-installation)
   - [Option 2 - Installation with bring-your-own SQL install Script](#option-2---installation-with-bring-your-own-sql-install-script)
@@ -189,6 +191,20 @@ Defaults to `true`
 
 
 
+# Webroot write access
+
+By default the webroot is read-only for the web server user `www-data` (see [SECURITY.md](SECURITY.md)). These options open it up again, fully or in part. `REDCAP_MODULES_WEB_INSTALL_ENABLE` has no effect while `FIX_REDCAP_DIR_PERMISSIONS` is `false`.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `REDCAP_EASY_UPGRADE_ENABLE` | `false` | Make the whole webroot writable for `www-data`, as REDCap's browser-based "Easy Upgrade" needs it. Not recommended for production. |
+| `REDCAP_MODULES_WEB_INSTALL_ENABLE` | `false` | Make only `<webroot>/modules` writable for `www-data`, so admins can install and delete external modules in the Control Center. `www-data` can then write PHP that Apache executes. See [MODULE_PROV.md](MODULE_PROV.md#installing-modules-in-the-web-ui). |
+
+> [!TIP]
+> With `REDCAP_MODULES_WEB_INSTALL_ENABLE=false`, downloading a module in the Control Center fails with the misleading message *"A duplicate request was detected"*. See [MODULE_PROV.md](MODULE_PROV.md#troubleshooting).
+
+
+
 # REDCap database connection environment variable
 
 
@@ -232,6 +248,36 @@ Defaults to `true`
 
 This container image can prefill the database with table users. for more details have a look at [User provisioning](USER_PROV.md)
 
+# Project provisioning
+
+Create projects on boot from REDCap project XML files. Full documentation and spec format: [PROJECT_PROV.md](PROJECT_PROV.md)
+
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `ENABLE_PROJECT_PROV` | `false` | Switch project provisioning on |
+| `PROJECT_PROV` | `` | Project specs as a json list |
+| `PROJECT_PROV_*` | `` | Single project spec as indexed json, e.g. `PROJECT_PROV_1={"key": "study-template", "xml": "study-template.xml"}` |
+| `PROJECT_PROV_FILE_DIR` | `/opt/redcap-docker/projects` | Scanned for yaml/json files with project specs, base directory for relative `xml` paths |
+| `PROJECT_PROV_DOWNLOAD_TIMEOUT` | `600` | Maximum seconds for downloading one project XML from a `url` |
+
+# Data export
+
+Periodic exports via the REDCap API, run by the cron container (`CRON_MODE=true`). Full documentation, job format and examples: [DATA_EXPORT.md](DATA_EXPORT.md)
+
+| Variable       | Default | Description |
+| -------------- | ------- | ----------- |
+| `ENABLE_DATA_EXPORT` | `false` | Switch the data export on |
+| `EXPORT_API_URL` | `` | Required. REDCap API URL as reachable from the cron container, e.g. `http://redcap/api/` |
+| `EXPORT_DIR` | `/opt/redcap-docker/exports` | Output directory, one subdirectory per job |
+| `EXPORT_JOBS_FILE_DIR` | `/opt/redcap-docker/export-jobs` | Scanned for yaml/json files with export jobs |
+| `EXPORT_JOBS` | `` | Export jobs as a json list |
+| `EXPORT_JOBS_*` | `` | Single export job as indexed json, e.g. `EXPORT_JOBS_1={"name": "nightly", ...` |
+| `EXPORT_DEFAULT_KEEP` | `0` | Exports kept per job if the job sets no `keep`. `0` keeps all |
+| `EXPORT_SERVICE_USERNAME` | `redcap_docker_export` | REDCap user the container creates and uses for the exports |
+| `EXPORT_API_TIMEOUT` | `3600` | Maximum seconds for one API export |
+| `EXPORT_API_VERIFY_TLS` | `true` | Verify the TLS certificate of an `https://` `EXPORT_API_URL` |
+| `EXPORT_STATE_DIR` | `/tmp/redcap-export-state` | Last result and lock file per job, read by the healthcheck |
+
 
 # REDCap installation
 
@@ -267,14 +313,17 @@ See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for full documentation.
 | `REDCAP_UPGRADE_BACKUP_DIR` | `/opt/redcap-docker/backups` | Directory where `redcap-upgrade` stores pre-upgrade database backups. |
 | `REDCAP_UPGRADE_BACKUP_DB_USER` | `` | Optional elevated database user for backups (e.g. `root`). Use when the application DB user lacks `mysqldump` privileges. |
 | `REDCAP_UPGRADE_BACKUP_DB_PASSWORD` | `` | Password for `REDCAP_UPGRADE_BACKUP_DB_USER`. |
+| `REDCAP_UPGRADE_TABLE_FIX` | `true` | After an upgrade (`redcap-upgrade` or `REDCAP_AUTO_UPGRADE`), apply REDCap's Auto-Fix when its database structure check finds differences. `false` only reports them (same as `--no-table-fix`). |
 
 # REDCap Basic Admin tasks
 
 ## suspend site_admin
 
 ```env
-REDCAP_SUSPEND_SITE_ADMIN # Default: True
+REDCAP_SUSPEND_SITE_ADMIN # Default: false
 ```
+
+If set to true, REDCaps default user `site_admin` is suspended on every boot and loses all admin rights (`super_user`, `account_manager`, `access_system_config`, `access_system_upgrade`, `access_external_module_install`, `admin_rights`, `access_admin_dashboards`). Make sure another admin exists, e.g. via [User provisioning](USER_PROV.md). The container log prints a warning if no other active admin is found.
 
 
 # MSMTP
@@ -316,6 +365,8 @@ If you want to run the job as soon the container starts you set this to true. On
 
 see the [cron example](examples/instance_with_cron) for a docker compose exmaple.
 
+The cron container can also run periodic data exports, see [Data export](#data-export).
+
 # REDCap Application Config vars
 
 This container enables you to set any configuration variable from the `redcap_config` database table — everything configurable in the REDCap web UI under **Control Center** — as a `RCCONF_*` environment variable.
@@ -332,6 +383,10 @@ APPLY_RCCONF_VARIABLES # Default: false
 If set to `true`, all supplied `RCCONF_*` environment variables are written to the database on **every container start**, overwriting any changes made via the web interface since the last boot.
 
 Set to `false` after initial setup if you want the configuration to be applied only once.
+
+Each applied variable is listed in the container log. Values of fields whose name contains `secret` or ends in `password`, `token` or `key` (all fields of type `secret` below) are shown as `***`. If a variable cannot be written, the error is logged and the remaining variables are still applied.
+
+Example: enable the Database Query Tool in the Control Center with `RCCONF_database_query_tool_enabled=1` (see [Data Entry](#data-entry)).
 
 ## Type reference
 

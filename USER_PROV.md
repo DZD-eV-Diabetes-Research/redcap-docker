@@ -32,6 +32,8 @@ You can set the environment variable `USER_PROV_OVERWRITE_EXISTING` to true or f
 
 "Existing" means there is a user with the same `username` as in the user provisioning data.
 
+A `password` is always set for newly created users. For existing users it is only updated when `USER_PROV_OVERWRITE_EXISTING` is true.
+
 
 # User data structure/model
 
@@ -80,6 +82,10 @@ Following attributes can be provied optionaly:
 * `ui_state`
 * `api_token_auto_request`
 * `fhir_data_mart_create_project`
+
+Attributes that are not set (or set to `null`) get REDCaps column default. Flags like `super_user` or `allow_create_db` take `0`/`1` (or `false`/`true`). Note that REDCap defaults `allow_create_db` to `1`, so set `allow_create_db: 0` for users that must not create projects.
+
+Text values are trimmed and HTML tags are removed (except for `password`, `api_token`, `two_factor_auth_secret` and `ui_state`, which are stored as given). A user entry with an unknown attribute or an invalid value (e.g. `super_user: yes`) is skipped with an error in the container log, all other users are still provisioned.
 
 ## Example
 

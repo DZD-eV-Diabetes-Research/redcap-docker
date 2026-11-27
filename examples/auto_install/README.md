@@ -22,6 +22,7 @@ cd redcap-docker/examples/auto_install
 #    REDCAP_VERSION, REDCAP_COMMUNITY_USER, REDCAP_COMMUNITY_PASSWORD
 
 # 3. Start
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch the download + install (first boot only)
 ```
@@ -34,6 +35,7 @@ To upgrade REDCap, bump `REDCAP_VERSION` and restart:
 
 ```bash
 # Edit docker-compose.yaml: change REDCAP_VERSION to the new version
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 ```
 

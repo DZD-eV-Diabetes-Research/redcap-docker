@@ -1,0 +1,21 @@
+# Project specs, see PROJECT_PROV.md for all properties.
+# Every key is created once; later starts skip it.
+REDCapProjectList:
+  # Put a REDCap project XML next to this file as study-template.xml
+  # (Project Setup -> Other Functionality -> "Download metadata only (XML)" on any instance).
+  # Title and purpose are taken from the XML.
+  - key: study-template
+    xml: study-template.xml
+    owner: study.lead
+
+  # The same XML as an empty training project with its own title
+  - key: training
+    xml: study-template.xml
+    title: Training project
+    purpose: 0
+    metadata_only: true
+
+  # Download from another server instead of a local file, pinned by checksum:
+  # - key: study-b
+  #   url: https://files.example.org/redcap/study-b.xml
+  #   sha256: <sha256sum of the file>

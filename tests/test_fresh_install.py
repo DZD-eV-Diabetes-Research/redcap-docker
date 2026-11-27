@@ -5,6 +5,7 @@
 # installed_a_snapshot fixture; this test verifies the resulting state without
 # re-downloading, satisfying the "download once per run" constraint.
 
+import docker
 import pytest
 
 from conftest import (
@@ -57,3 +58,46 @@ def test_fresh_install_via_version_env(
     assert installed_version == REDCAP_TEST_VERSION, (
         f"Expected redcap_version={REDCAP_TEST_VERSION!r}, got {installed_version!r}"
     )
+
+
+@pytest.mark.timeout(120)
+def test_fresh_install_first_boot_webroot_is_read_only(
+    docker_client: docker.DockerClient,
+    installed_a_snapshot: tuple[str, bytes],
+) -> None:
+    """
+    The snapshot volume is the webroot exactly as the fresh-install boot left
+    it, before any restart. 90-fix_permissions.sh runs before the reconciler
+    deploys the files, so the reconciler must apply the permissions again:
+    otherwise Apache serves the very first boot with a webroot www-data can
+    write to (root:www-data 750/640 is the target, www-data has UID/GID 33).
+    """
+    vol, _ = installed_a_snapshot
+    out = docker_client.containers.run(
+        "alpine",
+        command=[
+            "sh", "-c",
+            "cd /v && f=$(ls -d redcap_v* | head -1) && "
+            "stat -c '%n %u %g %a' . index.php \"$f\" \"$f/index.php\" modules temp",
+        ],
+        volumes={vol: {"bind": "/v", "mode": "ro"}},
+        remove=True,
+    ).decode()
+    got = {}
+    for line in out.strip().splitlines():
+        name, uid, gid, mode = line.split()
+        got[name] = (uid, gid, mode)
+    version_dir = next(n for n in got if n.startswith("redcap_v") and "/" not in n)
+    expected = {
+        ".": ("0", "33", "750"),
+        "index.php": ("0", "33", "640"),
+        version_dir: ("0", "33", "750"),
+        f"{version_dir}/index.php": ("0", "33", "640"),
+        "modules": ("0", "33", "750"),
+        "temp": ("33", "33", "750"),
+    }
+    for name, want in expected.items():
+        assert got.get(name) == want, (
+            f"After the fresh-install boot {name!r} must be uid/gid/mode {want}, "
+            f"got {got.get(name)}.\nAll:\n{out}"
+        )

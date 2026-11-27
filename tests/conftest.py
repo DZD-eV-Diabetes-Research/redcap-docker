@@ -416,11 +416,26 @@ class RedcapStack:
         finally:
             conn.close()
 
+    def db_execute(self, sql: str, args: tuple = ()) -> int:
+        """Run a writing statement and commit it. Returns the affected row count."""
+        conn = self._db_conn()
+        try:
+            with conn.cursor() as cur:
+                affected = cur.execute(sql, args)
+            conn.commit()
+            return affected
+        finally:
+            conn.close()
+
     def get_config(self, field: str) -> str | None:
         rows = self.db_query(
             "SELECT value FROM redcap_config WHERE field_name = %s", (field,)
         )
         return rows[0][0] if rows else None
+
+    def history_versions(self) -> list[str]:
+        """Versions recorded in redcap_history_version (written by REDCap's upgrade SQL)."""
+        return [r[0] for r in self.db_query("SELECT redcap_version FROM redcap_history_version")]
 
     def get_redcap_version(self) -> str | None:
         return self.get_config("redcap_version")
@@ -439,19 +454,72 @@ class RedcapStack:
         cols = ["username", "user_firstname", "user_lastname", "user_email"]
         return dict(zip(cols, rows[0]))
 
+    def module_id(self, prefix: str) -> int | None:
+        """Return the external_module_id REDCap assigned to a module prefix, or None."""
+        rows = self.db_query(
+            "SELECT external_module_id FROM redcap_external_modules "
+            "WHERE directory_prefix = %s",
+            (prefix,),
+        )
+        return rows[0][0] if rows else None
+
+    def module_enabled_version(self, prefix: str) -> str | None:
+        """
+        Return the system-wide enabled version of a module, or None if it is not
+        system-enabled. A 'version' setting row with project_id IS NULL is
+        REDCap's canonical marker that a module is enabled system-wide.
+        """
+        rows = self.db_query(
+            "SELECT s.value FROM redcap_external_modules m "
+            "JOIN redcap_external_module_settings s "
+            "  ON m.external_module_id = s.external_module_id "
+            "WHERE m.directory_prefix = %s "
+            "  AND s.`key` = 'version' AND s.project_id IS NULL",
+            (prefix,),
+        )
+        return rows[0][0] if rows else None
+
+    def module_system_setting(self, prefix: str, key: str) -> str | None:
+        """Return a module's system-level setting value, or None if unset."""
+        rows = self.db_query(
+            "SELECT s.value FROM redcap_external_modules m "
+            "JOIN redcap_external_module_settings s "
+            "  ON m.external_module_id = s.external_module_id "
+            "WHERE m.directory_prefix = %s "
+            "  AND s.`key` = %s AND s.project_id IS NULL",
+            (prefix, key),
+        )
+        return rows[0][0] if rows else None
+
     # ── Container exec ────────────────────────────────────────────────────────
 
-    def exec_run(self, cmd: str | list) -> tuple[int, str]:
+    def exec_run(
+        self, cmd: str | list, user: str = "", environment: dict | None = None
+    ) -> tuple[int, str]:
         result = self._rc.exec_run(
             ["sh", "-c", cmd] if isinstance(cmd, str) else cmd,
             stdout=True,
             stderr=True,
+            user=user,
+            environment=environment,
         )
         return result.exit_code, result.output.decode("utf-8", errors="replace")
 
     def list_backups(self) -> list[str]:
         _, out = self.exec_run("ls /opt/redcap-docker/backups/ 2>/dev/null || true")
         return [f for f in out.splitlines() if f.strip()]
+
+    def stat_path(self, path: str) -> tuple[str, str, str]:
+        """
+        Return (owner, group, octal_mode) of a path inside the container.
+        Raises if the path does not exist.
+        """
+        exit_code, out = self.exec_run(f"stat -c '%U %G %a' {path}")
+        out = out.strip()
+        if exit_code != 0:
+            raise RuntimeError(f"stat failed for {path!r}: {out}")
+        owner, group, mode = out.split()
+        return owner, group, mode
 
     # ── MySQL readiness ───────────────────────────────────────────────────────
 

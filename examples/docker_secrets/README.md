@@ -27,6 +27,7 @@ echo -n "your_portal_password"   > secrets/community_password.txt
 # 3. Edit docker-compose.yaml: set REDCAP_VERSION and REDCAP_COMMUNITY_USER
 
 # 4. Start
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap
 ```

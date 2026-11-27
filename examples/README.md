@@ -12,7 +12,10 @@ Each subdirectory is a self-contained `docker compose` setup. Copy the one close
 | [auto_install](auto_install/) | 🧪 Auto-download REDCap from the community portal on first boot |
 | [instance_with_mail](instance_with_mail/) | Email via MSMTP |
 | [instance_with_cron](instance_with_cron/) | Separate cron container for REDCap background jobs |
+| [instance_with_data_export](instance_with_data_export/) | Cron container with periodic data exports (records, project XML) |
 | [local_instance_with_user_prov](local_instance_with_user_prov/) | Provision users from env vars and a YAML file |
+| [instance_with_modules](instance_with_modules/) | Install/enable external modules from env vars and a YAML file |
+| [instance_with_project_prov](instance_with_project_prov/) | Create projects on boot from REDCap project XML files |
 | [local_instance_custom_edocs](local_instance_custom_edocs/) | Store user uploads outside the webroot |
 | [docker_secrets](docker_secrets/) | 🔒 Keep passwords out of env vars using Docker Secrets |
 
@@ -33,6 +36,7 @@ data/
 Start any example with:
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch startup progress
 ```

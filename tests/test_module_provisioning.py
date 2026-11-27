@@ -63,16 +63,10 @@ MODULE_CLASS_PHP = (
 )
 
 
-@pytest.fixture
-def module_volume(
-    docker_client: docker.DockerClient,
-) -> Generator[str, None, None]:
+def _create_module_volume(docker_client: docker.DockerClient):
     """
-    Create a Docker volume populated with the minimal test module's files
-    (config.json + main class file at the volume root) and yield its name.
-
-    Mount it read-only at MODULE_MOUNT so it appears as
-    /var/www/html/modules/<prefix>_<version>/ inside the REDCap container.
+    Create a Docker volume holding the minimal test module's files
+    (config.json + main class file at the volume root) and return it.
     """
     vol = docker_client.volumes.create(f"rctest_mod_{uuid.uuid4().hex[:8]}")
 
@@ -92,6 +86,20 @@ def module_volume(
         volumes={vol.name: {"bind": "/m", "mode": "rw"}},
         remove=True,
     )
+    return vol
+
+
+@pytest.fixture
+def module_volume(
+    docker_client: docker.DockerClient,
+) -> Generator[str, None, None]:
+    """
+    Yield the name of a volume with the minimal test module's files.
+
+    Mount it read-only at MODULE_MOUNT so it appears as
+    /var/www/html/modules/<prefix>_<version>/ inside the REDCap container.
+    """
+    vol = _create_module_volume(docker_client)
 
     yield vol.name
 
@@ -190,21 +198,42 @@ def test_module_provisioning_install_only(
     )
 
 
+@pytest.fixture
+def second_module_volume(
+    docker_client: docker.DockerClient,
+) -> Generator[str, None, None]:
+    """A second copy of the test module, to mount two versions side by side."""
+    vol = _create_module_volume(docker_client)
+
+    yield vol.name
+
+    try:
+        vol.remove(force=True)
+    except Exception:
+        pass
+
+
 @pytest.mark.timeout(360)
 def test_module_provisioning_version_update(
     redcap_stack: RedcapStack,
     installed_a_snapshot: tuple[str, bytes],
     module_volume: str,
+    second_module_volume: str,
 ) -> None:
     """
     A module already system-enabled at one version must be switched to a newer
-    version on the next boot when the pinned version changes. This exercises the
-    disable->enable update path (REDCap refuses to enable a second version of the
-    same namespace, so the old enabled version must be cleared first).
+    version in ONE boot when the pinned version changes (issue #28). This
+    exercises the disable->enable update path (REDCap refuses to enable a second
+    version of the same namespace, so the old enabled version must be cleared
+    first).
+
+    The old version's files stay on disk during the switch, as they do in real
+    deployments. That matters: the External Module framework drops versions
+    whose directory is missing from its enabled-version cache, so a test that
+    removes the old directory never sees the stale cache that broke the switch.
 
     The module's version is determined by its directory name (<prefix>_v<ver>),
-    so we mount the same volume at a different "_v" path to simulate a new
-    release without needing a second set of files.
+    so the same files mounted at a different "_v" path simulate a new release.
     """
     v_old, v_new = "1.0.0", "1.0.1"
     mount_old = f"/var/www/html/modules/{MODULE_PREFIX}_v{v_old}"
@@ -212,14 +241,15 @@ def test_module_provisioning_version_update(
 
     vol, dump = installed_a_snapshot
 
-    # Boot 1: enable the old version.
+    # Boot 1: enable the old version with a system setting.
     redcap_stack.start_from_snapshot(
         vol, dump,
         {
             "REDCAP_VERSION": REDCAP_TEST_VERSION,
             "ENABLE_MODULE_PROV": "true",
             "MODULE_PROV": json.dumps([
-                {"source": "local", "prefix": MODULE_PREFIX, "version": v_old, "enabled": True}
+                {"source": "local", "prefix": MODULE_PREFIX, "version": v_old, "enabled": True,
+                 "settings": {"test_setting": "kept-across-update"}}
             ]),
             **_CREDENTIALS,
         },
@@ -230,7 +260,7 @@ def test_module_provisioning_version_update(
         "Pre-condition failed: module was not enabled at the old version."
     )
 
-    # Boot 2: same DB, bump the pinned version (mount the files at the new path).
+    # Boot 2: same DB, bump the pinned version. Both version dirs are present.
     redcap_stack.restart_redcap(
         {
             "REDCAP_VERSION": REDCAP_TEST_VERSION,
@@ -240,10 +270,20 @@ def test_module_provisioning_version_update(
             ]),
             **_CREDENTIALS,
         },
-        extra_volumes={module_volume: mount_new},
+        extra_volumes={module_volume: mount_old, second_module_volume: mount_new},
     )
     logs = redcap_stack.assert_booted(timeout=BOOT_TIMEOUT_FAST)
 
     assert redcap_stack.module_enabled_version(MODULE_PREFIX) == f"v{v_new}", (
-        f"Module was not updated to v{v_new}.\n\nLogs:\n{logs}"
+        f"Module was not updated to v{v_new} in one boot.\n\nLogs:\n{logs}"
+    )
+    assert "[MODULE PROVISIONING][ERROR]" not in logs, (
+        f"Version switch logged an error.\n\nLogs:\n{logs}"
+    )
+    assert "Module provisioning done." in logs, (
+        f"Expected the clean summary line.\n\nLogs:\n{logs}"
+    )
+    # The DB-only disable keeps system settings.
+    assert redcap_stack.module_system_setting(MODULE_PREFIX, "test_setting") == "kept-across-update", (
+        "System setting from the old version was lost during the version switch."
     )

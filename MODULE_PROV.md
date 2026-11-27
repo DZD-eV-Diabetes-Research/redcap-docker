@@ -350,6 +350,11 @@ enables the new one via REDCap's framework — so config-default settings and cr
 jobs are re-initialised for the new version. Project enablements and any
 settings you set previously are kept.
 
+If the new version cannot be enabled (for example because its code throws an
+error), the old version is enabled again, the boot log shows an `ERROR` line
+with the reason, and provisioning ends with "Module provisioning finished with
+errors" instead of "Module provisioning done.".
+
 Notes and limits:
 
 - Updates happen **at container start**, not while running. A running instance is

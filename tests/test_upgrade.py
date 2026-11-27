@@ -91,6 +91,19 @@ def test_upgrade_noninteractive(
         f"got {db_version!r}"
     )
 
+    # Regression test for issue #27: the upgrade must run REDCap's upgrade SQL,
+    # not only set redcap_version. REDCap's SQL records the upgrade in
+    # redcap_history_version, and the table check must pass. "OK" may come
+    # after REDCap's Auto-Fix: e.g. 16.1.x -> 17.0.x misses a column in REDCap's
+    # own upgrade steps, which the upgrader repairs by default.
+    assert REDCAP_TEST_UPGRADE_VERSION in redcap_stack.history_versions(), (
+        f"redcap_history_version has no row for {REDCAP_TEST_UPGRADE_VERSION}: "
+        f"REDCap's upgrade SQL did not run.\nOutput:\n{output}"
+    )
+    assert "Database structure check: OK" in output, (
+        f"REDCap's table check did not pass after the upgrade.\nOutput:\n{output}"
+    )
+
     backups = redcap_stack.list_backups()
     assert backups, "No backup files found in /opt/redcap-docker/backups/ after upgrade"
     assert any(

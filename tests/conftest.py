@@ -433,6 +433,10 @@ class RedcapStack:
         )
         return rows[0][0] if rows else None
 
+    def history_versions(self) -> list[str]:
+        """Versions recorded in redcap_history_version (written by REDCap's upgrade SQL)."""
+        return [r[0] for r in self.db_query("SELECT redcap_version FROM redcap_history_version")]
+
     def get_redcap_version(self) -> str | None:
         return self.get_config("redcap_version")
 

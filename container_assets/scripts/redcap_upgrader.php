@@ -10,8 +10,6 @@ if (PHP_SAPI !== 'cli') {
 $helpers_dir = __DIR__ . '/startup-scripts/php_helpers';
 require_once $helpers_dir . '/db.php';
 require_once $helpers_dir . '/redcap_info.php';
-require_once $helpers_dir . '/run_sql_file.php';
-require_once $helpers_dir . '/processed_file_state_manager.php';
 require_once $helpers_dir . '/redcap_community_downloader.php';
 
 
@@ -64,8 +62,13 @@ Behaviour flags:
   --keep-old      Keep the previous version directory after a successful
                   upgrade. When backup is enabled this is always the default
                   (the old directory is needed for a clean rollback).
-  --no-sql        Skip SQL upgrade scripts (file extraction only).
+  --no-sql        Skip the database upgrade: install the files and set
+                  redcap_version only. The schema stays at the old version
+                  until REDCap's upgrade SQL is run by hand.
   --no-offline    Do not set REDCap to offline mode during the upgrade.
+  --no-table-fix  After the upgrade, only report differences found by
+                  REDCap's database structure check instead of applying
+                  REDCap's Auto-Fix. (env: REDCAP_UPGRADE_TABLE_FIX=false)
 
   --help, -h      Show this help.
 
@@ -104,6 +107,9 @@ function parse_args(array $argv): array
         'keep-old'           => false,
         'no-sql'             => false,
         'no-offline'         => false,
+        // REDCAP_UPGRADE_TABLE_FIX=false turns Auto-Fix off for REDCAP_AUTO_UPGRADE too.
+        'no-table-fix'       => getenv('REDCAP_UPGRADE_TABLE_FIX') !== false
+            && filter_var(getenv('REDCAP_UPGRADE_TABLE_FIX'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false,
     ];
 
     for ($i = 1; $i < count($argv); $i++) {
@@ -121,6 +127,7 @@ function parse_args(array $argv): array
             case '--keep-old':           $opts['keep-old']           = true; break;
             case '--no-sql':             $opts['no-sql']             = true; break;
             case '--no-offline':         $opts['no-offline']         = true; break;
+            case '--no-table-fix':       $opts['no-table-fix']       = true; break;
             case '--help': case '-h':    usage(); exit(0);
             default:
                 fwrite(STDERR, "Unknown option: {$argv[$i]}\n\n");
@@ -522,7 +529,56 @@ function restore_database_backup(string $backup_file): void
         );
     }
 
+    drop_tables_missing_from_dump($backup_file);
+
     printf("Database successfully restored from: $backup_file\n");
+}
+
+/**
+ * The dump only drops and recreates the tables it contains. Tables the upgrade
+ * SQL created afterwards would survive the restore and make the next upgrade
+ * attempt fail on "CREATE TABLE ... already exists". Drop them.
+ */
+function drop_tables_missing_from_dump(string $backup_file): void
+{
+    $in_dump = [];
+    $gz = gzopen($backup_file, 'rb');
+    if ($gz === false) {
+        throw new RuntimeException("Cannot read backup file: $backup_file");
+    }
+    while (($line = gzgets($gz)) !== false) {
+        if (strncmp($line, 'CREATE TABLE `', 14) === 0 && preg_match('/^CREATE TABLE `([^`]+)`/', $line, $m)) {
+            $in_dump[$m[1]] = true;
+        }
+    }
+    gzclose($gz);
+    if (!$in_dump) {
+        // Not a dump we understand. Dropping "everything not in it" would be wrong.
+        printf("WARNING: No CREATE TABLE statements found in %s, not checking for leftover tables.\n", $backup_file);
+        return;
+    }
+
+    $db    = get_db_con();
+    $extra = [];
+    $res   = $db->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'");
+    while ($row = $res->fetch_row()) {
+        if (!isset($in_dump[$row[0]])) {
+            $extra[] = $row[0];
+        }
+    }
+    if ($extra) {
+        printf("Dropping %d table(s) created after the backup: %s\n", count($extra), implode(', ', $extra));
+        $db->query('SET FOREIGN_KEY_CHECKS = 0');
+        foreach ($extra as $table) {
+            if (!$db->query('DROP TABLE `' . str_replace('`', '``', $table) . '`')) {
+                $error = $db->error;
+                $db->close();
+                throw new RuntimeException("Could not drop table '$table': $error");
+            }
+        }
+        $db->query('SET FOREIGN_KEY_CHECKS = 1');
+    }
+    $db->close();
 }
 
 function parse_to_version_from_backup_filename(string $backup_file): ?string
@@ -631,45 +687,204 @@ function find_redcap_version_dir_in_extraction(string $extract_root, string $ver
     );
 }
 
-function extract_version_from_sql_filename(string $filename): ?string
+/**
+ * Run one of the php_helpers scripts in a separate PHP process. REDCap's
+ * bootstrap defines globals and constants, so it must not run in this process.
+ * PHP notices go to stderr so they cannot end up in the captured stdout.
+ *
+ * @return array{0:int,1:string,2:string} [exit code, stdout, stderr]
+ */
+function run_php_helper(string $script, array $args = []): array
 {
-    if (!preg_match('/upgrade_redcap_v(\d+\.\d+\.?\d*)/i', $filename, $m)) {
-        return null;
+    $cmd = 'php -d display_errors=stderr -f ' . escapeshellarg(__DIR__ . "/startup-scripts/php_helpers/$script");
+    if ($args) {
+        $cmd .= ' -- ' . implode(' ', array_map('escapeshellarg', $args));
     }
-    $parts = explode('.', $m[1]);
-    return implode('.', array_map('intval', $parts));
+    // stderr goes to a file: reading two pipes one after the other can deadlock
+    // when the child fills the stderr pipe while we still wait for stdout.
+    $stderr_file = tempnam(sys_get_temp_dir(), 'redcap_helper_err_');
+    $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['file', $stderr_file, 'w']], $pipes);
+    if (!is_resource($proc)) {
+        @unlink($stderr_file);
+        throw new RuntimeException("Could not start: $cmd");
+    }
+    $stdout = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    $exit_code = proc_close($proc);
+    $stderr = (string) file_get_contents($stderr_file);
+    @unlink($stderr_file);
+    return [$exit_code, (string) $stdout, $stderr];
 }
 
-function find_upgrade_sql_files(string $version_dir, string $current_version, string $target_version): array
+/** Last $n lines of $text, for error messages. */
+function tail_lines(string $text, int $n = 20): string
 {
-    $sql_dir = "$version_dir/Resources/sql";
+    $lines = preg_split('/\R/', trim($text));
+    return implode("\n", array_slice($lines, -$n));
+}
 
-    if (!is_dir($sql_dir)) {
-        printf("WARNING: Expected SQL directory not found at '$sql_dir'. Skipping SQL step.\n");
-        return [];
+/**
+ * Get the SQL that upgrades the database from its current redcap_version to
+ * $target_version, generated by REDCap's own upgrade code (see
+ * redcap_upgrade_sql_generator.php). $version_dir must already be installed in
+ * the webroot.
+ */
+function generate_upgrade_sql(string $version_dir, string $target_version): string
+{
+    [$exit_code, $out, $err] = run_php_helper('redcap_upgrade_sql_generator.php', [$version_dir]);
+
+    $header = "-- --- SQL to upgrade REDCap to version $target_version from ";
+    $pos    = strpos($out, $header);
+    if ($exit_code !== 0 || $pos === false) {
+        throw new RuntimeException(
+            "Could not generate the upgrade SQL with REDCap's upgrade.php (exit $exit_code).\n" .
+            "stdout (start):\n" . substr(trim($out), 0, 1500) . "\n" .
+            "stderr (end):\n" . tail_lines($err)
+        );
     }
 
-    $candidates = [];
-    $handle     = opendir($sql_dir);
-    while ($handle && ($entry = readdir($handle)) !== false) {
-        if (!preg_match('/^upgrade_.*\.sql$/i', $entry)) {
-            continue;
+    // upgrade.php sends the SQL with \r\n line endings (meant as a download).
+    // Use plain \n, as REDCap's own Easy Upgrade does when it runs the SQL.
+    $sql = str_replace("\r\n", "\n", substr($out, $pos));
+
+    $footer = "UPDATE redcap_config SET value = '$target_version' WHERE field_name = 'redcap_version';";
+    if (strpos($sql, $footer) === false) {
+        throw new RuntimeException(
+            "The generated upgrade SQL does not end with the redcap_version update to $target_version. " .
+            "Refusing to run an incomplete upgrade.\nstderr (end):\n" . tail_lines($err)
+        );
+    }
+    return $sql;
+}
+
+/**
+ * Write the upgrade SQL to a file that outlives this run, so a failed statement
+ * can be looked up by the line number the mysql client reports.
+ */
+function save_upgrade_sql(string $sql, string $dir, string $from_version, string $to_version): string
+{
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true)) {
+        $dir = sys_get_temp_dir();
+    }
+    $file = sprintf('%s/redcap_upgrade_sql_%s_from_%s_to_%s.sql', $dir, date('Ymd_His'), $from_version, $to_version);
+    if (file_put_contents($file, $sql) === false) {
+        throw new RuntimeException("Cannot write upgrade SQL to $file");
+    }
+    chmod($file, 0640);
+    return $file;
+}
+
+/**
+ * Run an SQL file with the mysql client as the REDCap DB user. The client stops
+ * at the first failing statement and exits non-zero, which is what we want:
+ * the caller restores the backup.
+ */
+function run_sql_file_with_mysql_client(string $sql_file): void
+{
+    $host   = getenv('DB_HOSTNAME') ?: 'localhost';
+    $port   = getenv('DB_PORT')     ?: '3306';
+    $dbname = getenv('DB_NAME')     ?: '';
+    $user   = getenv('DB_USERNAME') ?: '';
+    $pass   = getenv('DB_PASSWORD') ?: '';
+
+    $opts_file = tempnam(sys_get_temp_dir(), 'redcap_mysql_opts_');
+    file_put_contents($opts_file, "[client]\npassword=$pass\n");
+    chmod($opts_file, 0600);
+
+    $cmd = sprintf(
+        'mysql --defaults-file=%s -h %s -P %s -u %s --default-character-set=utf8mb4 %s < %s',
+        escapeshellarg($opts_file),
+        escapeshellarg($host),
+        escapeshellarg($port),
+        escapeshellarg($user),
+        escapeshellarg($dbname),
+        escapeshellarg($sql_file)
+    );
+
+    exec($cmd . ' 2>&1', $output, $exit_code);
+    @unlink($opts_file);
+
+    if ($exit_code !== 0) {
+        throw new RuntimeException(
+            "Upgrade SQL failed (mysql exit $exit_code):\n" . implode("\n", $output) . "\n" .
+            "Line numbers refer to $sql_file"
+        );
+    }
+}
+
+/**
+ * Ask REDCap whether the database structure matches the installed version
+ * (the check behind the Control Center's "database structure is incorrect"
+ * warning), and with $fix run REDCap's Auto-Fix when it does not.
+ *
+ * Returns null when the check could not run, otherwise
+ *   ['before' => fix SQL ('' = structure correct),
+ *    'autofix' => 'fixed'|'failed'|'nothing'|null (null: not attempted),
+ *    'after' => remaining fix SQL after Auto-Fix, or null]
+ */
+function run_table_check(bool $fix): ?array
+{
+    try {
+        [$exit_code, $out, $err] = run_php_helper('redcap_table_check.php', $fix ? ['--fix'] : []);
+    } catch (Exception $e) {
+        return null;
+    }
+    if ($exit_code !== 0
+        || !preg_match('/===TABLE_CHECK_BEGIN===\n(.*?)===TABLE_CHECK_END===/s', $out, $m)) {
+        printf("Table check output:\n%s\n%s\n", substr(trim($out), 0, 1500), tail_lines($err));
+        return null;
+    }
+    $result = ['before' => trim($m[1]), 'autofix' => null, 'after' => null];
+    if (preg_match('/===AUTOFIX_RESULT=(\w+)===/', $out, $a)
+        && preg_match('/===TABLE_CHECK_AFTER_BEGIN===\n(.*?)===TABLE_CHECK_AFTER_END===/s', $out, $b)) {
+        $result['autofix'] = $a[1];
+        $result['after']   = trim($b[1]);
+    }
+    return $result;
+}
+
+/**
+ * Check the database structure after the upgrade and print the result.
+ *
+ * REDCap's upgrade SQL does not always produce the structure REDCap expects
+ * (e.g. an upgrade step that skips a column for a version range it should not
+ * skip). REDCap leaves that to the admin's "Auto-Fix" click in the Control
+ * Center; with $fix we run the same Auto-Fix right away.
+ */
+function report_table_check(bool $fix): void
+{
+    printf("Checking database structure against redcap_v%s...\n", get_installed_redcap_version_no());
+    $check = run_table_check($fix);
+
+    if ($check === null) {
+        printf("WARNING: Could not run REDCap's database structure check. Look at the Control Center to confirm the upgrade.\n");
+        return;
+    }
+    if ($check['before'] === '') {
+        printf("Database structure check: OK\n");
+        return;
+    }
+
+    if ($check['autofix'] === null) {
+        fwrite(STDERR, "ERROR: Database structure check: REDCap reports differences after the upgrade.\n");
+        fwrite(STDERR, "The Control Center will show 'YOUR REDCAP DATABASE STRUCTURE IS INCORRECT'. Suggested fixes:\n");
+        fwrite(STDERR, $check['before'] . "\n");
+        fwrite(STDERR, "Apply them with the Auto-Fix button in the Control Center.\n");
+        return;
+    }
+
+    printf("REDCap's table check found differences after the upgrade SQL:\n%s\n", $check['before']);
+    printf("Applying REDCap's Auto-Fix (result: %s)...\n", $check['autofix']);
+    if ($check['after'] === '') {
+        printf("Database structure check: OK (after Auto-Fix)\n");
+    } else {
+        fwrite(STDERR, "ERROR: Database structure check: differences remain after Auto-Fix.\n");
+        fwrite(STDERR, "The Control Center will show 'YOUR REDCAP DATABASE STRUCTURE IS INCORRECT'. Remaining fixes:\n");
+        fwrite(STDERR, $check['after'] . "\n");
+        if ($check['autofix'] === 'failed') {
+            fwrite(STDERR, "Auto-Fix failed. The REDCap DB user may lack CREATE/ALTER/DROP privileges.\n");
         }
-        $file_version = extract_version_from_sql_filename($entry);
-        if (
-            $file_version !== null &&
-            version_compare($file_version, $current_version, '>') &&
-            version_compare($file_version, $target_version, '<=')
-        ) {
-            $candidates[$file_version] = "$sql_dir/$entry";
-        }
     }
-    if ($handle) {
-        closedir($handle);
-    }
-
-    uksort($candidates, 'version_compare');
-    return array_values($candidates);
 }
 
 function recursive_copy_dir(string $src, string $dst): void
@@ -834,6 +1049,7 @@ function run_upgrade(array $opts): void
     $keep_old         = $opts['keep-old'];
     $skip_sql         = $opts['no-sql'];
     $skip_offline     = $opts['no-offline'];
+    $table_fix        = !($opts['no-table-fix'] ?? false);
     // ── Pre-flight ────────────────────────────────────────────────────────────
 
     printf("=== REDCap In-Place Upgrade [BETA] ===\n\n");
@@ -896,15 +1112,19 @@ function run_upgrade(array $opts): void
             printf("  %d. Download redcap_v%s.zip from community portal.\n", $step++, $version);
         }
         printf("  %d. Extract zip to a temporary directory.\n", $step++);
-        printf("  %d. %s\n", $step++, $skip_sql
-            ? 'Skip SQL scripts (--no-sql).'
-            : "Run SQL upgrade scripts for versions > $current_version and <= $version.");
         printf("  %d. Copy redcap_v%s/ into: %s\n", $step++, $version, $doc_root);
+        printf("  %d. %s\n", $step++, $skip_sql
+            ? "Skip the database upgrade (--no-sql), only set redcap_version to $version."
+            : "Generate the upgrade SQL v$current_version -> v$version with REDCap's own upgrade code and run it.");
         printf("  %d. %s\n", $step++, $will_delete_old
             ? "Remove old version directory: $old_version_dir"
             : "Keep old version directory for rollback: $old_version_dir");
         if (!$skip_offline) {
-            printf("  %d. Set REDCap back to ONLINE mode.\n", $step);
+            printf("  %d. Set REDCap back to ONLINE mode.\n", $step++);
+        }
+        if (!$skip_sql) {
+            printf("  %d. Check the database structure with REDCap's table check%s.\n", $step,
+                $table_fix ? " and apply REDCap's Auto-Fix to any differences" : ' (report only, --no-table-fix)');
         }
         printf("\n[DRY RUN] No changes were made.\n");
         $db->close();
@@ -987,7 +1207,8 @@ function run_upgrade(array $opts): void
     // ── Upgrade (wrapped so we can auto-restore on failure) ───────────────────
 
     $tmp_dir     = sys_get_temp_dir() . '/redcap_upgrade_' . $version . '_' . uniqid();
-    $sql_was_run = false;
+    $sql_was_run      = false;
+    $target_installed = false;
     mkdir($tmp_dir, 0755, true);
 
     try {
@@ -1023,34 +1244,10 @@ function run_upgrade(array $opts): void
         $version_dir_in_tmp = find_redcap_version_dir_in_extraction($tmp_dir, $version);
         printf("Found version directory in archive: $version_dir_in_tmp\n\n");
 
-        // ── SQL upgrade scripts ───────────────────────────────────────────────
-
-        if (!$skip_sql) {
-            $sql_files = find_upgrade_sql_files($version_dir_in_tmp, $current_version, $version);
-
-            if (count($sql_files) === 0) {
-                printf("No SQL upgrade scripts found for versions > $current_version and <= $version.\n\n");
-            } else {
-                printf("Running %d SQL upgrade script(s)...\n", count($sql_files));
-                foreach ($sql_files as $sql_file) {
-                    $basename = basename($sql_file);
-                    if (file_was_processed($sql_file, 'REDCAP_UPGRADE')) {
-                        printf("  SKIP (already ran): $basename\n");
-                        continue;
-                    }
-                    printf("  Running : $basename\n");
-                    run_sql_files($sql_file, $db);
-                    $sql_was_run = true;
-                    mark_file_as_processed($sql_file, 'REDCAP_UPGRADE');
-                    printf("  Done    : $basename\n");
-                }
-                printf("\n");
-            }
-        } else {
-            printf("SQL upgrade scripts skipped (--no-sql).\n\n");
-        }
-
         // ── Install new version directory ─────────────────────────────────────
+        // Files go in first: REDCap's upgrade code reads the upgrade files from
+        // the new version directory in the webroot. Until redcap_version changes
+        // at the very end of the upgrade SQL, REDCap keeps serving the old version.
 
         printf("Installing redcap_v$version to $target_dir...\n");
 
@@ -1059,17 +1256,40 @@ function run_upgrade(array $opts): void
             recursive_rmdir($target_dir);
         }
 
+        $target_installed = true;
         recursive_copy_dir($version_dir_in_tmp, $target_dir);
         apply_version_dir_permissions($target_dir);
         printf("Files installed.\n\n");
 
-        // ── Update version in database ────────────────────────────────────────
+        // ── Upgrade the database ──────────────────────────────────────────────
 
-        $stmt = $db->prepare("UPDATE redcap_config SET value=? WHERE field_name='redcap_version'");
-        $stmt->bind_param('s', $version);
-        $stmt->execute();
-        $stmt->close();
-        printf("Database version updated to %s.\n\n", $version);
+        if (!$skip_sql) {
+            printf("Generating upgrade SQL v%s -> v%s with REDCap's upgrade code...\n", $current_version, $version);
+            $upgrade_sql = generate_upgrade_sql($target_dir, $version);
+            $sql_file    = save_upgrade_sql($upgrade_sql, $backup_dir, $current_version, $version);
+            preg_match_all('/^-- SQL for Version (\S+) --$/m', $upgrade_sql, $m);
+            printf("Upgrade SQL written to %s\n", $sql_file);
+            printf("Contains upgrade steps for %d version(s)%s.\n",
+                count($m[1]), $m[1] ? ': ' . implode(', ', $m[1]) : '');
+
+            printf("Running upgrade SQL...\n");
+            $sql_was_run = true;
+            run_sql_file_with_mysql_client($sql_file);
+
+            $db_version = $db->query("SELECT value FROM redcap_config WHERE field_name='redcap_version'")->fetch_column();
+            if ($db_version !== $version) {
+                throw new RuntimeException("Upgrade SQL ran, but redcap_version is '$db_version' instead of '$version'.");
+            }
+            printf("Database upgraded to %s.\n\n", $version);
+        } else {
+            printf("WARNING: Database upgrade skipped (--no-sql). Only redcap_version is set to %s.\n", $version);
+            printf("WARNING: The schema stays at v%s until REDCap's upgrade SQL is run by hand.\n", $current_version);
+            $stmt = $db->prepare("UPDATE redcap_config SET value=? WHERE field_name='redcap_version'");
+            $stmt->bind_param('s', $version);
+            $stmt->execute();
+            $stmt->close();
+            printf("Database version updated to %s.\n\n", $version);
+        }
 
         // ── Remove old version (only when backup is disabled) ─────────────────
 
@@ -1091,17 +1311,29 @@ function run_upgrade(array $opts): void
             recursive_rmdir($tmp_dir);
         }
 
+        $db_restored = false;
         if ($sql_was_run && $backup_file) {
             printf("\nSQL changes were applied. Automatically restoring database from backup...\n");
             try {
                 restore_database_backup($backup_file);
                 printf("Database restored to pre-upgrade state.\n");
+                $db_restored = true;
             } catch (Exception $restore_ex) {
                 fwrite(STDERR, "CRITICAL: Auto-restore also failed: " . $restore_ex->getMessage() . "\n");
                 fwrite(STDERR, "Manual restore required: redcap-upgrade --rollback $backup_file\n");
             }
         } elseif ($sql_was_run) {
             fwrite(STDERR, "WARNING: SQL changes were applied but no backup exists to restore from.\n");
+        }
+
+        // The database is at the old version again (or was never touched), so
+        // the new version directory is not needed. After a partial upgrade
+        // without a restore it stays, so the upgrade can be finished by hand.
+        if ($target_installed && (!$sql_was_run || $db_restored) && is_dir($target_dir)) {
+            printf("Removing the new version directory: %s\n", $target_dir);
+            recursive_rmdir($target_dir);
+        } elseif ($target_installed && is_dir($target_dir)) {
+            fwrite(STDERR, "Keeping $target_dir: the database is partly upgraded and was not restored.\n");
         }
 
         if (!$skip_offline) {
@@ -1126,6 +1358,15 @@ function run_upgrade(array $opts): void
     }
 
     $db->close();
+
+    // ── Database structure check ──────────────────────────────────────────────
+    // Runs after the online switch: REDCap's bootstrap refuses to run while
+    // REDCap is offline.
+
+    if (!$skip_sql) {
+        printf("\n");
+        report_table_check($table_fix);
+    }
 
     // ── Post-upgrade summary ──────────────────────────────────────────────────
 

@@ -313,6 +313,7 @@ See [REDCAP_UPGRADE.md](REDCAP_UPGRADE.md) for full documentation.
 | `REDCAP_UPGRADE_BACKUP_DIR` | `/opt/redcap-docker/backups` | Directory where `redcap-upgrade` stores pre-upgrade database backups. |
 | `REDCAP_UPGRADE_BACKUP_DB_USER` | `` | Optional elevated database user for backups (e.g. `root`). Use when the application DB user lacks `mysqldump` privileges. |
 | `REDCAP_UPGRADE_BACKUP_DB_PASSWORD` | `` | Password for `REDCAP_UPGRADE_BACKUP_DB_USER`. |
+| `REDCAP_UPGRADE_TABLE_FIX` | `true` | After an upgrade (`redcap-upgrade` or `REDCAP_AUTO_UPGRADE`), apply REDCap's Auto-Fix when its database structure check finds differences. `false` only reports them (same as `--no-table-fix`). |
 
 # REDCap Basic Admin tasks
 

@@ -24,9 +24,15 @@ require_once __DIR__ . '/php_helpers/module_fetcher.php';
 
 const MODULE_PROV_ENV_BASE = 'MODULE_PROV';
 
+$MP_ERROR_COUNT = 0;
+
 function mp_log(string $level, string $msg): void
 {
-    printf("[MODULE PROVISIONING][$level]: $msg\n");
+    global $MP_ERROR_COUNT;
+    if ($level === 'ERROR') {
+        $MP_ERROR_COUNT++;
+    }
+    printf("[MODULE PROVISIONING][%s]: %s\n", $level, $msg);
 }
 
 /** Collect specs from indexed env vars: MODULE_PROV_1, MODULE_PROV_2, ... */
@@ -191,7 +197,8 @@ function run_enabler(array $tasks): void
     passthru($cmd, $exit_code);
     @unlink($tasks_file);
     if ($exit_code !== 0) {
-        mp_log('ERROR', "Module enabler exited with code $exit_code.");
+        // The enabler exits non-zero when it logged at least one ERROR.
+        mp_log('ERROR', "Module enabler reported errors (exit code $exit_code).");
     }
 }
 
@@ -220,4 +227,8 @@ mp_log('INFO', "Collected " . count($specs) . " module spec(s).");
 
 $tasks = build_tasks($specs, $default_enable);
 run_enabler($tasks);
-mp_log('INFO', "Module provisioning done.");
+if ($MP_ERROR_COUNT > 0) {
+    mp_log('WARNING', "Module provisioning finished with errors. See the ERROR lines above.");
+} else {
+    mp_log('INFO', "Module provisioning done.");
+}

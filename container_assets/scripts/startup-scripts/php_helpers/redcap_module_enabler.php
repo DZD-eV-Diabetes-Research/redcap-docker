@@ -27,21 +27,27 @@ require_once __DIR__ . '/redcap_info.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/module_fetcher.php';
 
+$EM_ERROR_COUNT = 0;
+
 function em_log(string $level, string $msg): void
 {
-    printf("[MODULE PROVISIONING][$level]: $msg\n");
+    global $EM_ERROR_COUNT;
+    if ($level === 'ERROR') {
+        $EM_ERROR_COUNT++;
+    }
+    printf("[MODULE PROVISIONING][%s]: %s\n", $level, $msg);
 }
 
 $tasks_file = $argv[1] ?? null;
 if ($tasks_file === null || !is_file($tasks_file)) {
     em_log('ERROR', "Enabler called without a valid tasks file. Nothing to do.");
-    exit(0);
+    exit(1);
 }
 
 $tasks = json_decode((string) file_get_contents($tasks_file), true);
 if (!is_array($tasks)) {
     em_log('ERROR', "Tasks file '$tasks_file' did not contain valid JSON.");
-    exit(0);
+    exit(1);
 }
 if (empty($tasks)) {
     exit(0);
@@ -71,7 +77,56 @@ use ExternalModules\ExternalModules;
 
 if (!class_exists('ExternalModules\\ExternalModules')) {
     em_log('ERROR', "External Module framework not available after REDCap bootstrap. Aborting module enable step.");
-    exit(0);
+    exit(1);
+}
+
+/**
+ * Re-read which module versions are enabled system-wide.
+ *
+ * The framework caches this per PHP process (ExternalModules::$systemwideEnabledVersions)
+ * and disable() does not refresh it. Without a refresh, enabling a new version
+ * right after disabling the old one still sees the old version and fails with
+ * "a different version of the module is already enabled". REDCap's own UI does
+ * the disable and the enable in two separate requests, so it never hits this.
+ * The refresh method is private, hence the reflection.
+ */
+function em_refresh_enabled_versions_cache(): bool
+{
+    try {
+        $method = new ReflectionMethod(ExternalModules::class, 'cacheAllEnableData');
+        $method->setAccessible(true); // no-op since PHP 8.1, needed before
+        $method->invoke(null);
+        return true;
+    } catch (Throwable $e) {
+        em_log('ERROR', "Could not refresh the External Module framework's enabled-version cache: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Re-enable $old_version after a failed version switch, so the module does not
+ * stay disabled system-wide until the next boot.
+ */
+function em_restore_old_version(string $prefix, string $old_version, string $new_version): void
+{
+    em_refresh_enabled_versions_cache();
+    $err = ExternalModules::enableAndCatchExceptions($prefix, $old_version);
+    if ($err === null) {
+        em_log('ERROR', "Module '$prefix' stays at '$old_version', the switch to '$new_version' did not happen. Fix the error above and restart the container.");
+        return;
+    }
+    em_log('ERROR', "Re-enabling '{$prefix}_{$old_version}' through the framework failed: " . $err->getMessage());
+
+    // Last resort: put the version row back directly. That is all the DB-only
+    // disable removed besides the cron jobs, which the next successful enable
+    // registers again.
+    try {
+        ExternalModules::setSystemSetting($prefix, ExternalModules::KEY_VERSION, $old_version);
+        em_log('ERROR', "Restored the version row of '$prefix' to '$old_version' directly (module cron jobs stay unregistered until the next successful enable).");
+    } catch (Throwable $e) {
+        em_log('ERROR', "Restoring the version row also failed: " . $e->getMessage()
+            . ". Module '$prefix' is now DISABLED system-wide. Enable it in the Control Center or fix the error and restart.");
+    }
 }
 
 /**
@@ -121,10 +176,19 @@ function em_enable_module(string $prefix, string $version, bool $enable, array $
             // enablement, and fires no disable hook.
             em_log('INFO', "Updating module '$prefix' from '$current' to '$version'...");
             ExternalModules::disable($prefix, true);
+            if (!em_refresh_enabled_versions_cache() || ExternalModules::getEnabledVersion($prefix) !== null) {
+                em_log('ERROR', "Module '$prefix' still counts as enabled at '" . ExternalModules::getEnabledVersion($prefix)
+                    . "' after disabling it, so '$version' cannot be enabled.");
+                em_restore_old_version($prefix, $current, $version);
+                return;
+            }
         }
         $err = ExternalModules::enableAndCatchExceptions($prefix, $version);
         if ($err !== null) {
             em_log('ERROR', "Failed to enable '{$prefix}_{$version}': " . $err->getMessage());
+            if ($current !== null) {
+                em_restore_old_version($prefix, $current, $version);
+            }
             return;
         }
         em_log('INFO', "System-enabled module '{$prefix}_{$version}'.");
@@ -198,4 +262,5 @@ foreach ($tasks as $task) {
     em_enable_module($prefix, $version, $enable, $projects, $settings);
 }
 
-exit(0);
+// A non-zero exit tells the orchestrator that at least one ERROR was logged.
+exit($EM_ERROR_COUNT > 0 ? 1 : 0);

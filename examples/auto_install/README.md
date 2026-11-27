@@ -1,6 +1,4 @@
-# Auto-install (Beta)
-
-> 🧪 This example uses beta features. See [Beta Channel](../../README.md#beta-channel).
+# Auto-install
 
 The container downloads REDCap directly from the community portal on first boot, installs the database schema, and starts serving. No manual file copying needed. On subsequent boots it skips the download and starts immediately.
 

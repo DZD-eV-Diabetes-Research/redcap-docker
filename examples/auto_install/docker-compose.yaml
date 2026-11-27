@@ -2,7 +2,7 @@ services:
   redcap:
     image: dzdde/redcap-docker
     environment:
-      # --- Beta: Auto-install/upgrade ---
+      # --- Auto-install/upgrade ---
       # The container downloads this version on first boot if files are not yet present.
       REDCAP_VERSION: "16.0.49"
       REDCAP_COMMUNITY_USER: your_community_username       # community.projectredcap.org

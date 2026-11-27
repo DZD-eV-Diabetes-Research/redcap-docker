@@ -3,7 +3,7 @@
 
 Yet another try to containerize [REDCap](https://www.project-redcap.org/) — but with a focus on **automated, hands-off deployments**.
 
-**Status**: Usable - beta  
+**Status**: Stable  
 **Maintainer**: Tim Bleimehl, DZD  
 **Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
 **Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)

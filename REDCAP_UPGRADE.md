@@ -50,9 +50,7 @@ Check [Docker Hub tags](https://hub.docker.com/r/dzdde/redcap-docker/tags) or [G
 
 ### Method 1 — Automatic via REDCAP_VERSION
 
-> [!WARNING]
-> **This feature is currently in BETA.**
-> It has been tested on a limited number of REDCap versions and MySQL configurations.
+> [!TIP]
 > Always verify the post-upgrade backup before deleting it, and keep the old version
 > directory until you are confident the upgrade succeeded.
 > Please report any issues at https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues
@@ -125,9 +123,7 @@ services:
 
 ### Method 2 — Upgrader Script (redcap-upgrade)
 
-> [!WARNING]
-> **This feature is currently in BETA.**
-> It has been tested on a limited number of REDCap versions and MySQL configurations.
+> [!TIP]
 > Always verify the post-upgrade backup before deleting it, and keep the old version
 > directory until you are confident the upgrade succeeded.
 > Please report any issues at https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues

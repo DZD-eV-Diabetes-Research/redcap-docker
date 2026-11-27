@@ -3,7 +3,7 @@
 
 Yet another try to containerize [REDCap](https://www.project-redcap.org/) — but with a focus on **automated, hands-off deployments**.
 
-**Status**: Usable - beta  
+**Status**: Stable  
 **Maintainer**: Tim Bleimehl, DZD  
 **Docker image**: [dzdde/redcap-docker](https://hub.docker.com/r/dzdde/redcap-docker)  
 **Source**: [github.com/DZD-eV-Diabetes-Research/redcap-docker](https://github.com/DZD-eV-Diabetes-Research/redcap-docker)
@@ -31,6 +31,7 @@ https://github.com/DZD-eV-Diabetes-Research/redcap-docker/issues)
     - [Volumes \& Paths](#volumes--paths)
       - [REDCap file repository](#redcap-file-repository)
     - [User Provisioning](#user-provisioning)
+    - [Module Provisioning](#module-provisioning)
     - [File Ownership](#file-ownership)
   - [Updates \& Upgrades](#updates--upgrades)
   - [Beta Channel](#beta-channel)
@@ -66,16 +67,19 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 ## Features
 
+
 - **Auto-install/upgrade/update** Set `REDCAP_VERSION` and your community portal credentials and the container downloads and installs REDCap on first boot, no manual file copying required
 - **Manual upgrade/update-wizard** (`redcap-upgrade`) Checks for updates, downloads from the REDCap community portal, runs SQL migrations, creates a database backup, and rolls back. All from a single command inside the running container. See [Updates & Upgrades](#updates--upgrades).
 - **Security-hardened by default** — read-only webroot, HTTP security headers, PHP hardening, Docker Secrets support. REDCap's browser-based Easy Upgrade is disabled by default (see [Security](#security)).
 - **Automated testing** We run an automated testing rig, to validate security and functionality before every change and/or release (see [Testing](tests/README.md)).
+- **External Module Provisioning** install/enable modules from GitHub, a zip URL, a mounted dir, or the REDCap central repo, all via environment variables and/or YAML files. see [Module Provisioning](#module-provisioning)
 - Database and application configuration entirely via environment variables
 - Automated DB schema installation . No need to manually run install SQL scripts
 - Simple mail setup via environment variables (`msmtprc`-based)
 - Automated routine tasks such as deactivating the default admin (optional)
 - "Cron mode": run the same image as the REDCap cron job manager
 - User provisioning via environment variables and/or YAML files
+- Periodic data exports (records, reports, project XML) via the REDCap API, with retention, run by the cron container. See [DATA_EXPORT.md](DATA_EXPORT.md)
 
 
 ---
@@ -84,7 +88,7 @@ This project is our attempt to containerize REDCap in a way that allows deployin
 
 The container ships with several hardening defaults:
 
-- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path.
+- **Read-only webroot** — the `www-data` process cannot write PHP files into the webroot, closing off the main vector for persistent backdoor injection. REDCap's built-in browser-based upgrade ("Easy Upgrade") is **disabled by default** for this reason. The container's own `redcap-upgrade` command and `REDCAP_AUTO_UPGRADE` are unaffected and remain the recommended upgrade path. For the same reason, **REDCap's web UI external-module installer (Repo download) does not work** by default; the Control Center then reports a misleading *"A duplicate request was detected"*. Use [Module Provisioning](#module-provisioning) instead, or set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true` to make only `modules/` writable so admins can install modules in the web UI (see [SECURITY.md](SECURITY.md#installing-external-modules-in-the-web-ui) for the risk).
 - **HTTP security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` — sent on every response.
 - **PHP hardening** — `expose_php = Off`, `display_errors = Off`.
 - **Docker Secrets support** — sensitive variables (`DB_PASSWORD`, `DB_SALT`, `REDCAP_COMMUNITY_PASSWORD`) can be loaded from files via `_FILE` variants to avoid plaintext env vars.
@@ -152,6 +156,7 @@ services:
 ```
 
 ```bash
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch the install progress
 ```
@@ -203,8 +208,10 @@ See [config_vars_list.md](config_vars_list.md) for the full variable reference.
 | **Email** | Prefix any msmtp config key with `MSMTP_` — e.g. `MSMTP_host=mail.example.com` |
 | **Cron** | `CRON_MODE`, `CRON_INTERVAL`, `CRON_RUN_JOB_ON_START` |
 | **User provisioning** | `USER_PROV`, `USER_PROV_FILE_DIR`, `USER_PROV_OVERWRITE_EXISTING` |
+| **Project provisioning** | `ENABLE_PROJECT_PROV`, `PROJECT_PROV`, `PROJECT_PROV_FILE_DIR`, see [PROJECT_PROV.md](PROJECT_PROV.md) |
+| **Data export** | `ENABLE_DATA_EXPORT`, `EXPORT_API_URL`, `EXPORT_JOBS`, `EXPORT_JOBS_FILE_DIR`, `EXPORT_DIR`, see [DATA_EXPORT.md](DATA_EXPORT.md) |
 | **Upgrades** | `REDCAP_UPGRADE_BACKUP_DIR`, `REDCAP_UPGRADE_BACKUP_DB_USER` |
-| **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
+| **Security** | `REDCAP_EASY_UPGRADE_ENABLE` (default `false`), `REDCAP_MODULES_WEB_INSTALL_ENABLE` (default `false`), `REDCAP_INTEGRITY_CHECK_ON_BOOT` (default `false`), `*_FILE` secret variants — see [SECURITY.md](SECURITY.md) |
 | **Server** | `SERVER_NAME`, `APACHE_DOCUMENT_ROOT`, `WWW_DATA_UID`, `WWW_DATA_GID` |
 
 #### REDCap application settings
@@ -252,6 +259,8 @@ services:
 
 See the [cron example](examples/instance_with_cron) for a full setup.
 
+The cron container can also export project data on a schedule (records, saved reports or the full project XML) to a mounted directory. See [DATA_EXPORT.md](DATA_EXPORT.md).
+
 ---
 
 ### Volumes & Paths
@@ -263,8 +272,11 @@ See the [cron example](examples/instance_with_cron) for a full setup.
 | `/config/apache/custom.virtualhost` | Custom Apache virtual-host directives | — |
 | `/config/redcap/install/install.sql` | Optional custom install SQL script | `REDCAP_INSTALL_SQL_SCRIPT_PATH` |
 | `/opt/redcap-docker/users` | User provisioning YAML/JSON files | `USER_PROV_FILE_DIR` |
+| `/opt/redcap-docker/projects` | Project provisioning YAML/JSON files and project XML files | `PROJECT_PROV_FILE_DIR` |
 | `/opt/redcap-docker/sql_scripts_run_once` | SQL scripts to run once at boot (e.g. manual upgrade scripts) | `AT_BOOT_RUN_SQL_SCRIPTS_FROM_LOCATION` |
 | `/opt/redcap-docker/backups` | Pre-upgrade database backups | `REDCAP_UPGRADE_BACKUP_DIR` |
+| `/opt/redcap-docker/export-jobs` | Data export job YAML/JSON files | `EXPORT_JOBS_FILE_DIR` |
+| `/opt/redcap-docker/exports` | Data export output, one directory per job | `EXPORT_DIR` |
 
 > [!TIP]
 > Mount `/opt/redcap-docker/backups` to the host so backups survive container restarts:
@@ -302,6 +314,39 @@ USER_PROV='[{"username":"admin","user_firstname":"Admin","user_lastname":"User",
 > ```env
 > RCCONF_auth_meth_global=table
 > ```
+
+---
+
+### Module Provisioning
+
+Install (and optionally enable + configure) REDCap external modules on container boot, via environment variables or YAML/JSON files. Sources: a GitHub release, an arbitrary zip URL, a pre-mounted directory, or the REDCap central repository.
+
+> [!NOTE]
+> Because of the read-only webroot hardening, REDCap's **web UI module installer (Repo download) does not work** by default, and this feature is the supported way to add modules. To let admins install modules in the web UI on an instance, set `REDCAP_MODULES_WEB_INSTALL_ENABLE=true`. See [Security](#security).
+
+- Full documentation: [MODULE_PROV.md](MODULE_PROV.md)
+- Working example: [docker compose example](examples/instance_with_modules)
+
+```env
+ENABLE_MODULE_PROV=true
+# Default is install-only; set true to system-enable provisioned modules.
+MODULE_PROV_DEFAULT_ENABLE=false
+MODULE_PROV_1='{"source":"github","repo":"vanderbilt-redcap/redcap-banner","version":"1.2.0","enabled":true}'
+```
+
+---
+
+### Project Provisioning
+
+Create REDCap projects on container boot from REDCap project XML files, e.g. a template exported with *Download metadata only (XML)* on another instance, or a `project_xml` file of the [periodic data export](DATA_EXPORT.md). The XML comes from a mounted file or an `https://` URL. Each project is created once and never changed afterwards.
+
+- Full documentation: [PROJECT_PROV.md](PROJECT_PROV.md)
+- Working example: [docker compose example](examples/instance_with_project_prov)
+
+```env
+ENABLE_PROJECT_PROV=true
+PROJECT_PROV_1='{"key":"study-template","xml":"study-template.xml","owner":"admin"}'
+```
 
 ---
 

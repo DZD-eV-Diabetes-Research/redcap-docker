@@ -116,3 +116,16 @@ def test_reconciler_auto_upgrade(
         f"Expected DB version={REDCAP_TEST_UPGRADE_VERSION!r} after auto-upgrade, "
         f"got {upgraded_version!r}"
     )
+
+    # Regression test for issue #27: the upgrade must run REDCap's upgrade SQL,
+    # not only set redcap_version. REDCap's SQL records the upgrade in
+    # redcap_history_version, and the table check must pass. "OK" may come
+    # after REDCap's Auto-Fix: e.g. 16.1.x -> 17.0.x misses a column in REDCap's
+    # own upgrade steps, which the upgrader repairs by default.
+    assert REDCAP_TEST_UPGRADE_VERSION in redcap_stack.history_versions(), (
+        f"redcap_history_version has no row for {REDCAP_TEST_UPGRADE_VERSION}: "
+        f"REDCap's upgrade SQL did not run.\nLogs:\n{logs}"
+    )
+    assert "Database structure check: OK" in logs, (
+        f"REDCap's table check did not pass after the upgrade.\nLogs:\n{logs}"
+    )

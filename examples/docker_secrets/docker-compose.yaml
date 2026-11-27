@@ -17,12 +17,12 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_password
       DB_SALT_FILE: /run/secrets/db_salt
 
-      # --- Beta: Auto-install (portal password also from a secret) ---
-      REDCAP_VERSION: "14.9.5"
+      # --- Auto-install (portal password also from a secret) ---
+      REDCAP_VERSION: "16.0.49"
       REDCAP_COMMUNITY_USER: your_community_username
       REDCAP_COMMUNITY_PASSWORD_FILE: /run/secrets/community_password
 
-      # --- Beta: Abort startup if PHP files have been tampered with ---
+      # --- Abort startup if PHP files have been tampered with ---
       # Requires community portal credentials (already set above).
       REDCAP_INTEGRITY_CHECK_ON_BOOT: "true"
 

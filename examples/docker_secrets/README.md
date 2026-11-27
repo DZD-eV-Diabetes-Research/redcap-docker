@@ -8,7 +8,7 @@ Keeps database password, salt, and community portal password out of environment 
 
 - `DB_PASSWORD_FILE` / `DB_SALT_FILE` — load credentials from Docker Secret files
 - `REDCAP_COMMUNITY_PASSWORD_FILE` — portal password for auto-install, also via secret
-- `REDCAP_INTEGRITY_CHECK_ON_BOOT: "true"` — 🧪 abort startup if PHP files have been tampered with
+- `REDCAP_INTEGRITY_CHECK_ON_BOOT: "true"` — abort startup if PHP files have been tampered with
 
 The full list of `_FILE` variants: `DB_PASSWORD_FILE`, `DB_SALT_FILE`, `DB_USERNAME_FILE`, `REDCAP_COMMUNITY_PASSWORD_FILE`. See [SECURITY.md](../../SECURITY.md#docker-secrets--avoiding-plaintext-passwords).
 
@@ -27,6 +27,7 @@ echo -n "your_portal_password"   > secrets/community_password.txt
 # 3. Edit docker-compose.yaml: set REDCAP_VERSION and REDCAP_COMMUNITY_USER
 
 # 4. Start
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap
 ```

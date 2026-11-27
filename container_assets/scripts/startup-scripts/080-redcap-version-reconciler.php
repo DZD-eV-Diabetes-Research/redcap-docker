@@ -176,6 +176,17 @@ try {
     $archive_root = dirname($extracted_dir);
     deploy_redcap_root_files($archive_root, $doc_root, $uid, $gid);
 
+    // 90-fix_permissions.sh already ran in this boot, but on the still empty
+    // webroot, and the files above were deployed as www-data. Apache starts
+    // right after the startup scripts, so without a second pass the first boot
+    // would serve a webroot www-data can write to. The script honours
+    // FIX_REDCAP_DIR_PERMISSIONS and the Easy Upgrade / module web install modes.
+    printf("[RECONCILER] Applying webroot permissions to the freshly installed files...\n");
+    passthru('bash -c ' . escapeshellarg('. ' . __DIR__ . '/90-fix_permissions.sh'), $perm_exit);
+    if ($perm_exit !== 0) {
+        fwrite(STDERR, "[RECONCILER] WARNING: applying webroot permissions exited with $perm_exit. Restart the container to retry.\n");
+    }
+
     printf("[RECONCILER] Database setup will run in the next startup step.\n");
 
 } catch (Exception $e) {

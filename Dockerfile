@@ -91,6 +91,11 @@ ENV REDCAP_AUTO_UPGRADE=false
 # risk on production servers. Set to true only if you specifically need the in-browser upgrade
 # tool — the container's own redcap-upgrade command does NOT require this to be enabled.
 ENV REDCAP_EASY_UPGRADE_ENABLE=false
+# Let admins install external modules in REDCap's Control Center (Repo download, module delete).
+# Makes only <webroot>/modules writable for www-data; the rest of the webroot stays read-only.
+# www-data can then write PHP that Apache executes, so enable it only where admins need it.
+# Module provisioning (MODULE_PROV.md) works without it.
+ENV REDCAP_MODULES_WEB_INSTALL_ENABLE=false
 # Run a file-integrity check against a canonical REDCap download on every boot.
 # Disabled by default because it requires a download and slows startup.
 # Aborts boot if tampering is detected.
@@ -131,6 +136,16 @@ ENV ENABLE_USER_PROV=true
 ENV USER_PROV_FILE_DIR=/opt/redcap-docker/users
 RUN mkdir -p $USER_PROV_FILE_DIR
 ENV USER_PROV_OVERWRITE_EXISTING=false
+# External Module Provisioning (see MODULE_PROV.md)
+ENV ENABLE_MODULE_PROV=false
+ENV MODULE_PROV_DEFAULT_ENABLE=false
+ENV MODULE_PROV_FILE_DIR=/opt/redcap-docker/modules
+RUN mkdir -p $MODULE_PROV_FILE_DIR
+# Project provisioning from REDCap project XML files (see PROJECT_PROV.md)
+ENV ENABLE_PROJECT_PROV=false
+ENV PROJECT_PROV_FILE_DIR=/opt/redcap-docker/projects
+ENV PROJECT_PROV_DOWNLOAD_TIMEOUT=600
+RUN mkdir -p $PROJECT_PROV_FILE_DIR
 # Application default config
 ENV RCCONF_redcap_base_url=http://localhost
 ENV RCCONF_password_algo=sha512
@@ -140,6 +155,18 @@ ENV CRON_MODE=false
 ENV CRON_INTERVAL="*/5 * * * *"
 ENV CRON_RUN_JOB_ON_START=false
 ENV CRON_HEALTH_STATE_FILE=/tmp/cron-health.txt
+# periodic data export via the REDCap API, runs in the cron container (see DATA_EXPORT.md)
+ENV ENABLE_DATA_EXPORT=false
+ENV EXPORT_API_URL=
+ENV EXPORT_API_TIMEOUT=3600
+ENV EXPORT_API_VERIFY_TLS=true
+ENV EXPORT_DIR=/opt/redcap-docker/exports
+ENV EXPORT_JOBS_FILE_DIR=/opt/redcap-docker/export-jobs
+ENV EXPORT_DEFAULT_KEEP=0
+ENV EXPORT_SERVICE_USERNAME=redcap_docker_export
+ENV EXPORT_STATE_DIR=/tmp/redcap-export-state
+RUN mkdir -p $EXPORT_DIR $EXPORT_JOBS_FILE_DIR
+RUN ln -s /opt/redcap-docker/assets/scripts/redcap_export.sh /usr/bin/redcap-export
 # register cron command
 RUN ln -s /opt/redcap-docker/assets/scripts/cron-job.sh /usr/bin/redcap-cron
 # register in-place upgrade and install commands

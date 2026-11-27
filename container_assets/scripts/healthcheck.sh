@@ -8,6 +8,15 @@ if [[ "${CRON_MODE}" =~ ^(1|[yY]|[yY]es|[tT]rue)$ ]]; then
         echo "Cron job exited with error: $value"
         exit 1
     fi
+    # data export jobs write "0" or their last error into <job>.status
+    for status_file in "${EXPORT_STATE_DIR}"/*.status; do
+        [ -f "$status_file" ] || continue
+        value=$(cat "$status_file")
+        if [ "$value" != "0" ]; then
+            echo "Data export job '$(basename "$status_file" .status)' failed: $value"
+            exit 1
+        fi
+    done
     exit 0
 else
     echo "Start REDCap Docker Webserver..."

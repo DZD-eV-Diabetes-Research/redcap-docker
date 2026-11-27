@@ -1,6 +1,4 @@
-# Auto-install (Beta)
-
-> 🧪 This example uses beta features. See [Beta Channel](../../README.md#beta-channel).
+# Auto-install
 
 The container downloads REDCap directly from the community portal on first boot, installs the database schema, and starts serving. No manual file copying needed. On subsequent boots it skips the download and starts immediately.
 
@@ -22,6 +20,7 @@ cd redcap-docker/examples/auto_install
 #    REDCAP_VERSION, REDCAP_COMMUNITY_USER, REDCAP_COMMUNITY_PASSWORD
 
 # 3. Start
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 docker compose logs -f redcap   # watch the download + install (first boot only)
 ```
@@ -34,6 +33,7 @@ To upgrade REDCap, bump `REDCAP_VERSION` and restart:
 
 ```bash
 # Edit docker-compose.yaml: change REDCAP_VERSION to the new version
+docker compose pull             # pull the latest image — we ship fixes frequently
 docker compose up -d
 ```
 

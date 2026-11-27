@@ -127,7 +127,7 @@ The session-scoped fixtures ensure each artifact is downloaded at most once per 
 
 | File | Tests | Scenarios |
 |---|---|---|
-| `test_fresh_install.py` | 1 | Post-install state from session snapshot |
+| `test_fresh_install.py` | 2 | Post-install state from session snapshot; webroot already read-only (root:www-data 750/640) right after the fresh-install boot |
 | `test_reconciler.py` | 3 | Already at version, upgrade warning, auto-upgrade |
 | `test_upgrade.py` | 2 | `redcap-upgrade --dry-run`, non-interactive upgrade |
 | `test_config.py` | 4 | `RCCONF_*` vars applied, user provisioning (quotes, `0` values, passwords, invalid users, overwrite), `REDCAP_SUSPEND_SITE_ADMIN` revokes admin rights, PHP timezone from `TZ` in cron mode |
